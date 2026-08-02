@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_dhaaru_ofu_maaiy",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":323.17532,
+  "exportDir":"",
+  "name":"mus_dhaaru_ofu_maaiy",
+  "parent":{
+    "name":"Naifaru Dhohokkobe Exclusives",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi)/Naifaru Dhohokkobe Exclusives.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_dhaaru_ofu_maaiy.mp3",
+  "volume":1.0,
+}

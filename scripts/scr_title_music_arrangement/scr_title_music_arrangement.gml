@@ -18,18 +18,26 @@ if (_current_month == 7 && _current_day == 26) {
     // =================================================================
     else {
         global.title_playlist = [
-			mus_mujuraa,
-            mus_mage_maaladivaina,
-            mus_rey_kanda_gais,
-            mus_nil_diyawela,
-            mus_falhi_jahaa,
+			mus_mujuraa, // Naifaru Dhohokkobe
+			mus_dhaaru_ofu_maaiy,
+			mus_naanaavee_seedhaa_loabi,
+			mus_ofu_maaiy,
+			mus_dhombey_thedhuvey, // Holhudhoo Abdulla
+			mus_dhuru_dhuru_gaavey,
+			mus_kaaku_keenhey_kuree,
+			mus_vadaigannavashey,
+            mus_falhi_jahaa, // The Only AI Dhivehi Song to Exist
+            mus_mage_maaladivaina, // Sinhala
+            mus_nil_diyawela,			
+            mus_rey_kanda_gais, // Aetherian Dhivehi (Monaigaa Alhavaa)
             mus_raalhehge_monaigaa,
             mus_alhavaa,
             mus_reythi_aadha,
             mus_reythi_reyge_balaalumey,
             mus_ranga_dhun_yeh,
             mus_monaigaa_hithaa,
-			mus_moodhu_raalhahge_taalam
+			mus_moodhu_raalhahge_taalam,
+			mus_monaigaa_alhavaa
         ];
     }
 

@@ -125,16 +125,25 @@ if (_key_confirm) {
             info_text = "TEXTURE PACK SUPPORT\nCOMING SOON IN VERSION 1.1!";
             break;
             
-        case 14: // TITLE SCREEN
+        case 14: // CONCLUDE GAMEPLAY / QUIT
+            game_end();
+            break;
+			
+        case 15: // SPLASH SCREEN
+            if (room_exists(rm_splash)) {
+                room_goto(rm_splash);
+            } else {
+                if (audio_exists(sfx_textbox)) audio_play_sound(sfx_textbox, 1, false);
+            }
+            break;  	
+			
+        case 16: // TITLE SCREEN
             if (room_exists(rm_title)) {
                 room_goto(rm_title);
             } else {
                 if (audio_exists(sfx_textbox)) audio_play_sound(sfx_textbox, 1, false);
             }
             break;  
-        
-        case 15: // CONCLUDE GAMEPLAY / QUIT
-            game_end();
-            break;
+
     }
 }

@@ -42,8 +42,9 @@ options_list = [
     "PARALLAX SCROLLING TEST",
     "MODS",
     "TEXTURE PACKS",
+	"CONCLUDE GAMEPLAY",
+	"RETURN TO SPLSH SCREEN",
     "RETURN TO TITLE SCREEN",
-    "CONCLUDE GAMEPLAY"
 ];
 
 current_menu_selection = 0;

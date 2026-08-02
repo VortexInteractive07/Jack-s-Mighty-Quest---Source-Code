@@ -1,9 +1,9 @@
 /// @description Clean Up Allocation Resources
 
-// CRITICAL FIX: Turn automatic surface drawing back on when obj_controller is destroyed
+// Restore automatic surface drawing when the controller is destroyed/room ends
 application_surface_draw_enable(true);
 
-// Free pause surface memory safely to prevent leaks
+// Safely free the pause surface from VRAM to prevent memory leaks
 if (surface_exists(pause_surface)) {
     surface_free(pause_surface);
     pause_surface = -1;

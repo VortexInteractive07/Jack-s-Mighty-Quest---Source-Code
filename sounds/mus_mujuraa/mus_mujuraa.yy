@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":192.0058,
+  "duration":192.00581,
   "exportDir":"",
   "name":"mus_mujuraa",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":44100,
-  "soundFile":"mus_mujuraa.mp3",
+  "sampleRate":48000,
+  "soundFile":"mus_mujuraa.wav",
   "volume":1.0,
 }

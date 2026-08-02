@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_kaaku_keenhey_kuree",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":130.82123,
+  "exportDir":"",
+  "name":"mus_kaaku_keenhey_kuree",
+  "parent":{
+    "name":"Holhudhoo Abdulla Hassan Bangers",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi)/Holhudhoo Abdulla Hassan Bangers.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_kaaku_keenhey_kuree.mp3",
+  "volume":1.0,
+}

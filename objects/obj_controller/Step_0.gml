@@ -1,7 +1,53 @@
-/// @description Process Gameplay Loop, UI Animations & Pause Engine
+/// @description Process Gameplay Loop, Toast Animation & Pause Engine
 
 // UI Pulse Ticker
 pulse_timer += 0.08;
+
+// Toggle Toast Notifications with "M" key
+if (keyboard_check_pressed(ord("M"))) {
+    global.show_music_toast = !global.show_music_toast;
+}
+
+// =================================================================
+// MINECRAFT JAVA-STYLE TOAST ANIMATION STATE MACHINE (Top Left)
+// =================================================================
+if (global.show_music_toast) {
+    switch (toast_state) {
+        case 1: // Slide Left In
+            toast_anim_timer += 0.08;
+            var _t = clamp(toast_anim_timer, 0, 1);
+            var _ease = 1 - power(1 - _t, 3);
+            toast_slide_x = lerp(-200, toast_max_x, _ease);
+            
+            if (_t >= 1) {
+                toast_state      = 2; // Hold
+                toast_hold_timer = 150; // 2.5 Seconds
+            }
+            break;
+            
+        case 2: // Display / Hold
+            toast_hold_timer--;
+            toast_slide_x = toast_max_x;
+            if (toast_hold_timer <= 0) {
+                toast_state      = 3; // Slide Right Out
+                toast_anim_timer = 0;
+            }
+            break;
+            
+        case 3: // Slide Right Out
+            toast_anim_timer += 0.08;
+            var _t = clamp(toast_anim_timer, 0, 1);
+            var _ease = _t * _t; // Quadratic ease in
+            toast_slide_x = lerp(toast_max_x, display_get_gui_width() + 50, _ease);
+            
+            if (_t >= 1) {
+                toast_state = 0; // Hidden
+            }
+            break;
+    }
+} else {
+    toast_state = 0;
+}
 
 // Title Card Timer Ticker & Auto-Disable
 if (show_title_card) {
@@ -12,25 +58,36 @@ if (show_title_card) {
 }
 
 // =================================================================
-// MINECRAFT-STYLE SEQUENTIAL MUSIC PLAYLIST MONITOR
+// DYNAMIC MUSIC PLAYLIST MONITOR
 // =================================================================
 var _boss_is_active = variable_global_exists("boss_active") && global.boss_active;
 
 if (global.music_mode == 1 && !is_paused && !player_dead && !stage_cleared && !is_transitioning && !_boss_is_active) {
     if (variable_global_exists("title_playlist") && is_array(global.title_playlist) && array_length(global.title_playlist) > 0) {
         
-        if (global.current_song_index >= array_length(global.title_playlist)) {
-            global.current_song_index = 0;
+        if (!variable_global_exists("title_music_started")) {
+            global.title_music_started = false;
         }
 
         var _current_song = global.title_playlist[global.current_song_index];
 
-        if (audio_exists(_current_song) && !audio_is_playing(_current_song)) {
-            global.current_song_index = (global.current_song_index + 1) % array_length(global.title_playlist);
-            var _next_song = global.title_playlist[global.current_song_index];
-            
-            if (audio_exists(_next_song)) {
-                audio_play_sound(_next_song, 100, false);
+        if (!audio_is_playing(_current_song)) {
+            if (global.title_music_started) {
+                global.current_song_index = (global.current_song_index + 1) % array_length(global.title_playlist);
+                _current_song = global.title_playlist[global.current_song_index];
+            }
+
+            if (audio_exists(_current_song)) {
+                audio_play_sound(_current_song, 100, false);
+                global.title_music_started = true;
+                
+                // Trigger Toast Notification for the new track
+                if (global.show_music_toast) {
+                    toast_title      = audio_get_name(_current_song);
+                    toast_state      = 1;
+                    toast_anim_timer = 0;
+                    toast_slide_x    = -200;
+                }
             }
         }
     }
@@ -68,7 +125,6 @@ if (keyboard_check_pressed(vk_escape) && !player_dead && !stage_cleared && !is_t
         draw_surface(application_surface, 0, 0);
         surface_reset_target();
         
-        // Deactivate all instances except the controller and camera
         instance_deactivate_all(true);
         instance_activate_object(id);
         
@@ -148,8 +204,6 @@ if (is_paused) {
                 global.game_paused = false;
                 instance_activate_all();
                 audio_resume_all();
-                
-                // CRITICAL FIX: Turn automatic surface drawing back on for the menu room
                 application_surface_draw_enable(true);
                 
                 if (surface_exists(pause_surface)) {
@@ -242,7 +296,6 @@ if (is_transitioning) {
             global.player_score = 0;
             global.gems_collected = 0;
             
-            // CRITICAL FIX: Ensure surface drawing is on if game over directs to menu
             application_surface_draw_enable(true);
             
             var _rm_go = asset_get_index("rm_gameover");

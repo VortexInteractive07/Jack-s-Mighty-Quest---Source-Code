@@ -4,7 +4,7 @@
 boss_name       = "Pumpkin Head";
 hp              = 100;
 max_hp          = 100;
-damage_val      = 25;        // Contact damage to player
+damage_val      = 10;        // Contact damage to player
 knockback_speed = 4.0;
 
 // --- MOVEMENT & PHYSICS ---
