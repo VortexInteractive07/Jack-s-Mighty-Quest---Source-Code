@@ -1,0 +1,47 @@
+================================================================================
+                    OFFICIAL SECURITY & LICENSE NOTICE
+================================================================================
+Project: Jack's Mighty Quest [TM]
+Developer: Vortex Interactive
+Target Runtime Environment: GameMaker LTS 2026.0.0.16
+================================================================================
+
+I see that you've painstakingly tried to rip all of the assets from Jack's 
+Mighty Quest [TM], didn't you? 
+
+Let's be entirely clear about what you are looking at right now. Every single 
+sprite, script, audio track, room layout, and line of code inside this compiled 
+package didn't just appear out of thin air. I used all of my blood, sweat, 
+dedication, and tears to make this game possible. It represents countless hours 
+of calculation, debugging, and creative design to construct a functional engine.
+
+Yet, despite that effort, you guys managed to steal all of my content without 
+my permission, thinking you could simply mine the file directory, bypass the 
+executable layer, and extract the assets without anyone noticing.
+
+Extracting, distributing, or repurposing these materials without an explicit 
+license or written authorization from Vortex Interactive is a direct violation 
+of intellectual property law. 
+
+And know this: you might get DMCAed immediately. 
+
+We monitor file-sharing repositories, community forums, and distribution 
+networks closely. If these ripped assets are hosted, re-uploaded, or utilized 
+in unauthorized projects anywhere on the internet, formal digital takedown 
+notices will be deployed to your host, repository provider, or service provider 
+without prior warning. Your infrastructure will be flagged, and your access 
+will be terminated.
+
+If you respect the medium of game development, close the extractor, delete 
+the ripped directory, and support the project through legitimate channels. 
+Otherwise, be prepared to face the legal boundaries established to protect 
+independent creation.
+
+--------------------------------------------------------------------------------
+Written and Signed by:
+Ibrahim Aayan bin Abdullah
+Founder & Lead Developer, Vortex Interactive
+
+© 2026 Vortex Interactive. All rights reserved. Unauthorized distribution, 
+modification, or extraction of compiled binaries and assets is strictly prohibited.
+================================================================================

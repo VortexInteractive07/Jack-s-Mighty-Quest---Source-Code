@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_asteriskobelisk",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":67.390144,
+  "exportDir":"",
+  "name":"mus_asteriskobelisk",
+  "parent":{
+    "name":"Unused",
+    "path":"folders/Sounds/Soundtrack/Unused.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_asteriskobelisk.wav",
+  "volume":1.0,
+}
