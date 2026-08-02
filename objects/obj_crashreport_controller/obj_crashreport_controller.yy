@@ -10,8 +10,8 @@
   "name":"obj_crashreport_controller",
   "overriddenProperties":[],
   "parent":{
-    "name":"Crash Handling",
-    "path":"folders/Objects/Crash Handling.yy",
+    "name":"Crash Handling (Unused)",
+    "path":"folders/Objects/Crash Handling (Unused).yy",
   },
   "parentObjectId":null,
   "persistent":false,

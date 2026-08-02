@@ -3,8 +3,8 @@
   "%Name":"shd_heat_haze",
   "name":"shd_heat_haze",
   "parent":{
-    "name":"Shaders",
-    "path":"folders/Shaders.yy",
+    "name":"Shaders (Unused)",
+    "path":"folders/Shaders (Unused).yy",
   },
   "resourceType":"GMShader",
   "resourceVersion":"2.0",
