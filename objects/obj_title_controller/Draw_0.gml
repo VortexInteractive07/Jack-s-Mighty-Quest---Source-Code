@@ -2,7 +2,7 @@
 
 var _view_w = 426;
 var _view_h = 240;
-var version_text = "ALPHA DEMO v1.0"; 
+var version_text = "GITHUB DEMO v1.0"; 
 
 // Safety check for customizable blink speed variable (default to 30 if not defined in Create Event)
 var _speed = variable_instance_exists(id, "blink_speed") ? max(1, blink_speed) : 30;
