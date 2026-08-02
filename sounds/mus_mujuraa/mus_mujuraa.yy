@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_mujuraa",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":192.0058,
+  "exportDir":"",
+  "name":"mus_mujuraa",
+  "parent":{
+    "name":"Naifaru Dhohokkobe Exclusives",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi)/Naifaru Dhohokkobe Exclusives.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_mujuraa.mp3",
+  "volume":1.0,
+}

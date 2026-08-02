@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_o_wazan",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":240.09433,
+  "exportDir":"",
+  "name":"mus_o_wazan",
+  "parent":{
+    "name":"Holhudhoo Abdulla Hassan Bangers",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi)/Holhudhoo Abdulla Hassan Bangers.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_o_wazan.mp3",
+  "volume":1.0,
+}

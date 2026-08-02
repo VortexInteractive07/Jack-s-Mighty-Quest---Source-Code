@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_reythi_aadha_supremacy",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":30.77225,
+  "exportDir":"",
+  "name":"mus_reythi_aadha_supremacy",
+  "parent":{
+    "name":"Songs (Aetherian Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_reythi_aadha_supremacy.wav",
+  "volume":1.0,
+}

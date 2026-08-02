@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_evil_clockwork_sophisticatingly_improved_version",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":207.672,
+  "exportDir":"",
+  "name":"mus_evil_clockwork_sophisticatingly_improved_version",
+  "parent":{
+    "name":"Soundtrack",
+    "path":"folders/Sounds/Soundtrack.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_evil_clockwork_sophisticatingly_improved_version.mp3",
+  "volume":1.0,
+}

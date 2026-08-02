@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_levelcomplete_randommessage",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_levelcomplete_randommessage",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
