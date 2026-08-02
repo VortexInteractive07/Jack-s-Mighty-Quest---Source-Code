@@ -1,9 +1,10 @@
-/// @description Handle Damage & Knockback Collision
-if (boost_timer > 0) {
-    // Destroy or damage enemy if Jack rams into them during D+C boost
+/// @description Handle Ramming & Damage Collision
+
+if (boost_timer > 0 || always_dash_mode || speedrunner_mode) {
+    // Shred enemies in Speedrunner or Boost mode!
     with (other) {
         if (variable_instance_exists(id, "hp")) {
-            hp -= 50;
+            hp -= 100;
         } else {
             instance_destroy();
         }

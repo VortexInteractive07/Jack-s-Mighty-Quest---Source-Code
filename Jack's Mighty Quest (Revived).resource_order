@@ -210,6 +210,7 @@
     {"name":"mus_menu_new","order":16,"path":"sounds/mus_menu_new/mus_menu_new.yy",},
     {"name":"mus_menu","order":8,"path":"sounds/mus_menu/mus_menu.yy",},
     {"name":"mus_monaigaa_hithaa","order":8,"path":"sounds/mus_monaigaa_hithaa/mus_monaigaa_hithaa.yy",},
+    {"name":"mus_moodhu_raalhahge_taalam","order":9,"path":"sounds/mus_moodhu_raalhahge_taalam/mus_moodhu_raalhahge_taalam.yy",},
     {"name":"mus_nil_diyawela","order":1,"path":"sounds/mus_nil_diyawela/mus_nil_diyawela.yy",},
     {"name":"mus_no_bridge_to_cross_almost_mjstyle","order":1,"path":"sounds/mus_no_bridge_to_cross_almost_mjstyle/mus_no_bridge_to_cross_almost_mjstyle.yy",},
     {"name":"mus_no_bridge_to_cross_extended","order":2,"path":"sounds/mus_no_bridge_to_cross_extended/mus_no_bridge_to_cross_extended.yy",},

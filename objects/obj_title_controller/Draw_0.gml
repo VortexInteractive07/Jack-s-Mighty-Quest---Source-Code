@@ -32,8 +32,8 @@ if (fade_state != "in") {
     draw_set_valign(fa_middle);
     draw_set_halign(fa_left); 
 
-    if (font_exists(fnt_bitmap)) {
-        draw_set_font(fnt_bitmap);
+    if (font_exists(fnt_dialogue)) {
+        draw_set_font(fnt_dialogue);
     } else {
         draw_set_font(-1);
     }
@@ -161,8 +161,8 @@ if (fade_state != "in") {
     
     if (font_exists(fnt_dialogue)) {
         draw_set_font(fnt_dialogue);
-    } else if (font_exists(fnt_bitmap)) {
-        draw_set_font(fnt_bitmap);
+    } else if (font_exists(fnt_dialogue)) {
+        draw_set_font(fnt_dialogue);
     } else {
         draw_set_font(-1);
     }
@@ -214,8 +214,8 @@ draw_set_valign(fa_bottom);
 
 if (font_exists(fnt_dialogue)) {
     draw_set_font(fnt_dialogue);
-} else if (font_exists(fnt_bitmap)) {
-    draw_set_font(fnt_bitmap);
+} else if (font_exists(fnt_dialogue)) {
+    draw_set_font(fnt_dialogue);
 } else {
     draw_set_font(-1);
 }

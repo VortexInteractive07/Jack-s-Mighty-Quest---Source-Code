@@ -16,6 +16,7 @@ function scr_credits_music_arrangement() {
         mus_reythi_aadha,
         mus_reythi_reyge_balaalumey,
 		mus_ranga_dhun_yeh,
-		mus_monaigaa_hithaa
+		mus_monaigaa_hithaa,
+		mus_moodhu_raalhahge_taalam
     ];
 }
