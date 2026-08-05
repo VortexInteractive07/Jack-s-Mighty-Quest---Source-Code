@@ -138,3 +138,12 @@ cube_edges = [
 fade_alpha = 0;        
 is_fading  = false;    
 fade_speed = 0.02;
+
+// 7. Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

@@ -1,6 +1,6 @@
 /// @description Clean Up Allocation Resources
 
-// Restore automatic surface drawing when the controller is destroyed/room ends
+// Restore automatic surface drawing when the controller is destroyed or room ends
 application_surface_draw_enable(true);
 
 // Safely free the pause surface from VRAM to prevent memory leaks

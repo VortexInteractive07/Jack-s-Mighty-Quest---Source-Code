@@ -76,10 +76,16 @@ if (_key_confirm) {
             break;
             
         case 6: // STATISTICS
-            is_info_open = true; 
-            info_text = "CURRENTLY UNDER DEVELOPMENT\nDUE TO ONGOING TECHNICAL\nWORK!\n\nWE APOLOGISE FOR THE INCONVENIENCE\nCAUSED!\n--VORTEX INTERACTIVE--";
+            //is_info_open = true; 
+            //info_text = "CURRENTLY UNDER DEVELOPMENT\nDUE TO ONGOING TECHNICAL\nWORK!\n\nWE APOLOGISE FOR THE INCONVENIENCE\nCAUSED!\n--VORTEX INTERACTIVE--";
+            //break;
+            if (room_exists(rm_stats)) {
+                room_goto(rm_stats);
+            } else {
+                if (audio_exists(sfx_textbox)) audio_play_sound(sfx_textbox, 1, false);
+            }
             break;
-            
+			
         case 7: // CREDITS
             if (room_exists(rm_credits)) {
                 room_goto(rm_credits);

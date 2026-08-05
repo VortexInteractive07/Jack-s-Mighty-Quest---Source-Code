@@ -50,3 +50,12 @@ layer_data = [
     { name: "bg_near_ground",    id: layer_get_id("bg_near_ground"),    factor: 0.80, auto_spd: 0.00, scroll_acc: 0 },
     { name: "bg_near_ground_2",  id: layer_get_id("bg_near_ground_2"),  factor: 1.00, auto_spd: 0.00, scroll_acc: 0 }
 ];
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_jukebox_list",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scripts.yy",
+    "name":"Jukebox",
+    "path":"folders/Scripts/Jukebox.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -17,12 +17,10 @@ var _key_jump_release = keyboard_check_released(ord("D"));
 var _key_run          = keyboard_check(ord("S"));
 var _key_massacre     = keyboard_check(ord("F"));
 
-// --- Master Hidden Debug Mode (F12) ---
 if (keyboard_check_pressed(vk_f12)) {
     speedrunner_mode = !speedrunner_mode;
     
     if (!speedrunner_mode) {
-        // Reset sub-cheats upon exiting Debug Mode
         always_dash_mode = false;
         god_infinite_hp  = false;
         god_no_pit_fall  = false;
@@ -32,43 +30,24 @@ if (keyboard_check_pressed(vk_f12)) {
     }
 }
 
-// --- Debug Commands (Only functional when F12 Mode is ON) ---
 if (speedrunner_mode) {
-    // C Key: Always Dash Mode Toggle
-    if (keyboard_check_pressed(ord("C"))) {
-        always_dash_mode = !always_dash_mode;
-    }
-    
-    // L Key: Infinite Lives / Infinite HP Toggle
+    if (keyboard_check_pressed(ord("C"))) always_dash_mode = !always_dash_mode;
     if (keyboard_check_pressed(ord("L"))) {
         god_infinite_hp = !god_infinite_hp;
-        if (god_infinite_hp) hp = hp_max; // Instant max heal
+        if (god_infinite_hp) hp = hp_max;
     }
-    
-    // P Key: Prevent Pit Fall Damage Below Y <= 0 (or room bottom)
-    if (keyboard_check_pressed(ord("P"))) {
-        god_no_pit_fall = !god_no_pit_fall;
-    }
-    
-    // H Key: Block Enemy Attacks / Enemy Invincibility Toggle
-    if (keyboard_check_pressed(ord("H"))) {
-        god_block_enemy = !god_block_enemy;
-    }
+    if (keyboard_check_pressed(ord("P"))) god_no_pit_fall = !god_no_pit_fall;
+    if (keyboard_check_pressed(ord("H"))) god_block_enemy = !god_block_enemy;
 }
 
-// Ensure HP stays topped off when L-Cheat is enabled
-if (god_infinite_hp) {
-    hp = hp_max;
-}
+if (god_infinite_hp) hp = hp_max;
 
-// Standard Boost Combo Trigger (S + C)
 var _key_boost_combo = (!always_dash_mode) && 
                       ((keyboard_check(ord("S")) && keyboard_check_pressed(ord("C"))) || 
                        (keyboard_check(ord("C")) && keyboard_check_pressed(ord("S"))));
 
 var _move = _key_right - _key_left;
 
-// Dynamic Speed Adjustments for Debug Mode
 if (speedrunner_mode) {
     walk_speed   = base_walk_speed * 1.6;
     run_speed    = base_run_speed * 1.8;
@@ -92,9 +71,7 @@ if (_key_jump) jump_buffer_timer = jump_buffer_max;
 
 if ((_key_boost_combo || always_dash_mode) && state == 0) {
     boost_timer = boost_duration;
-    if (_key_boost_combo && audio_exists(sfx_whoosh)) {
-        audio_play_sound(sfx_whoosh, 1, false);
-    }
+    if (_key_boost_combo && audio_exists(sfx_whoosh)) audio_play_sound(sfx_whoosh, 1, false);
     if (_move == 0) hsp = facing * boost_speed;
 }
 
@@ -102,6 +79,21 @@ var _on_ground = place_meeting(x, y + 1, obj_wall);
 
 var _target_max_speed = (_key_run || always_dash_mode) ? run_speed : walk_speed;
 if (boost_timer > 0) _target_max_speed = boost_speed;
+
+
+// ============================================================================
+// --- BACKWARDS LONG JUMP (BLJ) MECHANIC ---
+// ============================================================================
+if (_key_left && _key_right && _key_jump && _on_ground) {
+    hsp = 15.0; // Shoot aggressively to the right
+    facing = -1; // Face backwards (left)
+    vsp = jump_height * 0.8; // Specialized trajectory 
+    coyote_timer = 0;
+    jump_buffer_timer = 0;
+    state = 0;
+    if (audio_exists(sfx_jump)) audio_play_sound(sfx_jump, 1, false);
+}
+
 
 // ============================================================================
 // --- 3. STATE MACHINE ---
@@ -115,16 +107,19 @@ switch (state) {
             break;
         }
 
-        if (_move != 0) {
-            var _acc = (boost_timer > 0) ? 0.85 : (_on_ground ? accel : air_accel);
-            hsp = lerp(hsp, _move * _target_max_speed, _acc);
-            facing = _move;
-        } else if (boost_timer > 0) {
-            hsp = lerp(hsp, facing * boost_speed, 0.20);
-        } else {
-            var _decel = _on_ground ? fric : air_fric;
-            hsp = lerp(hsp, 0, _decel);
-            if (abs(hsp) < 0.1) hsp = 0;
+        // Only process normal acceleration if not performing a BLJ sequence
+        if (!(_key_left && _key_right)) {
+            if (_move != 0) {
+                var _acc = (boost_timer > 0) ? 0.85 : (_on_ground ? accel : air_accel);
+                hsp = lerp(hsp, _move * _target_max_speed, _acc);
+                facing = _move;
+            } else if (boost_timer > 0) {
+                hsp = lerp(hsp, facing * boost_speed, 0.20);
+            } else {
+                var _decel = _on_ground ? fric : air_fric;
+                hsp = lerp(hsp, 0, _decel);
+                if (abs(hsp) < 0.1) hsp = 0;
+            }
         }
 
         if (!_on_ground) {
@@ -134,11 +129,13 @@ switch (state) {
             coyote_timer = coyote_max;
         }
 
-        if (jump_buffer_timer > 0 && coyote_timer > 0) {
+        if (jump_buffer_timer > 0 && coyote_timer > 0 && !(_key_left && _key_right)) {
             vsp = jump_height;
             coyote_timer = 0;
             jump_buffer_timer = 0;
             if (audio_exists(sfx_jump)) audio_play_sound(sfx_jump, 1, false);
+            
+            if (variable_global_exists("stats")) global.stats.total_jumps += 1;
         }
 
         if (_key_jump_release && vsp < -1.5) vsp *= 0.45;
@@ -179,20 +176,27 @@ switch (state) {
         break;
 }
 
+if (!variable_instance_exists(id, "death_recorded")) death_recorded = false;
+
+if (state == 3) {
+    if (!death_recorded) {
+        if (variable_global_exists("stats")) global.stats.total_deaths += 1;
+        death_recorded = true;
+    }
+} else {
+    death_recorded = false;
+}
+
 // ============================================================================
 // --- 4. PRECISE COLLISIONS, SLOPE FIXES & PIT PROTECTION ---
 // ============================================================================
-
-// --- P KEY PIT FALL PROTECTION FEATURE ---
-// Prevents pit fall damage/death if fallen below y <= 0 or room floor
 if (god_no_pit_fall) {
     if (y > room_height || y < 0) {
-        vsp = jump_height * 1.5; // Bounce Jack back up safely!
+        vsp = jump_height * 1.5; 
         if (y < 0) y = 16;
     }
 }
 
-// --- Emergency Unstuck ---
 if (place_meeting(x, y, obj_wall)) {
     var _attempts = 0;
     while (place_meeting(x, y, obj_wall) && _attempts < 16) {
@@ -201,7 +205,6 @@ if (place_meeting(x, y, obj_wall)) {
     }
 }
 
-// --- Horizontal Collisions ---
 var _stepped_up = false;
 var _sub_h = sign(hsp);
 
@@ -216,15 +219,12 @@ if (place_meeting(x + hsp, y, obj_wall)) {
     }
     
     if (!_stepped_up) {
-        while (!place_meeting(x + _sub_h, y, obj_wall)) {
-            x += _sub_h;
-        }
+        while (!place_meeting(x + _sub_h, y, obj_wall)) x += _sub_h;
         hsp = 0;
     }
 }
 x += hsp;
 
-// --- Downward Slope Snapping ---
 if (_on_ground && !_stepped_up && vsp >= 0 && !place_meeting(x, y + 1, obj_wall)) {
     for (var _down = 1; _down <= 8; _down++) {
         if (place_meeting(x, y + _down, obj_wall)) {
@@ -234,12 +234,9 @@ if (_on_ground && !_stepped_up && vsp >= 0 && !place_meeting(x, y + 1, obj_wall)
     }
 }
 
-// --- Vertical Collisions ---
 var _sub_v = sign(vsp);
 if (place_meeting(x, y + vsp, obj_wall)) {
-    while (!place_meeting(x, y + _sub_v, obj_wall)) {
-        y += _sub_v;
-    }
+    while (!place_meeting(x, y + _sub_v, obj_wall)) y += _sub_v;
     vsp = 0;
 }
 y += vsp;
@@ -260,7 +257,7 @@ switch (state) {
                 else if (sprite_exists(spr_player_fall))         sprite_index = spr_player_fall;
             } else {
                 if (sprite_index != spr_player_fall && sprite_index != spr_player_fall_loop) {
-                    if (sprite_exists(spr_player_fall))           sprite_index = spr_player_fall;
+                    if (sprite_exists(spr_player_fall))            sprite_index = spr_player_fall;
                     else if (sprite_exists(spr_player_fall_loop)) sprite_index = spr_player_fall_loop;
                 }
             }
@@ -298,9 +295,7 @@ if (sprite_index == spr_player_run) {
 // ============================================================================
 for (var i = array_length(trail_history) - 1; i >= 0; i--) {
     trail_history[i].alpha -= (boost_timer > 0 || speedrunner_mode) ? 0.08 : 0.12;
-    if (trail_history[i].alpha <= 0) {
-        array_delete(trail_history, i, 1);
-    }
+    if (trail_history[i].alpha <= 0) array_delete(trail_history, i, 1);
 }
 
 var _is_flash_speed = (abs(hsp) >= 9.0 || boost_timer > 0 || always_dash_mode) && state == 0;
@@ -316,18 +311,16 @@ if (_is_flash_speed) {
                            ((array_length(trail_history) % 2 == 0) ? c_aqua : c_white));
         
         array_push(trail_history, {
-            sprite:     sprite_index,
-            frame:      image_index,
-            x_pos:      round(x),
-            y_pos:      round(y + draw_y_offset),
-            facing_dir: facing,
-            color:      _trail_color,
-            alpha:      0.95
+            sprite:      sprite_index,
+            frame:       image_index,
+            x_pos:       round(x),
+            y_pos:       round(y + draw_y_offset),
+            facing_dir:  facing,
+            color:       _trail_color,
+            alpha:       0.95
         });
         
-        if (array_length(trail_history) > trail_max) {
-            array_delete(trail_history, 0, 1);
-        }
+        if (array_length(trail_history) > trail_max) array_delete(trail_history, 0, 1);
     }
 } else {
     trail_spawn_timer = 0;

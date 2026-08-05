@@ -17,40 +17,50 @@ if (view_enabled) {
 }
 
 // Gameplay Mechanics States
-stage_cleared      = false;
-player_dead        = false;
-death_reason       = "";
-is_transitioning   = false;
-transition_timer   = 0;
-stage_time         = 12000; 
-low_hp_beep_timer  = 0;
-show_debug         = false;
+stage_cleared     = false;
+player_dead       = false;
+death_reason      = "";
+is_transitioning  = false;
+transition_timer  = 0;
+stage_time        = 12000; 
+low_hp_beep_timer = 0;
+show_debug        = false;
+
+// Speedometer (MPH & KM/H) Engine Variables
+speed_px_sec  = 0;
+speed_mph     = 0;
+speed_kmh     = 0;
+display_speed = 0;
+use_kmh       = true; // Toggle true for KM/H, false for MPH
 
 // Boss Encounters State Flag
 global.boss_active = false;
 
 // Title Card State Variables - Duration 150 frames (2.5s at 60 FPS)
-show_title_card     = true; 
+show_title_card     = false; 
 title_card_timer    = 0;    
 title_card_duration = 150;  
 
 // UI Interpolation & Animations
-hp_display_smooth  = 100;
-pulse_timer        = 0;
+hp_display_smooth = 100;
+pulse_timer       = 0;
 
-// Music Toast Notification System Variables (Minecraft Java Style - Top Left)
+// Music Toast Notification System Variables
 if (!variable_global_exists("show_music_toast")) {
-    global.show_music_toast = false; // Toggleable via 'M' key
+    global.show_music_toast = true; // Enabled by default; toggleable via 'M' key
 }
 
-toast_state       = 0;   // 0: Hidden, 1: Sliding In, 2: Displaying, 3: Sliding Out
-toast_anim_timer  = 0;   // Progress frame ticker
-toast_slide_x     = -200; // Off-screen left position
+if (!variable_global_exists("artist_name")) global.artist_name = "Unknown Artist";
+if (!variable_global_exists("artist_type")) global.artist_type = "composer";
+
+toast_state       = 0;    // 0: Hidden, 1: Sliding In, 2: Displaying, 3: Sliding Out
+toast_anim_timer  = 0;    // Progress frame ticker
+toast_slide_x     = -220; // Off-screen left position
 toast_max_x       = 10;   // Resting position on top-left
-toast_hold_timer  = 0;   // Hold duration counter
+toast_hold_timer  = 0;    // Hold duration counter
 toast_title       = "";
 
-// Safe Asset Indexing helper array for splash screen
+// Easter Egg Engine Variables
 splash_sprites = [];
 var _vortex_logo = asset_get_index("spr_vortex_logo");
 var _vortex_presents = asset_get_index("spr_vortex_presents");
@@ -66,13 +76,23 @@ splash_index       = 0;
 splash_timer       = 0;
 splash_active      = false;
 
-// Pause Menu State Engine
-is_paused          = false;
-global.game_paused = false;
-pause_selection    = 0;
-pause_options      = ["RESUME", "RESTART LEVEL", "JUKEBOX", "RETURN TO MENU", "EXIT GAME"]; 
-pause_total        = array_length(pause_options);
-pause_surface      = -1; 
+// Glitch & Color Inversion Effects
+glitch_color       = c_white;
+glitch_offset_x    = 0;
+glitch_offset_y    = 0;
+glitch_scale_x     = 1;
+glitch_scale_y     = 1;
+glitch_subimage    = 0;
+
+// Redesigned Pause Menu State Engine
+is_paused           = false;
+global.game_paused  = false;
+pause_selection     = 0;
+pause_select_smooth = 0;    
+pause_options       = ["RESUME", "RESTART LEVEL", "JUKEBOX", "RETURN TO MENU", "EXIT GAME"]; 
+pause_total         = array_length(pause_options);
+pause_surface       = -1; 
+pause_music_enabled = true; // Toggle true to keep music playing during pause menu
 
 // Global Variable Safety Initializations
 if (!variable_global_exists("player_lives"))       global.player_lives = 3;
@@ -83,12 +103,11 @@ if (!variable_global_exists("current_song_index")) global.current_song_index = 0
 // Force audio engine out of any leftover pause state
 audio_resume_all();
 
-// Set music mode default if not defined (Mode 1 = Playlist, Mode 2 = Stage Music)
+// Set music mode default if not defined
 if (!variable_global_exists("music_mode") || global.music_mode == 0) {
     global.music_mode = 1;
 }
 
-// Ensure audio is stopped only right before playing room BGM
 audio_stop_all();
 
 switch (global.music_mode) {
@@ -108,12 +127,20 @@ switch (global.music_mode) {
                 audio_play_sound(_first_song, 100, false);
                 global.title_music_started = true;
                 
-                // Trigger Minecraft-style Toast Notification
                 if (global.show_music_toast) {
-                    toast_title      = audio_get_name(_first_song);
-                    toast_state      = 1; // Start Slide In
+                    if (script_exists(asset_get_index("scr_get_song_info"))) {
+                        var _info = scr_get_song_info(_first_song);
+                        toast_title        = _info.title;
+                        global.artist_name = _info.artist_name;
+                        global.artist_type = _info.artist_type;
+                    } else {
+                        toast_title        = audio_get_name(_first_song);
+                        global.artist_name = "Unknown Artist";
+                        global.artist_type = "composer";
+                    }
+                    toast_state      = 1;
                     toast_anim_timer = 0;
-                    toast_slide_x    = -200;
+                    toast_slide_x    = -220;
                 }
             }
         }
@@ -125,14 +152,31 @@ switch (global.music_mode) {
             if (_designated_track != -1 && audio_exists(_designated_track)) {
                 audio_play_sound(_designated_track, 100, true);
                 
-                // Trigger Minecraft-style Toast Notification
                 if (global.show_music_toast) {
-                    toast_title      = audio_get_name(_designated_track);
-                    toast_state      = 1; // Start Slide In
+                    if (script_exists(asset_get_index("scr_get_song_info"))) {
+                        var _info = scr_get_song_info(_designated_track);
+                        toast_title        = _info.title;
+                        global.artist_name = _info.artist_name;
+                        global.artist_type = _info.artist_type;
+                    } else {
+                        toast_title        = audio_get_name(_designated_track);
+                        global.artist_name = "Unknown Artist";
+                        global.artist_type = "composer";
+                    }
+                    toast_state      = 1;
                     toast_anim_timer = 0;
-                    toast_slide_x    = -200;
+                    toast_slide_x    = -220;
                 }
             }
         }
         break;
+}
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
 }

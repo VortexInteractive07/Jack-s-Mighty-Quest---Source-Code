@@ -44,3 +44,12 @@ for (var i = 0; i < max_stars; i++) {
         z: random_range(1, 6) 
     };
 }
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

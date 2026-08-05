@@ -112,3 +112,12 @@ if (audio_exists(mus_mujuraa)) {
         audio_play_sound(mus_mujuraa, 1, true);
     }
 }
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

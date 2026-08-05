@@ -1,27 +1,58 @@
-/// @description Process Gameplay Loop, Toast Animation & Pause Engine
+/// @description Process Gameplay Loop, Speedometer, Toast Engine & Pause Systems
 
 // UI Pulse Ticker
 pulse_timer += 0.08;
 
-// Toggle Toast Notifications with "M" key
+// Toggle Speedometer Unit (KM/H <-> MPH) via 'U' Key
+if (keyboard_check_pressed(ord("U"))) {
+    use_kmh = !use_kmh;
+}
+
+// Toggle Toast Notifications via 'M' Key
 if (keyboard_check_pressed(ord("M"))) {
     global.show_music_toast = !global.show_music_toast;
 }
 
 // =================================================================
-// MINECRAFT JAVA-STYLE TOAST ANIMATION STATE MACHINE (Top Left)
+// SPEEDOMETER CALCULATION ENGINE
+// =================================================================
+var _p_obj = asset_get_index("obj_player");
+if (_p_obj != -1 && instance_exists(_p_obj)) {
+    var _vx = 0;
+    var _vy = 0;
+    
+    if (variable_instance_exists(_p_obj, "hsp")) _vx = _p_obj.hsp;
+    else if (variable_instance_exists(_p_obj, "phy_speed_x")) _vx = _p_obj.phy_speed_x;
+    
+    if (variable_instance_exists(_p_obj, "vsp")) _vy = _p_obj.vsp;
+    else if (variable_instance_exists(_p_obj, "phy_speed_y")) _vy = _p_obj.phy_speed_y;
+
+    var _pix_per_frame = point_distance(0, 0, _vx, _vy);
+    speed_px_sec = _pix_per_frame * 60;
+    
+    speed_mph = speed_px_sec * 0.045;
+    speed_kmh = speed_mph * 1.60934;
+    
+    var _target_speed = use_kmh ? speed_kmh : speed_mph;
+    display_speed = lerp(display_speed, _target_speed, 0.25);
+} else {
+    display_speed = lerp(display_speed, 0, 0.2);
+}
+
+// =================================================================
+// TOAST ANIMATION STATE MACHINE (Top Left)
 // =================================================================
 if (global.show_music_toast) {
     switch (toast_state) {
-        case 1: // Slide Left In
-            toast_anim_timer += 0.08;
+        case 1: // Slide In
+            toast_anim_timer += 0.06;
             var _t = clamp(toast_anim_timer, 0, 1);
             var _ease = 1 - power(1 - _t, 3);
-            toast_slide_x = lerp(-200, toast_max_x, _ease);
+            toast_slide_x = lerp(-220, toast_max_x, _ease);
             
             if (_t >= 1) {
-                toast_state      = 2; // Hold
-                toast_hold_timer = 150; // 2.5 Seconds
+                toast_state      = 2;
+                toast_hold_timer = 180;
             }
             break;
             
@@ -29,20 +60,18 @@ if (global.show_music_toast) {
             toast_hold_timer--;
             toast_slide_x = toast_max_x;
             if (toast_hold_timer <= 0) {
-                toast_state      = 3; // Slide Right Out
+                toast_state      = 3;
                 toast_anim_timer = 0;
             }
             break;
             
-        case 3: // Slide Right Out
+        case 3: // Slide Out
             toast_anim_timer += 0.08;
-            var _t = clamp(toast_anim_timer, 0, 1);
-            var _ease = _t * _t; // Quadratic ease in
-            toast_slide_x = lerp(toast_max_x, display_get_gui_width() + 50, _ease);
+            _t = clamp(toast_anim_timer, 0, 1);
+            _ease = _t * _t;
+            toast_slide_x = lerp(toast_max_x, -220, _ease);
             
-            if (_t >= 1) {
-                toast_state = 0; // Hidden
-            }
+            if (_t >= 1) toast_state = 0;
             break;
     }
 } else {
@@ -52,9 +81,7 @@ if (global.show_music_toast) {
 // Title Card Timer Ticker & Auto-Disable
 if (show_title_card) {
     title_card_timer++;
-    if (title_card_timer >= title_card_duration) {
-        show_title_card = false;
-    }
+    if (title_card_timer >= title_card_duration) show_title_card = false;
 }
 
 // =================================================================
@@ -65,9 +92,7 @@ var _boss_is_active = variable_global_exists("boss_active") && global.boss_activ
 if (global.music_mode == 1 && !is_paused && !player_dead && !stage_cleared && !is_transitioning && !_boss_is_active) {
     if (variable_global_exists("title_playlist") && is_array(global.title_playlist) && array_length(global.title_playlist) > 0) {
         
-        if (!variable_global_exists("title_music_started")) {
-            global.title_music_started = false;
-        }
+        if (!variable_global_exists("title_music_started")) global.title_music_started = false;
 
         var _current_song = global.title_playlist[global.current_song_index];
 
@@ -81,26 +106,65 @@ if (global.music_mode == 1 && !is_paused && !player_dead && !stage_cleared && !i
                 audio_play_sound(_current_song, 100, false);
                 global.title_music_started = true;
                 
-                // Trigger Toast Notification for the new track
                 if (global.show_music_toast) {
-                    toast_title      = audio_get_name(_current_song);
+                    if (script_exists(asset_get_index("scr_get_song_info"))) {
+                        var _info = scr_get_song_info(_current_song);
+                        toast_title        = _info.title;
+                        global.artist_name = _info.artist_name;
+                        global.artist_type = _info.artist_type;
+                    } else {
+                        toast_title        = audio_get_name(_current_song);
+                        global.artist_name = "Unknown Artist";
+                        global.artist_type = "composer";
+                    }
                     toast_state      = 1;
                     toast_anim_timer = 0;
-                    toast_slide_x    = -200;
+                    toast_slide_x    = -220;
                 }
             }
         }
     }
 }
 
-// Easter Egg Toggle (Shift + S)
+// =================================================================
+// EASTER EGG TOGGLE & RANDOM GLITCH ENGINE (Shift + S)
+// =================================================================
 if (keyboard_check_pressed(ord("S")) && keyboard_check(vk_shift)) {
     if (array_length(splash_sprites) > 0) {
         splash_active = !splash_active;
         splash_timer = 0;
-        splash_index = (splash_index + 1) % array_length(splash_sprites);
+        
+        splash_index = irandom(array_length(splash_sprites) - 1);
+        
+        glitch_color    = make_color_rgb(irandom(255), irandom(255), irandom(255));
+        glitch_offset_x = irandom_range(-12, 12);
+        glitch_offset_y = irandom_range(-12, 12);
+        glitch_scale_x  = choose(-1, 1);
+        glitch_scale_y  = choose(-1, 1);
+        
         var _sfx_text = asset_get_index("sfx_textbox");
         if (_sfx_text != -1 && audio_exists(_sfx_text)) audio_play_sound(_sfx_text, 1, false);
+    }
+}
+
+// Process Real-time Glitch Effect jitter while active
+if (splash_active) {
+    splash_timer++;
+    
+    if (splash_timer % 4 == 0) {
+        glitch_offset_x = irandom_range(-8, 8);
+        glitch_offset_y = irandom_range(-8, 8);
+        glitch_color    = make_color_rgb(irandom(255), irandom(255), irandom(255));
+    }
+    
+    if (splash_timer % 15 == 0) {
+        glitch_scale_x = choose(-1, 1);
+        glitch_scale_y = choose(-1, 1);
+    }
+    
+    var _spr = splash_sprites[splash_index];
+    if (sprite_exists(_spr)) {
+        glitch_subimage = (glitch_subimage + 0.2) % sprite_get_number(_spr);
     }
 }
 
@@ -113,7 +177,7 @@ if (keyboard_check_pressed(vk_escape) && !player_dead && !stage_cleared && !is_t
     var _sfx_cont = asset_get_index("sfx_textbox_continue");
     
     if (is_paused) {
-        audio_pause_all();
+        if (!pause_music_enabled) audio_pause_all();
         
         var _widescreen_w = 426;
         var _widescreen_h = 240;
@@ -132,10 +196,11 @@ if (keyboard_check_pressed(vk_escape) && !player_dead && !stage_cleared && !is_t
         if (_cam_obj != -1 && instance_exists(_cam_obj)) instance_activate_object(_cam_obj);
         
         pause_selection = 0;
+        pause_select_smooth = 0;
         if (_sfx_text != -1 && audio_exists(_sfx_text)) audio_play_sound(_sfx_text, 1, false);
     } else {
         instance_activate_all();
-        audio_resume_all();
+        if (!pause_music_enabled) audio_resume_all();
         
         if (surface_exists(pause_surface)) {
             surface_free(pause_surface);
@@ -146,13 +211,15 @@ if (keyboard_check_pressed(vk_escape) && !player_dead && !stage_cleared && !is_t
     }
 }
 
-// Pause Menu Mechanics
+// Redesigned Pause Menu Mechanics
 if (is_paused) {
-    var _key_up      = keyboard_check_pressed(vk_up);
-    var _key_down    = keyboard_check_pressed(vk_down);
-    var _key_confirm = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(ord("A"));
+    var _key_up      = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
+    var _key_down    = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
+    var _key_confirm = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(ord("A")) || keyboard_check_pressed(vk_space);
     var _sfx_text    = asset_get_index("sfx_textbox");
     var _sfx_cont    = asset_get_index("sfx_textbox_continue");
+    
+    pause_select_smooth = lerp(pause_select_smooth, pause_selection, 0.35);
     
     if (_key_up) {
         pause_selection--;
@@ -172,7 +239,7 @@ if (is_paused) {
                 is_paused = false;
                 global.game_paused = false;
                 instance_activate_all();
-                audio_resume_all();
+                if (!pause_music_enabled) audio_resume_all();
                 if (surface_exists(pause_surface)) {
                     surface_free(pause_surface);
                     pause_surface = -1;
@@ -184,7 +251,7 @@ if (is_paused) {
                 is_paused = false;
                 global.game_paused = false;
                 instance_activate_all();
-                audio_resume_all();
+                if (!pause_music_enabled) audio_resume_all();
                 if (surface_exists(pause_surface)) surface_free(pause_surface);
                 room_restart();
                 break;
@@ -193,7 +260,7 @@ if (is_paused) {
                 is_paused = false;
                 global.game_paused = false;
                 instance_activate_all();
-                audio_resume_all();
+                if (!pause_music_enabled) audio_resume_all();
                 if (surface_exists(pause_surface)) surface_free(pause_surface);
                 var _rm_juke = asset_get_index("rm_jukebox");
                 if (_rm_juke != -1 && room_exists(_rm_juke)) room_goto(_rm_juke);
@@ -203,7 +270,7 @@ if (is_paused) {
                 is_paused = false;
                 global.game_paused = false;
                 instance_activate_all();
-                audio_resume_all();
+                if (!pause_music_enabled) audio_resume_all();
                 application_surface_draw_enable(true);
                 
                 if (surface_exists(pause_surface)) {
@@ -219,7 +286,7 @@ if (is_paused) {
                 }
                 break;
                 
-            case 4: // QUIT GAME
+            case 4: // EXIT GAME
                 game_end();
                 break;  
         }
@@ -235,7 +302,6 @@ if (!stage_cleared && !player_dead) {
         player_dead = true;
         death_reason = "time";
         
-        var _p_obj = asset_get_index("obj_player");
         if (_p_obj != -1 && instance_exists(_p_obj)) {
             _p_obj.hp = 0;
             _p_obj.state = 3; 
@@ -250,8 +316,6 @@ if (!stage_cleared && !player_dead) {
     }
 }
 
-// Player Context Reference
-var _p_obj = asset_get_index("obj_player");
 var _player_valid = (_p_obj != -1 && instance_exists(_p_obj));
 
 // Low HP Warning Alarm

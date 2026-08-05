@@ -47,3 +47,12 @@ if (global.narrator_mode && !instance_exists(obj_narrator_controller)) {
 } else if (!global.narrator_mode) {
     audio_play_sound(mus_raalhehge_monaigaa, 10, false);
 }
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

@@ -22,7 +22,7 @@ selected_level_index  = 0;
 // Level Definitions (Target room, Display title, Subtitle)
 level_list = [
     { room_id: rm_game,   title: "Hmm, Empty?",       sub: "Act 1 - Subways" },
-    { room_id: rm_game_2, title: "Enemies Ahead",     sub: "Act 2 - City Scape" },
+    { room_id: rm_game_2, title: "Enemies Ahead",      sub: "Act 2 - City Scape" },
     { room_id: rm_game_3, title: "Chamber of Secrets", sub: "Act 3 - Boss Level" }
 ];
 
@@ -35,8 +35,8 @@ cheat_index    = 0;
 // Options: "fade", "curtain", "wipe_right", "pixelate", "circle_iris", "diamond_wipe"
 // =================================================================
 transition_type  = "fade"; 
-fade_state       = "in";          // States: "in", "idle", "out"
-fade_progress    = 0.0;           
+fade_state       = "in";         // States: "in", "idle", "out"
+fade_progress    = 0.0;            
 transition_speed = 0.025;         
 
 target_room = rm_main_menu;        // Default target room
@@ -46,23 +46,20 @@ target_room = rm_main_menu;        // Default target room
 // =================================================================
 
 // --- 1. MANUAL DATE OVERRIDE / CUSTOM EVENTS ---
-// Set 'use_manual_date' to true if you want to test or force a specific date!
 use_manual_date = false;
 manual_month    = 7;  // 1 - 12
 manual_day      = 26; // 1 - 31
 
-// You can add your own custom dates here anytime! { month, day, text, color }
 custom_events = [
     { month: 1,  day: 1,  text: "HAPPY NEW YEAR!", color: c_aqua }
 ];
 
-// --- 2. GET CURRENT SYSTEM DATE (OR MANUAL OVERRIDE) ---
+// --- 2. GET CURRENT SYSTEM DATE ---
 var _today_month = use_manual_date ? manual_month : date_get_month(date_current_datetime());
 var _today_day   = use_manual_date ? manual_day   : date_get_day(date_current_datetime());
 var _today_year  = date_get_year(date_current_datetime());
 
-// --- 3. ISLAMIC LUNAR HOLIDAY CALCULATOR (Ramadan, Eid al-Fitr, Eid al-Adha) ---
-// Estimates based on lunar conversion cycles for current and upcoming years
+// --- 3. ISLAMIC LUNAR HOLIDAY CALCULATOR ---
 var _ramadan_start_m = 0; var _ramadan_start_d = 0; var _ramadan_end_m = 0; var _ramadan_end_d = 0;
 var _eid_fitr_m      = 0; var _eid_fitr_d      = 0;
 var _eid_adha_m      = 0; var _eid_adha_d      = 0;
@@ -84,7 +81,6 @@ switch (_today_year) {
         _eid_adha_m      = 5;  _eid_adha_d      = 16;
         break;
     default:
-        // Generic approximation formula for years beyond 2027
         _ramadan_start_m = 2; _ramadan_start_d = 1; _ramadan_end_m = 3; _ramadan_end_d = 1;
         _eid_fitr_m      = 3; _eid_fitr_d      = 2;
         _eid_adha_m      = 5; _eid_adha_d      = 10;
@@ -132,9 +128,8 @@ else if (_today_month == 5 && _today_day == 1) {
     active_event_text  = "HAPPY LABOR DAY!";
     active_event_color = c_white;
 }
-
 // E. Custom Events Array Match
-if (active_event_text == "") {
+else {
     for (var e = 0; e < array_length(custom_events); e++) {
         var _evt = custom_events[e];
         if (_evt.month == _today_month && _evt.day == _today_day) {
@@ -146,9 +141,10 @@ if (active_event_text == "") {
 }
 
 // =================================================================
-// START TEXT POOL & RANDOMIZER
+// START TEXT POOL (200 VARIATIONS)
 // =================================================================
 start_text_pool = [
+    // 1 - 20: Standard & Conversational
     "Press [Enter] to Start!",
     "Press [Enter] to Begin Your Quest!",
     "Press [Enter] to Jump In!",
@@ -157,35 +153,26 @@ start_text_pool = [
     "Why are you AFK-ing right now? Hit [Enter] to begin!",
     "Don't be shy, little one! Hit [Enter] to begin!",
     "Let's Smurf in! Press [Enter] to start!",
-    "[Enter] Wo oste, hajimaru yo!",
-    "Presso [Enter] zu beginne!",
-
-    // --- Classic Arcade & High Hype ---
-    "INSERT COIN... Just kidding, hit [Enter]!",
     "Ready Player One? Hit [Enter]!",
     "Press [Enter] to prove your worth!",
     "Destiny awaits! Smash that [Enter] key!",
     "Press [Enter] to kick off the adventure!",
     "An epic journey begins with a single [Enter]!",
-
-    // --- Playful / Fourth-Wall ---
     "Are you just gonna stare at the menu? Press [Enter]!",
     "The [Enter] key is right there, tap it!",
     "Your keyboard called, it wants you to hit [Enter]!",
     "Take a breath, then smash [Enter]!",
     "No pressure, but [Enter] starts the game!",
     "Still loading your motivation? Hit [Enter]!",
-	"Arr! Are ye ready? Press [Enter] to begin ye quest!",
+    "Y'all ready for this? Press [Enter]!",
 
-    // --- Retro Engrish Style ---
+    // 21 - 40: Bootleg / Engrish Style
     "PUSH [ENTER] KEY FOR MAKE GREAT START!",
     "PLEASE PUSH [ENTER] TO PLAY GAME NOW!",
     "LET'S GETS GOING! PUSH [ENTER] BUTTON!",
     "WELCOME TO SUPER ADVENTURE! HIT [ENTER]!",
     "YOUR HERO WAITING! PLEASE PRESSING [ENTER]!",
     "CONGRATULATION! PUSH [ENTER] FOR START!",
-
-    // --- Multicart Bootleg NES Style ---
     "PLEASE TO SELECT BUTTON [ENTER] FOR START!",
     "WELCOME TO 9999-IN-1! PUSH [ENTER] TO PLAY!",
     "GOOD LUCK PLAYER! PRESS [ENTER] FOR ACTION NOW!",
@@ -194,11 +181,188 @@ start_text_pool = [
     "IT IS A HAPPY TIME! PUSH [ENTER] KEY!",
     "SELECT [ENTER] AND LET US GO TO FIGHTING!",
     "PUSH [ENTER] BUTTON AND DEFEAT THE BAD GUY!",
+    "INSERT COIN OR JUST PUSH [ENTER] FRIEND!",
+    "ALL YOUR BASE ARE BELONG TO [ENTER]!",
+    "VERY NICE GAME! PLEASE HIT [ENTER] KEY!",
+    "SUPER PLAYER MUST PRESS [ENTER] NOW!",
+    "DO NOT WAIT, PUSH [ENTER] FOR GLORY!",
+    "FAST ACTION START WITH [ENTER] BUTTON!",
 
-    // --- Multi-Language / Flavor ---
-    "[ENTER] key wo ose! Battle Start!",
+    // 41 - 60: Multilingual & Localized Flavour
+    "[Enter] Wo ose, hajimaru yo!",
+    "Presso [Enter] zu beginne!",
     "Drucken Sie [Enter] to begin!",
-    "Y'all ready for this? Press [Enter]!"
+    "Appuyez sur [Enter] pour commencer!",
+    "Pulse [Enter] para comenzar!",
+    "Premere [Enter] per iniziare!",
+    "Pressione [Enter] para começar!",
+    "Presis [Enter] start karein!",
+    "Naжмите [Enter] для начала!",
+    "Basilan [Enter] tusuna basin!",
+    "Drücke [Enter] zum Starten!",
+    "Haz click en [Enter] por favor!",
+    "Tlačítko [Enter] pro zahájení!",
+    "Naciśnij [Enter], aby zacząć!",
+    "Pussh [Enter] kī shuru!",
+    "Starten Sie mit [Enter]!",
+    "Apretando [Enter] para la acción!",
+    "Game start desu! Push [Enter]!",
+    "Guten Tag! Press [Enter] to play!",
+    "Bon appétit! Now hit [Enter]!",
+
+    // 61 - 80: Pirate & Fantasy Theme
+    "Arr! Are ye ready? Press [Enter] to begin ye quest!",
+    "Ahoy matey! Press [Enter] to hoist the sails!",
+    "By Blackbeard's ghost, hit [Enter] to set sail!",
+    "Grab yer cutlass and press [Enter]!",
+    "Treasure awaits those who press [Enter]!",
+    "Avast ye landlubber! Smash [Enter]!",
+    "Sail into danger with a tap of [Enter]!",
+    "A pirate's life for thee! Press [Enter]!",
+    "Batten down the hatches and press [Enter]!",
+    "Heave-ho! Hit [Enter] to start the voyage!",
+    "Invoke the ancient magic by pressing [Enter]!",
+    "The dungeon doors open when you press [Enter]!",
+    "A wizard is never late, he hits [Enter] precisely when he means to!",
+    "Slay the dragon with a mighty [Enter] press!",
+    "Drink an elixir of focus and hit [Enter]!",
+    "Equip your sword and press [Enter]!",
+    "The prophecy foretold your [Enter] press!",
+    "Cast your spell by striking [Enter]!",
+    "Venture into the unknown! Press [Enter]!",
+    "May the odds be ever in your [Enter] favor!",
+
+    // 81 - 100: Sci-Fi & Cyberpunk Tone
+    "Initiating sequence... Press [Enter] to override!",
+    "Terminal active. Press [Enter] to establish link.",
+    "System online. Tap [Enter] for mainframe access.",
+    "Cyber-deck ready. Hit [Enter] to jack in.",
+    "AI core online. Press [Enter] to initialize.",
+    "Hyperdrive engaged! Press [Enter] to warp.",
+    "Warning: Sector 7 breach! Hit [Enter]!",
+    "Bio-scan complete. Press [Enter] to spawn.",
+    "Matrix handshake successful. Press [Enter]!",
+    "Quantum portal unstable! Hit [Enter] now!",
+    "Robots incoming! Press [Enter] to deploy defense.",
+    "Reactor core stable. Press [Enter] to launch.",
+    "Satellite link established. Hit [Enter]!",
+    "Decoding sector parameters... Press [Enter].",
+    "Nanites ready. Press [Enter] to reconstruct.",
+    "Simulation loaded. Hit [Enter] to wake up.",
+    "Firewall breached! Press [Enter] to counter.",
+    "Overclocking CPU cores... Press [Enter]!",
+    "Mecha pilot standby. Hit [Enter] to sync.",
+    "Galaxy sector clean. Press [Enter] to proceed.",
+
+    // 101 - 120: Sarcastic & Playful Teases
+    "You could go outside, or you could press [Enter].",
+    "Is your finger tired already? Just tap [Enter].",
+    "Staring at title screens is a valid hobby, but [Enter] starts the game.",
+    "Error 404: Player motivation not found. Press [Enter] anyway.",
+    "Look at you, looking at this screen. Go on, hit [Enter].",
+    "I bet you can't press [Enter] with your elbow.",
+    "Do a barrel roll! Or just hit [Enter], whatever works.",
+    "Achievement unlocked: Pro Procrastinator. Hit [Enter] to play.",
+    "You have successfully stared at a static image for 3 seconds.",
+    "Okay, we get it, the background art looks nice. Press [Enter].",
+    "Keyboard warriors unite! Press [Enter] to battle.",
+    "Plot twist: Pressing [Enter] does absolutely nothing. (Kidding, it starts the game).",
+    "Warning: Excessive menu lingering may cause boredom. Press [Enter].",
+    "Initializing high-tier gaming stance... Hit [Enter].",
+    "Coffee levels low? Press [Enter] to compensate.",
+    "Your cat is judging you for not pressing [Enter] yet.",
+    "Press [Enter] to unlock absolute chaos.",
+    "Legend says if you hold [Enter], nothing happens. Just tap it.",
+    "Zero bugs found here. (Source: trust me bro). Hit [Enter].",
+    "Why press many button when one [Enter] do trick?",
+
+    // 121 - 140: Casual Chiptune / Retro Vibes
+    "Frequencies aligned. Hit [Enter] for square wave bliss.",
+    "Loading 8-bit assets into memory... Press [Enter].",
+    "PSG sound chip initialized. Hit [Enter] to drop beat.",
+    "FM synthesis engine standing by. Press [Enter].",
+    "RAM cassette loaded successfully. Press [Enter].",
+    "CRT monitor warmed up. Hit [Enter] to play.",
+    "Sprites rendered. Press [Enter] for action.",
+    "Scrolling background layer active. Hit [Enter].",
+    "VBLANK synchronized. Press [Enter] now.",
+    "ROM checksum verified. Hit [Enter] to boot.",
+    "Overscan border clear. Press [Enter]!",
+    "Palette swaps loaded. Hit [Enter] to start.",
+    "Controller port 1 connected. Press [Enter].",
+    "Sound channel 3 active. Hit [Enter] to jam.",
+    "DIP switch configured. Press [Enter] to enter world.",
+    "High score table ready. Hit [Enter] to make history.",
+    "Continue countdown: 9... 8... Hit [Enter]!",
+    "Bonus stage unlocked in your heart. Press [Enter].",
+    "Extra life acquired! Hit [Enter] to use it.",
+    "Power-up capsule descending. Press [Enter]!",
+
+    // 141 - 160: Short, Punchy, & Epic
+    "BEGIN.",
+    "ENTER THE VOID.",
+    "AWAKEN HERO.",
+    "START IT UP.",
+    "LET'S ROLL.",
+    "BREAK THE LIMIT.",
+    "CHARGE FORWARD.",
+    "FEEL THE RHYTHM.",
+    "UNLEASH POWER.",
+    "SEIZE THE DAY.",
+    "CLAIM VICTORY.",
+    "RISE & SHINE.",
+    "IGNITE THE SPARK.",
+    "BREAK THE SEAL.",
+    "CROSS THE LINE.",
+    "TAKE THE PLUNGE.",
+    "STEP INTO LIGHT.",
+    "CONQUER ALL.",
+    "STRIKE FAST.",
+    "GAME ON.",
+
+    // 161 - 180: Cozy & Chill Atmosphere
+    "Brewing tea... while you press [Enter].",
+    "Soft rain outside. Warm room inside. Press [Enter].",
+    "Take your time, relax, and hit [Enter] when ready.",
+    "A peaceful melody plays. Press [Enter] to join.",
+    "Snuggle up with a cat and hit [Enter].",
+    "Midnight coding session vibe. Press [Enter].",
+    "No rush here. Hit [Enter] whenever you feel like it.",
+    "Smooth jazz and retro pixels. Press [Enter].",
+    "Breathe in, breathe out, then press [Enter].",
+    "A cozy adventure awaits behind the [Enter] key.",
+    "Starlight twinkling outside. Hit [Enter] to begin.",
+    "Put on your favorite headphones and press [Enter].",
+    "Peaceful vibes only. Hit [Enter] to enter zone.",
+    "Warm fireplace crackling. Press [Enter] to start game.",
+    "Slow down and enjoy the title screen. Or hit [Enter].",
+    "Wrapped in a blanket of code. Press [Enter].",
+    "Gentle breezes and chiptune tunes. Hit [Enter].",
+    "A comforting cup of coffee is waiting. Press [Enter].",
+    "Silence in the room, click of [Enter] on the board.",
+    "Find your inner peace, then hit [Enter].",
+
+    // 181 - 200: Mystery & Curiosity
+    "What secrets lie beyond this screen? Press [Enter] to find out.",
+    "A door stands before you. Hit [Enter] to open it.",
+    "Whispers echo in the digital wind... Press [Enter].",
+    "You feel a strange presence. Hit [Enter] to investigate.",
+    "An unknown world is loading... Press [Enter] to enter.",
+    "Shadows shift on the horizon. Press [Enter].",
+    "The air grows heavy with anticipation. Hit [Enter].",
+    "A glowing portal flickers. Press [Enter] to step through.",
+    "Listen closely... Can you hear it? Press [Enter].",
+    "A cryptic message flashes: Hit [Enter] to decode.",
+    "The veil between worlds thins. Press [Enter].",
+    "Uncharted territory ahead. Hit [Enter] to map it.",
+    "An ancient relic hums with energy. Press [Enter].",
+    "The path splits here. Hit [Enter] to choose.",
+    "Something is watching from the code. Press [Enter].",
+    "A hidden chapter unlocks with [Enter].",
+    " Step across the threshold. Hit [Enter].",
+    "The mystery deepens. Press [Enter] to uncover truth.",
+    "A spark ignites in the dark. Hit [Enter].",
+    "The ultimate journey begins with [Enter]."
 ];
 
 randomize();
@@ -219,7 +383,11 @@ if (audio_exists(_first_song) && !audio_is_playing(_first_song)) {
     audio_play_sound(_first_song, 100, false); 
 }
 
-// Global Stats Tracker
+// Stats verification
 if (!variable_global_exists("stats")) {
-    global.stats = { total_deaths: 0, total_jumps: 0, time_played_sec: 0 };
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
 }

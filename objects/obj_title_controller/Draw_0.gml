@@ -4,7 +4,6 @@ var _view_w = 426;
 var _view_h = 240;
 var version_text = "GITHUB DEMO v1.0"; 
 
-// Safety check for customizable blink speed variable (default to 30 if not defined in Create Event)
 var _speed = variable_instance_exists(id, "blink_speed") ? max(1, blink_speed) : 30;
 
 // =================================================================
@@ -15,7 +14,6 @@ var _bg_sprite = dev_mode ? spr_titlescreen_development : spr_titlescreen;
 if (sprite_exists(_bg_sprite)) {
     draw_sprite_stretched(_bg_sprite, 0, 0, 0, room_width, room_height);
 } else if (sprite_exists(spr_titlescreen)) {
-    // Fallback to standard title screen if dev sprite is missing
     draw_sprite_stretched(spr_titlescreen, 0, 0, 0, room_width, room_height);
 } else {
     draw_clear(make_color_rgb(0, 0, 255)); 
@@ -25,7 +23,7 @@ if (sprite_exists(_bg_sprite)) {
 // 2. SUBTITLE SPLASH TEXT (Only draws AFTER transition finishes)
 // =================================================================
 if (fade_state != "in") {
-    var _splash_y = 131;   // Adjusted to sit perfectly below the title logo
+    var _splash_y = 131;   
     var _max_width = 360;  
     var _shadow_offset = 1; 
 
@@ -153,15 +151,13 @@ if (fade_state != "in") {
 }
 
 // =================================================================
-// 3. LEVEL SELECT UI / PRESS START DISPLAY
+// 3. LEVEL SELECT UI / PRESS START DISPLAY & HOLIDAY BANNER
 // =================================================================
 if (fade_state != "in") {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     
     if (font_exists(fnt_dialogue)) {
-        draw_set_font(fnt_dialogue);
-    } else if (font_exists(fnt_dialogue)) {
         draw_set_font(fnt_dialogue);
     } else {
         draw_set_font(-1);
@@ -170,25 +166,30 @@ if (fade_state != "in") {
     var _ui_center_x = floor(_view_w / 2);
     var _ui_y = floor(_view_h - 65);
 
+    // --- DRAW ACTIVE HOLIDAY BANNER (Top Center) ---
+    if (active_event_text != "") {
+        var _banner_y = 22;
+        draw_set_color(c_black);
+        draw_text(_ui_center_x + 1, _banner_y + 1, active_event_text);
+        draw_set_color(active_event_color);
+        draw_text(_ui_center_x, _banner_y, active_event_text);
+    }
+
     if (level_select_unlocked) {
-        // --- DRAW ACTIVE LEVEL SELECT MENU ---
         var _curr_lvl = level_list[selected_level_index];
         var _title_str = "< " + _curr_lvl.title + " >";
         var _sub_str   = _curr_lvl.sub;
 
-        // Level Title (Yellow / Shadow)
         draw_set_color(c_black);
         draw_text(_ui_center_x + 1, _ui_y + 1, _title_str);
         draw_set_color(c_yellow);
         draw_text(_ui_center_x, _ui_y, _title_str);
 
-        // Subtitle (Cyan / Shadow)
         draw_set_color(c_black);
         draw_text(_ui_center_x + 1, _ui_y + 15 + 1, _sub_str);
         draw_set_color(c_aqua);
         draw_text(_ui_center_x, _ui_y + 15, _sub_str);
 
-        // Blinking Start Prompt
         if ((blink_timer div _speed) % 2 == 0) {
             draw_set_color(c_black);
             draw_text(_ui_center_x + 1, _ui_y + 30 + 1, "[ PRESS ENTER TO STAGE START ]");
@@ -196,7 +197,6 @@ if (fade_state != "in") {
             draw_text(_ui_center_x, _ui_y + 30, "[ PRESS ENTER TO STAGE START ]");
         }
     } else {
-        // --- STANDARD BLINKING START MESSAGE ---
         if ((blink_timer div _speed) % 2 == 0) {
             draw_set_color(c_black);
             draw_text(_ui_center_x + 1, _ui_y + 15 + 1, start_message);
@@ -213,8 +213,6 @@ draw_set_halign(fa_right);
 draw_set_valign(fa_bottom);
 
 if (font_exists(fnt_dialogue)) {
-    draw_set_font(fnt_dialogue);
-} else if (font_exists(fnt_dialogue)) {
     draw_set_font(fnt_dialogue);
 } else {
     draw_set_font(-1);
@@ -236,27 +234,23 @@ if (fade_state != "idle") {
     var _p = (fade_state == "in") ? (1.0 - fade_progress) : fade_progress;
     
     switch (transition_type) {
-        // --- TYPE 1: CLASSIC FADE ---
         case "fade":
             draw_set_alpha(_p);
             draw_rectangle(0, 0, room_width, room_height, false);
             draw_set_alpha(1.0);
             break;
             
-        // --- TYPE 2: SIDE CURTAINS ---
         case "curtain":
             var _curtain_w = (_view_w / 2) * _p;
             draw_rectangle(0, 0, _curtain_w, _view_h, false);
             draw_rectangle(_view_w - _curtain_w, 0, _view_w, _view_h, false);
             break;
             
-        // --- TYPE 3: SCREEN WIPE RIGHT ---
         case "wipe_right":
             var _wipe_x = _view_w * _p;
             draw_rectangle(0, 0, _wipe_x, _view_h, false);
             break;
             
-        // --- TYPE 4: PIXELATE / MOSAIC RESAMPLE ---
         case "pixelate":
             if (surface_exists(application_surface)) {
                 var _grid_size = max(1, floor(32 * _p));
@@ -272,7 +266,6 @@ if (fade_state != "idle") {
             }
             break;
             
-        // --- TYPE 5: CIRCLE IRIS ---
         case "circle_iris":
             var _center_x = _view_w / 2;
             var _center_y = _view_h / 2;
@@ -303,7 +296,6 @@ if (fade_state != "idle") {
             }
             break;
             
-        // --- TYPE 6: DIAMOND GRID WIPE ---
         case "diamond_wipe":
             var _box_size = 16;
             var _cols = ceil(_view_w / _box_size);

@@ -1,12 +1,10 @@
-/// @description Render Main HUD, Toast Notification & Upgraded Title Card
+/// @description Render Main HUD, Speedometer, Music Toast, Title Card & Glitched Easter Egg
 
 var _gui_w = display_get_gui_width();
 var _gui_h = display_get_gui_height();
 
 var _fnt = asset_get_index("fnt_dialogue");
-if (_fnt != -1 && font_exists(_fnt)) {
-    draw_set_font(_fnt);
-}
+if (_fnt != -1 && font_exists(_fnt)) draw_set_font(_fnt);
 draw_set_alpha(1.0);
 draw_set_valign(fa_top);
 
@@ -76,13 +74,11 @@ if (!is_paused) {
         draw_set_color(c_lime);
         draw_text_transformed(_mid_x, _panel_y + 66, "TIME TICKS: " + string(stage_time), 0.55, 0.55, 0);
     } else {
-        // --- UPGRADED MAIN HUD ---
         draw_set_halign(fa_left);
         
-        // Offset Y if toast is active on top-left to prevent overlap
         var _hud_top_y = 6;
         if (toast_state != 0 && toast_slide_x > -100) {
-            _hud_top_y = 38; 
+            _hud_top_y = 44; 
         }
 
         // Left Panel (Player Status Box)
@@ -127,7 +123,6 @@ if (!is_paused) {
         draw_set_color(c_white);
         draw_text_transformed(12, _hud_top_y + 18, "HP", 0.48, 0.48, 0);
 
-        // Dark Background Track
         draw_set_color(make_color_rgb(18, 22, 32));
         draw_rectangle(_bar_x1, _bar_y1, _bar_x2, _bar_y2, false);
         
@@ -143,14 +138,12 @@ if (!is_paused) {
             draw_set_color(_bar_color);
             draw_rectangle(_bar_x1, _bar_y1, _bar_x1 + (_bar_w * _hp_percent), _bar_y2, false);
             
-            // Subtle Gloss Line
             draw_set_color(c_white);
             draw_set_alpha(0.25);
             draw_rectangle(_bar_x1, _bar_y1, _bar_x1 + (_bar_w * _hp_percent), _bar_y1 + 2, false);
             draw_set_alpha(1.0);
         }
         
-        // Bar Border
         draw_set_color(c_white);
         draw_set_alpha(0.25);
         draw_rectangle(_bar_x1, _bar_y1, _bar_x2, _bar_y2, true);
@@ -184,71 +177,50 @@ if (!is_paused) {
         draw_text_transformed(_right_margin - 7, 25, "LIVES  " + _raw_lives, 0.52, 0.52, 0);
         draw_set_color(make_color_rgb(255, 215, 0));
         draw_text_transformed(_right_margin - 8, 24, "LIVES  " + _raw_lives, 0.52, 0.52, 0);
+
+        // =================================================================
+        // REAL-TIME SPEEDOMETER (Bottom Right HUD Element)
+        // =================================================================
+        var _spd_x2 = _gui_w - 6;
+        var _spd_y2 = _gui_h - 6;
+        var _spd_x1 = _spd_x2 - 82;
+        var _spd_y1 = _spd_y2 - 22;
+
+        draw_set_color(make_color_rgb(10, 14, 22));
+        draw_set_alpha(0.80);
+        draw_roundrect_ext(_spd_x1, _spd_y1, _spd_x2, _spd_y2, 5, 5, false);
+
+        draw_set_color(make_color_rgb(0, 180, 240));
+        draw_set_alpha(0.40);
+        draw_roundrect_ext(_spd_x1, _spd_y1, _spd_x2, _spd_y2, 5, 5, true);
+        draw_set_alpha(1.0);
+
+        draw_set_halign(fa_right);
+        var _spd_unit = use_kmh ? " KM/H" : " MPH";
+        var _spd_val_str = string_format(display_speed, 3, 1);
+        var _spd_full_str = _spd_val_str + _spd_unit;
+
+        draw_set_color(c_black);
+        draw_text_transformed(_spd_x2 - 5, _spd_y1 + 5, _spd_full_str, 0.48, 0.48, 0);
+        draw_set_color(make_color_rgb(0, 220, 255));
+        draw_text_transformed(_spd_x2 - 6, _spd_y1 + 4, _spd_full_str, 0.48, 0.48, 0);
     }
 }
 
 // =================================================================
-// 2. MINECRAFT JAVA HOMAGE MUSIC TOAST (Top Left)
+// 2. UPGRADED CINEMATIC TITLE CARD OVERLAY
 // =================================================================
-if (toast_state != 0 && global.show_music_toast) {
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    
-    var _t_w = 170;
-    var _t_h = 28;
-    var _t_x = toast_slide_x;
-    var _t_y = 6;
-
-    // Toast Shadow & Outer Frame
-    draw_set_color(c_black);
-    draw_set_alpha(0.40);
-    draw_roundrect_ext(_t_x + 2, _t_y + 2, _t_x + _t_w + 2, _t_y + _t_h + 2, 4, 4, false);
-
-    // Dark Background (Minecraft Box style)
-    draw_set_color(make_color_rgb(18, 18, 24));
-    draw_set_alpha(0.92);
-    draw_roundrect_ext(_t_x, _t_y, _t_x + _t_w, _t_y + _t_h, 4, 4, false);
-
-    // Blue Left Border Stripe
-    draw_set_color(make_color_rgb(0, 220, 255));
-    draw_set_alpha(1.0);
-    draw_rectangle(_t_x, _t_y, _t_x + 3, _t_y + _t_h, false);
-
-    // Box Outline
-    draw_set_color(make_color_rgb(60, 65, 80));
-    draw_roundrect_ext(_t_x, _t_y, _t_x + _t_w, _t_y + _t_h, 4, 4, true);
-
-    // Text Header & Song Name
-    draw_set_color(make_color_rgb(255, 215, 0)); // Gold title
-    draw_text_transformed(_t_x + 8, _t_y + 4, "NOW PLAYING", 0.40, 0.40, 0);
-
-    draw_set_color(c_white);
-    var _disp_title = string_upper(toast_title);
-    if (string_width(_disp_title) * 0.45 > _t_w - 14) {
-        _disp_title = string_copy(_disp_title, 1, 18) + "...";
-    }
-    draw_text_transformed(_t_x + 8, _t_y + 14, _disp_title, 0.45, 0.45, 0);
-    
-    draw_set_alpha(1.0);
-}
-
-// =================================================================
-// 3. UPGRADED CINEMATIC TITLE CARD OVERLAY
-// =================================================================
-if (show_title_card && title_card_timer < title_card_duration) {
+if (!is_paused && show_title_card && title_card_timer < title_card_duration) {
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     
-    // Animation Calculations
     var _progress = title_card_timer / title_card_duration;
     var _card_alpha = 1.0;
     
-    // Fade out during last 30 frames
     if (title_card_timer > title_card_duration - 30) {
         _card_alpha = (title_card_duration - title_card_timer) / 30.0;
     }
     
-    // Entry Expansion Factor
     var _expand = clamp(title_card_timer / 20.0, 0, 1);
     var _bar_h = 44 * _expand;
     
@@ -257,12 +229,10 @@ if (show_title_card && title_card_timer < title_card_duration) {
     var _box_y1 = (_gui_h / 2) - _bar_h;
     var _box_y2 = (_gui_h / 2) + _bar_h;
     
-    // Dark Backdrop Band
     draw_set_color(make_color_rgb(8, 10, 15));
     draw_set_alpha(_card_alpha * 0.88);
     draw_rectangle(0, _box_y1, _gui_w, _box_y2, false);
     
-    // Glowing Horizon Lines
     draw_set_color(make_color_rgb(0, 220, 255));
     draw_set_alpha(_card_alpha);
     draw_line_width(0, _box_y1, _gui_w, _box_y1, 1);
@@ -279,19 +249,16 @@ if (show_title_card && title_card_timer < title_card_duration) {
     var _disc_str  = _card_data[2];
     
     if (_expand >= 0.8) {
-        // Stage Title
         draw_set_color(c_black);
         draw_text_transformed(_gui_w/2 + 1, _gui_h/2 - 21, _title_str, 0.90, 0.90, 0);
         draw_set_color(c_white);
         draw_text_transformed(_gui_w/2, _gui_h/2 - 22, _title_str, 0.90, 0.90, 0);
 
-        // Subtitle / Location Name
         draw_set_color(c_black);
         draw_text_transformed(_gui_w/2 + 1, _gui_h/2 + 1, _sub_str, 0.62, 0.62, 0);
         draw_set_color(make_color_rgb(255, 215, 0));
         draw_text_transformed(_gui_w/2, _gui_h/2, _sub_str, 0.62, 0.62, 0);
 
-        // Disclaimer / Zone Meta
         draw_set_color(c_black);
         draw_text_transformed(_gui_w/2 + 1, _gui_h/2 + 23, _disc_str, 0.48, 0.48, 0);
         draw_set_color(make_color_rgb(180, 195, 210));
@@ -302,7 +269,7 @@ if (show_title_card && title_card_timer < title_card_duration) {
 }
 
 // =================================================================
-// 4. PAUSE MENU OVERLAY
+// 3. PAUSE MENU OVERLAY
 // =================================================================
 if (is_paused) {
     if (surface_exists(pause_surface)) {
@@ -369,24 +336,120 @@ if (is_paused) {
 }
 
 // =================================================================
-// 5. SECRET EASTER EGG OVERLAY
+// 4. TOAST (Rendered Above Pause Layer)
 // =================================================================
-if (splash_active && array_length(splash_sprites) > 0) {
-    var _spr = splash_sprites[splash_index];
-    if (_spr != -1 && sprite_exists(_spr)) {
-        draw_sprite_stretched(_spr, 0, 0, 0, _gui_w, _gui_h);
-        
-        draw_set_halign(fa_right);
-        draw_set_valign(fa_bottom);
-        
-        draw_set_color(c_black);
-        draw_text_transformed(_gui_w - 7, _gui_h - 5, "[DEV EASTER EGG ACTIVE]", 0.45, 0.45, 0);
-        draw_set_color(c_yellow);
-        draw_text_transformed(_gui_w - 8, _gui_h - 6, "[DEV EASTER EGG ACTIVE]", 0.45, 0.45, 0);
-    }
+var _can_show_toast = global.show_music_toast;
+
+if (is_paused && toast_title != "") {
+    _can_show_toast = true;
 }
 
-// Reset Draw State Parameters
+if (_can_show_toast && (toast_state != 0 || is_paused)) {
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    
+    var _t_w = 175;
+    var _t_h = 34; 
+    
+    var _t_x = is_paused ? max(toast_slide_x, 6) : toast_slide_x;
+    var _t_y = 6;
+
+    draw_set_color(c_black);
+    draw_set_alpha(0.40);
+    draw_roundrect_ext(_t_x + 2, _t_y + 2, _t_x + _t_w + 2, _t_y + _t_h + 2, 4, 4, false);
+
+    draw_set_color(make_color_rgb(18, 18, 24));
+    draw_set_alpha(0.95);
+    draw_roundrect_ext(_t_x, _t_y, _t_x + _t_w, _t_y + _t_h, 4, 4, false);
+
+    draw_set_color(make_color_rgb(0, 220, 255));
+    draw_set_alpha(1.0);
+    draw_rectangle(_t_x, _t_y, _t_x + 3, _t_y + _t_h, false);
+
+    draw_set_color(make_color_rgb(60, 65, 80));
+    draw_roundrect_ext(_t_x, _t_y, _t_x + _t_w, _t_y + _t_h, 4, 4, true);
+
+    draw_set_color(make_color_rgb(255, 215, 0));
+    draw_text_transformed(_t_x + 8, _t_y + 3, "NOW PLAYING", 0.38, 0.38, 0);
+
+    draw_set_color(c_white);
+    var _disp_title = string_upper(toast_title);
+    if (string_width(_disp_title) * 0.42 > _t_w - 14) {
+        _disp_title = string_copy(_disp_title, 1, 18) + "...";
+    }
+    draw_text_transformed(_t_x + 8, _t_y + 12, _disp_title, 0.42, 0.42, 0);
+    
+    var _artist_type = variable_struct_exists(global, "artist_type") ? global.artist_type : "composer";
+    var _artist_raw  = variable_struct_exists(global, "artist_name") ? global.artist_name : "Unknown";
+    var _artist_str  = "";
+
+    if (_artist_type == "composer") {
+        _artist_str = "Composed by " + _artist_raw;
+    } else if (_artist_type == "artist") {
+        _artist_str = "By " + _artist_raw;
+    } else {
+        _artist_str = _artist_raw;
+    }
+
+    if (string_width(_artist_str) * 0.36 > _t_w - 14) {
+        _artist_str = string_copy(_artist_str, 1, 22) + "...";
+    }
+
+    draw_set_color(make_color_rgb(170, 185, 200));
+    draw_text_transformed(_t_x + 8, _t_y + 22, _artist_str, 0.36, 0.36, 0);
+    
+    draw_set_alpha(1.0);
+}
+
+// =================================================================
+// 5. SECRET EASTER EGG OVERLAY (SHIFT + S GLITCH ENGINE)
+// =================================================================
+if (splash_active && array_length(splash_sprites) > 0) {
+    draw_set_color(c_black);
+    draw_set_alpha(1.0);
+    draw_rectangle(0, 0, _gui_w, _gui_h, false);
+
+    var _spr = splash_sprites[splash_index];
+    if (_spr != -1 && sprite_exists(_spr)) {
+        var _cx = (_gui_w / 2) + glitch_offset_x;
+        var _cy = (_gui_h / 2) + glitch_offset_y;
+
+        gpu_set_blendmode(bm_add);
+        draw_sprite_ext(
+            _spr,
+            glitch_subimage,
+            _cx + irandom_range(-4, 4),
+            _cy + irandom_range(-4, 4),
+            glitch_scale_x,
+            glitch_scale_y,
+            irandom_range(-5, 5),
+            c_red,
+            0.6
+        );
+        gpu_set_blendmode(bm_normal);
+
+        draw_sprite_ext(
+            _spr,
+            glitch_subimage,
+            _cx,
+            _cy,
+            glitch_scale_x,
+            glitch_scale_y,
+            0,
+            glitch_color,
+            1.0
+        );
+    }
+    
+    draw_set_halign(fa_right);
+    draw_set_valign(fa_bottom);
+    
+    draw_set_color(c_black);
+    draw_text_transformed(_gui_w - 7, _gui_h - 5, "[DEV EASTER EGG ACTIVE]", 0.45, 0.45, 0);
+    draw_set_color(c_yellow);
+    draw_text_transformed(_gui_w - 8, _gui_h - 6, "[DEV EASTER EGG ACTIVE]", 0.45, 0.45, 0);
+}
+
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_color(c_white);

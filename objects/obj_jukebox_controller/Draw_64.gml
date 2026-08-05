@@ -1,139 +1,145 @@
-/// @description Render Full Jukebox Matrix & Clean Horizontal UI Focus Layouts
-
-var _gui_w = 320;
-var _gui_h = 240;
-var _shadow_offset = 1;
+/// @description Render Widescreen Modernized Jukebox UI
 
 if (font_exists(fnt_bit)) draw_set_font(fnt_bit);
 draw_set_valign(fa_top);
 
 // -----------------------------------------------------------------
-// SECTION 1: TOP HORIZONTAL TAB SELECTION SYSTEM (4 Columns)
+// BACKGROUND & CONTAINER GLASSES
 // -----------------------------------------------------------------
-var _tab_y = 10;
-var _tab_width = 74; 
-var _start_tab_x = 10;
+draw_set_color(make_color_rgb(12, 14, 22));
+draw_rectangle(0, 0, gui_w, gui_h, false);
 
-// Tab 0: OST
-var _t0 = (current_tab == 0) ? "[OST]" : " OST ";
-draw_set_halign(fa_center);
-draw_set_color(c_black); draw_text(_start_tab_x + (_tab_width*0) + _tab_width/2 + _shadow_offset, _tab_y + _shadow_offset, _t0);
-draw_set_color((current_tab == 0) ? c_yellow : c_white); draw_text(_start_tab_x + (_tab_width*0) + _tab_width/2, _tab_y, _t0);
+// Header Panel
+draw_set_color(make_color_rgb(20, 24, 38));
+draw_rectangle(8, 6, gui_w - 8, 30, false);
+draw_set_color(make_color_rgb(45, 55, 80));
+draw_rectangle(8, 6, gui_w - 8, 30, true);
 
-// Tab 1: SONGS
-var _t1 = (current_tab == 1) ? "[SONGS]" : " SONGS ";
-draw_set_color(c_black); draw_text(_start_tab_x + (_tab_width*1) + _tab_width/2 + _shadow_offset, _tab_y + _shadow_offset, _t1);
-draw_set_color((current_tab == 1) ? c_yellow : c_white); draw_text(_start_tab_x + (_tab_width*1) + _tab_width/2, _tab_y, _t1);
+// Main Content Panel
+draw_set_color(make_color_rgb(18, 22, 34));
+draw_rectangle(8, 34, gui_w - 8, 178, false);
+draw_set_color(make_color_rgb(38, 48, 70));
+draw_rectangle(8, 34, gui_w - 8, 178, true);
 
-// Tab 2: SFX
-var _t2 = (current_tab == 2) ? "[SFX]" : " SFX ";
-draw_set_color(c_black); draw_text(_start_tab_x + (_tab_width*2) + _tab_width/2 + _shadow_offset, _tab_y + _shadow_offset, _t2);
-draw_set_color((current_tab == 2) ? c_yellow : c_white); draw_text(_start_tab_x + (_tab_width*2) + _tab_width/2, _tab_y, _t2);
-
-// Tab 3: UNUSED
-var _t3 = (current_tab == 3) ? "[UNUSED]" : " UNUSED ";
-draw_set_color(c_black); draw_text(_start_tab_x + (_tab_width*3) + _tab_width/2 + _shadow_offset, _tab_y + _shadow_offset, _t3);
-draw_set_color((current_tab == 3) ? c_yellow : c_white); draw_text(_start_tab_x + (_tab_width*3) + _tab_width/2, _tab_y, _t3);
-
-// Boundary separator bar decoration
-draw_set_color(c_dkgray);
-draw_line(12, 26, _gui_w - 12, 26);
+// Footer / Now Playing Panel
+draw_set_color(make_color_rgb(14, 18, 28));
+draw_rectangle(8, 182, gui_w - 8, 234, false);
+draw_set_color(make_color_rgb(38, 48, 70));
+draw_rectangle(8, 182, gui_w - 8, 234, true);
 
 // -----------------------------------------------------------------
-// SECTION 2: SLIDING LISTFIELD COLUMN ENGINE (Left-Aligned Layouts)
+// SECTION 1: HEADER TABS
+// -----------------------------------------------------------------
+var _tabs = ["OST MUSIC", "LORE SONGS", "SOUND FX", "ARCHIVED"];
+var _tab_width = (gui_w - 24) / 4;
+var _start_x = 12;
+
+tab_target_x = _start_x + (current_tab * _tab_width);
+tab_draw_x   = lerp(tab_draw_x, tab_target_x, 0.35);
+
+draw_set_color(make_color_rgb(0, 220, 255));
+draw_rectangle(tab_draw_x, 26, tab_draw_x + _tab_width, 28, false);
+
+for (var i = 0; i < 4; i++) {
+    var _tx = _start_x + (i * _tab_width) + (_tab_width / 2);
+    var _is_active = (current_tab == i);
+    
+    draw_set_halign(fa_center);
+    draw_set_color(_is_active ? c_white : make_color_rgb(110, 125, 150));
+    draw_text(_tx, 12, _tabs[i]);
+}
+
+// -----------------------------------------------------------------
+// SECTION 2: SCROLLABLE LIST FIELD
 // -----------------------------------------------------------------
 draw_set_halign(fa_left);
-var _list_x = 26;
-var _start_y = 34;
-var _spacing = 13;
+var _list_x    = 24;
+var _start_y   = 40;
+var _spacing   = 19;
 
-if (current_tab == 0) {
-    var _ost_total = array_length(ost_list);
-    var _end_loop = min(ost_view_start + max_visible_items, _ost_total);
-    for (var i = ost_view_start; i < _end_loop; i++) {
-        var _draw_y = floor(_start_y + ((i - ost_view_start) * _spacing));
-        var _display_title = ost_list[i].title;
-        var _is_selected = (i == ost_cursor);
-        draw_set_color(c_black);
-        if (_is_selected) draw_text(_list_x - 12 + _shadow_offset, _draw_y + _shadow_offset, ">");
-        draw_text(_list_x + _shadow_offset, _draw_y + _shadow_offset, _display_title);
-        draw_set_color(_is_selected ? c_yellow : c_white);
-        if (_is_selected) draw_text(_list_x - 12, _draw_y, ">");
-        draw_text(_list_x, _draw_y, _display_title);
-    }
-} 
-else if (current_tab == 1) {
-    var _songs_total = array_length(songs_list);
-    var _end_loop = min(songs_view_start + max_visible_items, _songs_total);
-    for (var i = songs_view_start; i < _end_loop; i++) {
-        var _draw_y = floor(_start_y + ((i - songs_view_start) * _spacing));
-        var _display_title = songs_list[i].title;
-        var _is_selected = (i == songs_cursor);
-        draw_set_color(c_black);
-        if (_is_selected) draw_text(_list_x - 12 + _shadow_offset, _draw_y + _shadow_offset, ">");
-        draw_text(_list_x + _shadow_offset, _draw_y + _shadow_offset, _display_title);
-        draw_set_color(_is_selected ? c_yellow : c_white);
-        if (_is_selected) draw_text(_list_x - 12, _draw_y, ">");
-        draw_text(_list_x, _draw_y, _display_title);
-    }
+var _current_list = ost_list;
+var _current_cursor = ost_cursor;
+var _current_view = ost_view_start;
+
+switch (current_tab) {
+    case 1: _current_list = songs_list;  _current_cursor = songs_cursor;  _current_view = songs_view_start;  break;
+    case 2: _current_list = sfx_list;    _current_cursor = sfx_cursor;    _current_view = sfx_view_start;    break;
+    case 3: _current_list = unused_list; _current_cursor = unused_cursor; _current_view = unused_view_start; break;
 }
-else if (current_tab == 2) {
-    var _sfx_total = array_length(sfx_list);
-    var _end_loop = min(sfx_view_start + max_visible_items, _sfx_total);
-    for (var i = sfx_view_start; i < _end_loop; i++) {
-        var _draw_y = floor(_start_y + ((i - sfx_view_start) * _spacing));
-        var _display_title = sfx_list[i].title;
-        var _is_selected = (i == sfx_cursor);
-        draw_set_color(c_black);
-        if (_is_selected) draw_text(_list_x - 12 + _shadow_offset, _draw_y + _shadow_offset, ">");
-        draw_text(_list_x + _shadow_offset, _draw_y + _shadow_offset, _display_title);
-        draw_set_color(_is_selected ? c_yellow : c_white);
-        if (_is_selected) draw_text(_list_x - 12, _draw_y, ">");
-        draw_text(_list_x, _draw_y, _display_title);
-    }
+
+var _total_items = array_length(_current_list);
+var _end_loop    = min(_current_view + max_visible_items, _total_items);
+
+cursor_target_y = _start_y + ((_current_cursor - _current_view) * _spacing);
+cursor_draw_y   = lerp(cursor_draw_y, cursor_target_y, 0.4);
+
+if (_total_items > 0) {
+    draw_set_color(make_color_rgb(30, 45, 70));
+    draw_rectangle(14, cursor_draw_y - 2, gui_w - 22, cursor_draw_y + 14, false);
+    draw_set_color(make_color_rgb(0, 180, 220));
+    draw_rectangle(14, cursor_draw_y - 2, 16, cursor_draw_y + 14, false);
 }
-else {
-    var _unused_total = array_length(unused_list);
-    var _end_loop = min(unused_view_start + max_visible_items, _unused_total);
-    for (var i = unused_view_start; i < _end_loop; i++) {
-        var _draw_y = floor(_start_y + ((i - unused_view_start) * _spacing));
-        var _display_title = unused_list[i].title;
-        var _is_selected = (i == unused_cursor);
-        draw_set_color(c_black);
-        if (_is_selected) draw_text(_list_x - 12 + _shadow_offset, _draw_y + _shadow_offset, ">");
-        draw_text(_list_x + _shadow_offset, _draw_y + _shadow_offset, _display_title);
-        draw_set_color(_is_selected ? c_yellow : c_white);
-        if (_is_selected) draw_text(_list_x - 12, _draw_y, ">");
-        draw_text(_list_x, _draw_y, _display_title);
+
+for (var i = _current_view; i < _end_loop; i++) {
+    var _draw_y   = floor(_start_y + ((i - _current_view) * _spacing));
+    var _item     = _current_list[i];
+    var _is_selected = (i == _current_cursor);
+    var _is_playing  = (playing_asset == _item.asset && playing_track != noone && audio_is_playing(playing_track));
+    
+    if (_is_playing) {
+        draw_set_color(make_color_rgb(0, 255, 180));
+        draw_text(_list_x - 6, _draw_y, ">");
     }
+    
+    draw_set_color(_is_selected ? c_white : make_color_rgb(130, 145, 170));
+    draw_text(_list_x + 8, _draw_y, _item.title);
+}
+
+if (_total_items > max_visible_items) {
+    var _bar_x = gui_w - 14;
+    var _bar_y = 40;
+    var _bar_h = 130;
+    
+    draw_set_color(make_color_rgb(25, 32, 48));
+    draw_rectangle(_bar_x, _bar_y, _bar_x + 3, _bar_y + _bar_h, false);
+    
+    var _thumb_h = max(12, (_bar_h / _total_items) * max_visible_items);
+    var _thumb_y = _bar_y + ((_bar_h - _thumb_h) * (_current_cursor / max(1, _total_items - 1)));
+    
+    draw_set_color(make_color_rgb(0, 180, 220));
+    draw_rectangle(_bar_x, _thumb_y, _bar_x + 3, _thumb_y + _thumb_h, false);
 }
 
 // -----------------------------------------------------------------
-// SECTION 3: BOUNDED SUB-HUD HUD FOOTER (Dynamic Text & Lyric Display)
+// SECTION 3: NOW PLAYING & LYRIC HUD FOOTER
 // -----------------------------------------------------------------
-draw_set_color(c_dkgray);
-draw_line(12, _gui_h - 64, _gui_w - 12, _gui_h - 64);
+var _eq_x = gui_w - 50;
+var _eq_y = 198;
+for (var e = 0; e < 8; e++) {
+    var _h = equalizer_heights[e];
+    draw_set_color(make_color_rgb(0, 220, 255));
+    draw_rectangle(_eq_x + (e * 4), _eq_y - _h, _eq_x + (e * 4) + 2, _eq_y, false);
+}
 
-draw_set_halign(fa_center);
+draw_set_halign(fa_left);
 
-// Render the Lyrics or track meta details cleanly
-var _display_info_line = now_playing_name;
+var _info_string = now_playing_name;
+var _is_lyric = false;
+
 if (current_lyric_text != "") {
-    _display_info_line = current_lyric_text;
+    _info_string = "\"" + current_lyric_text + "\"";
+    _is_lyric = true;
 }
 
-// Lyric / Info String Bounded Render Output
-draw_set_color(c_black);
-draw_text_ext(_gui_w / 2 + _shadow_offset, (_gui_h - 58) + _shadow_offset, _display_info_line, 11, _gui_w - 28);
-draw_set_color((current_lyric_text != "") ? c_lime : c_aqua); // Glow lime green for active vocals lines!
-draw_text_ext(_gui_w / 2, _gui_h - 58, _display_info_line, 11, _gui_w - 28);
+draw_set_color(make_color_rgb(100, 120, 150));
+draw_text(16, 186, _is_lyric ? "LYRIC SYNC:" : "NOW PLAYING:");
 
-// Core Control Prompt Field
-var _control_prompt = "A/D: TAB | W/S: NAV | ENTER: PLAY | ESC: BACK | P: STOP";
-draw_set_color(c_black);
-draw_text(_gui_w / 2 + _shadow_offset, (_gui_h - 16) + _shadow_offset, _control_prompt);
-draw_set_color(c_gray);
-draw_text(_gui_w / 2, _gui_h - 16, _control_prompt);
+draw_set_color(_is_lyric ? make_color_rgb(80, 255, 160) : c_white);
+draw_text_ext(16, 197, _info_string, 11, gui_w - 75);
 
-// System State Restoration
+var _prompt = "[A/D] TAB  [W/S] SELECT  [ENTER] PLAY  [P/BKSP] STOP  [ESC] BACK";
+draw_set_halign(fa_center);
+draw_set_color(make_color_rgb(80, 95, 120));
+draw_text(gui_w / 2, 221, _prompt);
+
 draw_set_halign(fa_left);

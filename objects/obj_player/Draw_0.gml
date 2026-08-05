@@ -1,6 +1,5 @@
 /// @description Render Jack, Speedrunner FX & Additive Flash Trails
 
-// --- 1. Draw Additive Glowing Speed Trails ---
 if (array_length(trail_history) > 0) {
     gpu_set_blendmode(bm_add);
     
@@ -22,12 +21,8 @@ if (array_length(trail_history) > 0) {
     gpu_set_blendmode(bm_normal);
 }
 
-// --- 2. Damage Flashing ---
-if (invulnerable_timer > 0 && (floor(invulnerable_timer / 3) % 2 == 0)) {
-    exit;
-}
+if (invulnerable_timer > 0 && (floor(invulnerable_timer / 3) % 2 == 0)) exit;
 
-// --- 3. Main Player Rendering ---
 var _blend_color = speedrunner_mode ? c_lime : c_white;
 
 draw_sprite_ext(

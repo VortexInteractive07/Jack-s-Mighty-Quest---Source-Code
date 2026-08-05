@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_thiyaee_zaeemey",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":1,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":118.723625,
+  "exportDir":"",
+  "name":"mus_thiyaee_zaeemey",
+  "parent":{
+    "name":"Holhudhoo Abdulla Hassan Bangers",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi)/Holhudhoo Abdulla Hassan Bangers.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_thiyaee_zaeemey.wav",
+  "volume":1.0,
+}

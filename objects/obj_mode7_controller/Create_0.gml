@@ -32,3 +32,12 @@ var _spr = asset_get_index("spr_mode7_map"); // Replace "spr_mode7_map" with you
 if (_spr != -1 && sprite_exists(_spr)) {
     ground_tex = sprite_get_texture(_spr, 0);
 }
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

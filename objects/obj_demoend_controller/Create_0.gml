@@ -125,3 +125,12 @@ switch (play_mode) {
     case 3: // Textbox Mode WITHOUT Music
         break;
 }
+
+// Stats verification
+if (!variable_global_exists("stats")) {
+    global.stats = {
+        total_deaths: 0,
+        total_jumps: 0,
+        time_played_sec: 0
+    };
+}

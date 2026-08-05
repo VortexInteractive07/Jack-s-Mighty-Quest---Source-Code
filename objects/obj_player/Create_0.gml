@@ -2,7 +2,7 @@
 
 // --- Force Permanent Physics Mask ---
 if (sprite_exists(spr_player_mask)) {
-    mask_index = spr_player_mask;
+    mask_index = spr_player_mask; // Explicilty fixes 128x128 bounding box snags
 }
 
 // --- Visual Offset Tuning ---
@@ -13,9 +13,9 @@ speedrunner_mode = false;
 always_dash_mode = false;
 
 // --- F12 Sub-Cheats (Toggled via L, P, H inside Debug Mode) ---
-god_infinite_hp = false; // L key: Infinite Lives / Invincibility
-god_no_pit_fall  = false; // P key: Prevents death/damage below y level 0
-god_block_enemy  = false; // H key: Blocks enemy attacks completely
+god_infinite_hp = false; 
+god_no_pit_fall = false; 
+god_block_enemy = false; 
 
 // --- Base Physics Values ---
 base_walk_speed  = 5.6;
@@ -61,14 +61,13 @@ invulnerable_max   = 60;
 knockback_vsp      = -3.5;
 
 // --- Flash Trail FX Setup ---
-trail_max         = 12;
-trail_history     = [];
-trail_spawn_timer = 0;
-trail_spawn_delay = 1;
+trail_max          = 12;
+trail_history      = [];
+trail_spawn_timer  = 0;
+trail_spawn_delay  = 1;
 
 // --- Methods / Helper Functions ---
 take_damage = function(_damage, _source_x) {
-    // If God Mode (L) is active or Invulnerable, ignore all damage completely!
     if (god_infinite_hp || invulnerable_timer > 0 || state == 3) exit;
     
     hp -= _damage;
@@ -76,6 +75,11 @@ take_damage = function(_damage, _source_x) {
     
     if (hp <= 0) {
         hp = 0;
+        
+        if (state != 3 && variable_global_exists("stats")) {
+            global.stats.total_deaths += 1;
+        }
+        
         state = 3; // Death State
         hsp = 0;
         vsp = knockback_vsp;
@@ -94,3 +98,7 @@ take_damage = function(_damage, _source_x) {
         }
     }
 };
+
+if (!variable_global_exists("stats")) {
+    global.stats = { total_deaths: 0, total_jumps: 0, time_played_sec: 0 };
+}
