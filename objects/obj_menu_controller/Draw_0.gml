@@ -1,129 +1,69 @@
-/// @description Render Widescreen Adjusted UI Layout Array Matrices
+/// @description Render Procedural Background Engine
 
-// Track dynamic hardware dimensions safely
-var _view_w = room_width;
-var _view_h = room_height;
-var _shadow_offset = 1;
+var _cam_x = camera_get_view_x(view_camera[0]);
+var _cam_y = camera_get_view_y(view_camera[0]);
+var _w     = camera_get_view_width(view_camera[0]);
+var _h     = camera_get_view_height(view_camera[0]);
 
-// Ensure text_scale is defined and non-zero
-var _scale = 1;
-if (variable_instance_exists(id, "text_scale") && text_scale > 0) {
-    _scale = text_scale;
+// 1. BASE GRADIENT PASS
+draw_rectangle_color(
+    _cam_x, _cam_y, 
+    _cam_x + _w, _cam_y + _h, 
+    col_top, col_top, col_bottom, col_bottom, 
+    false
+);
+
+// 2. PATTERN / STARFIELD PASS
+switch (bg_mode) {
+    case 0: // SCROLLING RETRO GRID
+        draw_set_color(col_pattern);
+        draw_set_alpha(pattern_alpha);
+
+        var _start_x = _cam_x - grid_size + scroll_x;
+        for (var xx = _start_x; xx <= _cam_x + _w + grid_size; xx += grid_size) {
+            draw_line_width(xx, _cam_y, xx, _cam_y + _h, grid_thickness);
+        }
+
+        var _start_y = _cam_y - grid_size + scroll_y;
+        for (var yy = _start_y; yy <= _cam_y + _h + grid_size; yy += grid_size) {
+            draw_line_width(_cam_x, yy, _cam_x + _w, yy, grid_thickness);
+        }
+        break;
+
+    case 1: // PARALLAX STARFIELD
+        for (var i = 0; i < star_count; i++) {
+            var _s = stars[i];
+            var _alpha = (sin(_s.twinkle) + 1) * 0.5 * pattern_alpha + 0.3;
+            
+            draw_set_color(_s.color);
+            draw_set_alpha(_alpha);
+            
+            if (_s.size == 1) {
+                draw_point(_s.x, _s.y);
+            } else {
+                draw_rectangle(_s.x, _s.y, _s.x + 1, _s.y + 1, false);
+            }
+        }
+        break;
+
+    case 2: // DIAGONAL SCROLLING STRIPES
+        draw_set_color(col_pattern);
+        draw_set_alpha(pattern_alpha);
+
+        var _total_span = _w + _h + (grid_size * 2);
+        var _offset = (scroll_x + scroll_y) % (grid_size * 2);
+
+        for (var i = -grid_size * 2; i < _total_span; i += grid_size * 2) {
+            var _x1 = _cam_x + i + _offset;
+            var _y1 = _cam_y;
+            var _x2 = _x1 - _h;
+            var _y2 = _cam_y + _h;
+            
+            draw_line_width(_x1, _y1, _x2, _y2, grid_size * 0.5);
+        }
+        break;
 }
 
-// Ensure array and scroll variables exist safely
-var _total_items = 0;
-if (variable_instance_exists(id, "options_list") && is_array(options_list)) {
-    _total_items = array_length(options_list);
-}
-
-var _max_vis = variable_instance_exists(id, "max_visible_items") ? max_visible_items : _total_items;
-var _scroll  = variable_instance_exists(id, "scroll_offset") ? scroll_offset : 0;
-var _select  = variable_instance_exists(id, "current_menu_selection") ? current_menu_selection : 0;
-
-// ============================================================================
-// 1. BACKGROUND RENDER LAYER
-// ============================================================================
-if (sprite_exists(spr_bg_menu)) {
-    // Center the 426x240 background image inside room coordinate space
-    var _bg_x = floor((_view_w - 426) / 2);
-    draw_sprite(spr_bg_menu, 0, _bg_x, 0);
-} else {
-    // Brighter dark navy fallback so screen isn't pure black if sprite is missing
-    draw_clear(make_color_rgb(20, 24, 48));
-}
-
-// ============================================================================
-// 2. CONFIGURE TYPOGRAPHY RULES
-// ============================================================================
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
-
-if (font_exists(fnt_bit)) {
-    draw_set_font(fnt_bit);
-} else {
-    draw_set_font(-1);
-}
-
-// Shift menu layout rightwards horizontally
-var _start_x = 54;  
-var _start_y = 48;  
-var _spacing = 26; 
-
-// --- Viewport Scissoring Iterator Loop ---
-for (var i = 0; i < _max_vis; i++) {
-    var _actual_index = _scroll + i;
-    if (_actual_index >= _total_items) break; 
-    
-    var _draw_x = floor(_start_x);
-    var _draw_y = floor(_start_y + (i * _spacing));
-    var _menu_string = string(options_list[_actual_index]);
-    var _is_selected = (_actual_index == _select);
-    
-    // Draw crisp drop shadows first
-    draw_set_color(c_black);
-    if (_is_selected) {
-        draw_text_transformed(_draw_x - 14 + _shadow_offset, _draw_y + _shadow_offset, ">", _scale, _scale, 0);
-    }
-    draw_text_transformed(_draw_x + _shadow_offset, _draw_y + _shadow_offset, _menu_string, _scale, _scale, 0);
-    
-    // Draw foreground text layers
-    if (_is_selected) {
-        draw_set_color(c_yellow);
-        draw_text_transformed(_draw_x - 14, _draw_y, ">", _scale, _scale, 0);
-    } else {
-        draw_set_color(c_white);
-    }
-    draw_text_transformed(_draw_x, _draw_y, _menu_string, _scale, _scale, 0);
-}
-
-// ============================================================================
-// 3. SYSTEM METRICS FOOTER
-// ============================================================================
-draw_set_halign(fa_left);
-draw_set_valign(fa_bottom);
-
-var _footer_x = floor(12);
-var _footer_y = floor(_view_h - 8);
-
-draw_set_color(c_black);
-draw_text_transformed(_footer_x + _shadow_offset, _footer_y + _shadow_offset, "ALPHA v1.0", _scale, _scale, 0);
-draw_set_color(c_white);
-draw_text_transformed(_footer_x, _footer_y, "ALPHA v1.0", _scale, _scale, 0);
-
-// ============================================================================
-// 4. MODAL OVERLAYS SYSTEM DISPLAY STATE
-// ============================================================================
-if (variable_instance_exists(id, "is_info_open") && is_info_open) {
-    draw_set_color(c_black);
-    draw_set_alpha(0.88);
-    draw_rectangle(0, 0, _view_w, _view_h, false);
-    draw_set_alpha(1.0); 
-    
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    
-    var _cen_x = floor(_view_w / 2);
-    var _msg_y = floor(_view_h / 2 - 10);
-    var _prompt_y = floor(_view_h / 2 + 50);
-    var _return_prompt = "PRESS ANY KEY TO RETURN";
-    var _display_text = variable_instance_exists(id, "info_text") ? info_text : "";
-    
-    // Modal Text Drop Shadows
-    draw_set_color(c_black);
-    draw_text_ext_transformed(_cen_x + 1, _msg_y + 1, _display_text, 14, _view_w - 64, _scale, _scale, 0);
-    draw_text_transformed(_cen_x + 1, _prompt_y + 1, _return_prompt, _scale, _scale, 0);
-    
-    // Modal Text Foregrounds
-    draw_set_color(c_white);
-    draw_text_ext_transformed(_cen_x, _msg_y, _display_text, 14, _view_w - 64, _scale, _scale, 0);
-    
-    draw_set_color(c_yellow);
-    draw_text_transformed(_cen_x, _prompt_y, _return_prompt, _scale, _scale, 0);
-}
-
-// System State Restoration
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
-draw_set_color(c_white);
+// RESET RENDER STATE
 draw_set_alpha(1.0);
+draw_set_color(c_white);

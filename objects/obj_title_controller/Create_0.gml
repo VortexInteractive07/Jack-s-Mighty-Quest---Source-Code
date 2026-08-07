@@ -36,7 +36,7 @@ cheat_index    = 0;
 // =================================================================
 transition_type  = "fade"; 
 fade_state       = "in";         // States: "in", "idle", "out"
-fade_progress    = 0.0;            
+fade_progress    = 0.0;          
 transition_speed = 0.025;         
 
 target_room = rm_main_menu;        // Default target room
@@ -141,10 +141,10 @@ else {
 }
 
 // =================================================================
-// START TEXT POOL (200 VARIATIONS)
+// START TEXT POOL (210 VARIATIONS - ALL CONTAIN [ENTER])
 // =================================================================
 start_text_pool = [
-    // 1 - 20: Standard & Conversational
+    // 1 - 25: Standard & Conversational
     "Press [Enter] to Start!",
     "Press [Enter] to Begin Your Quest!",
     "Press [Enter] to Jump In!",
@@ -165,8 +165,13 @@ start_text_pool = [
     "No pressure, but [Enter] starts the game!",
     "Still loading your motivation? Hit [Enter]!",
     "Y'all ready for this? Press [Enter]!",
+    "Press [Enter] before Jack gets bored!",
+    "Don't keep the title screen waiting, press [Enter]!",
+    "Hit [Enter] to write your name in pixel history!",
+    "Press [Enter] and let the chiptunes wash over you!",
+    "What are you waiting for? Hit [Enter]!",
 
-    // 21 - 40: Bootleg / Engrish Style
+    // 26 - 50: Bootleg / Engrish Style
     "PUSH [ENTER] KEY FOR MAKE GREAT START!",
     "PLEASE PUSH [ENTER] TO PLAY GAME NOW!",
     "LET'S GETS GOING! PUSH [ENTER] BUTTON!",
@@ -187,8 +192,13 @@ start_text_pool = [
     "SUPER PLAYER MUST PRESS [ENTER] NOW!",
     "DO NOT WAIT, PUSH [ENTER] FOR GLORY!",
     "FAST ACTION START WITH [ENTER] BUTTON!",
+    "VICTOR SCHADENFREUDE IS VERY MAD! PUSH [ENTER]!",
+    "FOR GREAT JUSTICE, PLEASE TO PRESS [ENTER]!",
+    "DANGER! SCHADENFREUDE IS NEAR! HIT [ENTER]!",
+    "PLAY GAME VERY FUN! PUSH [ENTER] NOW!",
+    "NO DELAYING! PUSH [ENTER] TO BE HERO!",
 
-    // 41 - 60: Multilingual & Localized Flavour
+    // 51 - 75: Multilingual & Localized Flavour
     "[Enter] Wo ose, hajimaru yo!",
     "Presso [Enter] zu beginne!",
     "Drucken Sie [Enter] to begin!",
@@ -197,7 +207,7 @@ start_text_pool = [
     "Premere [Enter] per iniziare!",
     "Pressione [Enter] para começar!",
     "Presis [Enter] start karein!",
-    "Naжмите [Enter] для начала!",
+    "Нажмите [Enter] для начала!",
     "Basilan [Enter] tusuna basin!",
     "Drücke [Enter] zum Starten!",
     "Haz click en [Enter] por favor!",
@@ -209,30 +219,67 @@ start_text_pool = [
     "Game start desu! Push [Enter]!",
     "Guten Tag! Press [Enter] to play!",
     "Bon appétit! Now hit [Enter]!",
+    "Ahlan wa sahlan! Press [Enter] to play!",
+    "Maruhabaa! Press [Enter] to start!",
+    "Konnichiwa! Hit [Enter] for action!",
+    "Willkommen! Press [Enter] to begin!",
+    "Bienvenue! Hit [Enter] to start!",
 
-    // 61 - 80: Pirate & Fantasy Theme
-    "Arr! Are ye ready? Press [Enter] to begin ye quest!",
-    "Ahoy matey! Press [Enter] to hoist the sails!",
-    "By Blackbeard's ghost, hit [Enter] to set sail!",
-    "Grab yer cutlass and press [Enter]!",
-    "Treasure awaits those who press [Enter]!",
-    "Avast ye landlubber! Smash [Enter]!",
-    "Sail into danger with a tap of [Enter]!",
-    "A pirate's life for thee! Press [Enter]!",
-    "Batten down the hatches and press [Enter]!",
-    "Heave-ho! Hit [Enter] to start the voyage!",
-    "Invoke the ancient magic by pressing [Enter]!",
-    "The dungeon doors open when you press [Enter]!",
-    "A wizard is never late, he hits [Enter] precisely when he means to!",
-    "Slay the dragon with a mighty [Enter] press!",
-    "Drink an elixir of focus and hit [Enter]!",
-    "Equip your sword and press [Enter]!",
-    "The prophecy foretold your [Enter] press!",
-    "Cast your spell by striking [Enter]!",
-    "Venture into the unknown! Press [Enter]!",
-    "May the odds be ever in your [Enter] favor!",
+    // 76 - 100: Victor Schadenfreude & JMQ Lore
+    "Schadenfreude is laughing at your hesitation. Press [Enter]!",
+    "Victor Schadenfreude explicitly hates when you press [Enter]!",
+    "Victor's evil scheme is 99% complete! Hit [Enter] to ruin it!",
+    "Defeat Victor Schadenfreude by hitting [Enter] right now!",
+    "Victor Schadenfreude is plotting in the dark. Press [Enter]!",
+    "Jack's boots are laced up. Press [Enter] to ruin Victor's day!",
+    "Press [Enter] to stop Schadenfreude's wicked machinery!",
+    "Victor says you won't press [Enter]. Prove him wrong!",
+    "Male City is under threat! Hit [Enter] to launch Jack!",
+    "Jack is ready for his Mighty Quest! Press [Enter]!",
+    "Victor Schadenfreude takes pleasure in your AFK! Press [Enter]!",
+    "Press [Enter] to deliver Jack's jump kick to Victor's face!",
+    "The fate of the realm rests on one key: Press [Enter]!",
+    "Victor's minions are invading! Smash [Enter] to intervene!",
+    "Jack didn't train all day for you to not press [Enter]!",
+    "Victor Schadenfreude feeds on your delay! Press [Enter]!",
+    "Press [Enter] to crash Victor's villainous monologue!",
+    "Jack's Mighty Quest begins with a single [Enter]!",
+    "Victor thinks he's already won. Hit [Enter] to surprise him!",
+    "Stop staring at Schadenfreude's poster and press [Enter]!",
+    "Press [Enter] to send Victor packing back to his lair!",
+    "Jack is waiting at the spawn line. Hit [Enter]!",
+    "Victor's trap is set, but hitting [Enter] breaks it!",
+    "Are you team Jack or team Victor? Prove it with [Enter]!",
+    "Press [Enter] to start the ultimate quest against Schadenfreude!",
 
-    // 81 - 100: Sci-Fi & Cyberpunk Tone
+    // 101 - 125: Internet Memes & Gaming Culture
+    "All your [Enter] are belong to us!",
+    "Press [Enter] to pay respects... wait, wrong game!",
+    "It's dangerous to go alone! Take [Enter] with you!",
+    "Would you kindly press [Enter]?",
+    "Do a barrel roll! Or just hit [Enter]!",
+    "The cake is a lie, but [Enter] is real!",
+    "Arrow to the knee? No, finger to the [Enter] key!",
+    "Press [Enter] to praise the sun!",
+    "Gotta go fast! Smash [Enter]!",
+    "Over 9000 power needed! Hit [Enter] to charge!",
+    "Press [Enter]... or prepare to be unsheathed!",
+    "Skill issue? Press [Enter] to git gud!",
+    "Press [Enter] to dodge Victor's parry!",
+    "Big brain play: Pressing [Enter] immediately!",
+    "Touch grass? No, press [Enter]!",
+    "Press [Enter] to spawn in 4K pixel art!",
+    "One does not simply watch the title screen. Press [Enter]!",
+    "Press [Enter] for speedrun mode!",
+    "You have unlocked: The [Enter] Key! Use it!",
+    "Press [Enter] to trigger main character syndrome!",
+    "He's beginning to believe... Press [Enter]!",
+    "Press [Enter] to enter the matrix!",
+    "Absolute cinema! Hit [Enter] to start the movie!",
+    "Press [Enter] to gain +50 Agility!",
+    "Stealth level 100: Pressing [Enter] silently!",
+
+    // 126 - 150: Sci-Fi & Cyberpunk Tone
     "Initiating sequence... Press [Enter] to override!",
     "Terminal active. Press [Enter] to establish link.",
     "System online. Tap [Enter] for mainframe access.",
@@ -253,17 +300,21 @@ start_text_pool = [
     "Overclocking CPU cores... Press [Enter]!",
     "Mecha pilot standby. Hit [Enter] to sync.",
     "Galaxy sector clean. Press [Enter] to proceed.",
+    "Press [Enter] to download more RAM!",
+    "Subspace corridor open. Hit [Enter]!",
+    "Glitch in the system! Press [Enter] to patch!",
+    "Neural link synchronized. Press [Enter]!",
+    "Data stream stable. Hit [Enter] to commence!",
 
-    // 101 - 120: Sarcastic & Playful Teases
+    // 151 - 175: Sarcastic & Playful Teases
     "You could go outside, or you could press [Enter].",
     "Is your finger tired already? Just tap [Enter].",
     "Staring at title screens is a valid hobby, but [Enter] starts the game.",
     "Error 404: Player motivation not found. Press [Enter] anyway.",
     "Look at you, looking at this screen. Go on, hit [Enter].",
     "I bet you can't press [Enter] with your elbow.",
-    "Do a barrel roll! Or just hit [Enter], whatever works.",
     "Achievement unlocked: Pro Procrastinator. Hit [Enter] to play.",
-    "You have successfully stared at a static image for 3 seconds.",
+    "You have successfully stared at a static image for 3 seconds. Now hit [Enter]!",
     "Okay, we get it, the background art looks nice. Press [Enter].",
     "Keyboard warriors unite! Press [Enter] to battle.",
     "Plot twist: Pressing [Enter] does absolutely nothing. (Kidding, it starts the game).",
@@ -275,8 +326,14 @@ start_text_pool = [
     "Legend says if you hold [Enter], nothing happens. Just tap it.",
     "Zero bugs found here. (Source: trust me bro). Hit [Enter].",
     "Why press many button when one [Enter] do trick?",
+    "Press [Enter] if you think Victor Schadenfreude is bad at video games!",
+    "Hit [Enter] before Victor finishes his evil coffee!",
+    "Don't let Victor win by default! Press [Enter]!",
+    "Press [Enter] to flex on the main menu background!",
+    "Your keyboard miss you. Hit [Enter]!",
+    "Press [Enter] for immediate serotonin!",
 
-    // 121 - 140: Casual Chiptune / Retro Vibes
+    // 176 - 195: Retro & Chiptune Tech
     "Frequencies aligned. Hit [Enter] for square wave bliss.",
     "Loading 8-bit assets into memory... Press [Enter].",
     "PSG sound chip initialized. Hit [Enter] to drop beat.",
@@ -298,51 +355,7 @@ start_text_pool = [
     "Extra life acquired! Hit [Enter] to use it.",
     "Power-up capsule descending. Press [Enter]!",
 
-    // 141 - 160: Short, Punchy, & Epic
-    "BEGIN.",
-    "ENTER THE VOID.",
-    "AWAKEN HERO.",
-    "START IT UP.",
-    "LET'S ROLL.",
-    "BREAK THE LIMIT.",
-    "CHARGE FORWARD.",
-    "FEEL THE RHYTHM.",
-    "UNLEASH POWER.",
-    "SEIZE THE DAY.",
-    "CLAIM VICTORY.",
-    "RISE & SHINE.",
-    "IGNITE THE SPARK.",
-    "BREAK THE SEAL.",
-    "CROSS THE LINE.",
-    "TAKE THE PLUNGE.",
-    "STEP INTO LIGHT.",
-    "CONQUER ALL.",
-    "STRIKE FAST.",
-    "GAME ON.",
-
-    // 161 - 180: Cozy & Chill Atmosphere
-    "Brewing tea... while you press [Enter].",
-    "Soft rain outside. Warm room inside. Press [Enter].",
-    "Take your time, relax, and hit [Enter] when ready.",
-    "A peaceful melody plays. Press [Enter] to join.",
-    "Snuggle up with a cat and hit [Enter].",
-    "Midnight coding session vibe. Press [Enter].",
-    "No rush here. Hit [Enter] whenever you feel like it.",
-    "Smooth jazz and retro pixels. Press [Enter].",
-    "Breathe in, breathe out, then press [Enter].",
-    "A cozy adventure awaits behind the [Enter] key.",
-    "Starlight twinkling outside. Hit [Enter] to begin.",
-    "Put on your favorite headphones and press [Enter].",
-    "Peaceful vibes only. Hit [Enter] to enter zone.",
-    "Warm fireplace crackling. Press [Enter] to start game.",
-    "Slow down and enjoy the title screen. Or hit [Enter].",
-    "Wrapped in a blanket of code. Press [Enter].",
-    "Gentle breezes and chiptune tunes. Hit [Enter].",
-    "A comforting cup of coffee is waiting. Press [Enter].",
-    "Silence in the room, click of [Enter] on the board.",
-    "Find your inner peace, then hit [Enter].",
-
-    // 181 - 200: Mystery & Curiosity
+    // 196 - 210: Cozy, Mystery & Final Call-outs
     "What secrets lie beyond this screen? Press [Enter] to find out.",
     "A door stands before you. Hit [Enter] to open it.",
     "Whispers echo in the digital wind... Press [Enter].",
@@ -351,18 +364,35 @@ start_text_pool = [
     "Shadows shift on the horizon. Press [Enter].",
     "The air grows heavy with anticipation. Hit [Enter].",
     "A glowing portal flickers. Press [Enter] to step through.",
-    "Listen closely... Can you hear it? Press [Enter].",
     "A cryptic message flashes: Hit [Enter] to decode.",
     "The veil between worlds thins. Press [Enter].",
     "Uncharted territory ahead. Hit [Enter] to map it.",
     "An ancient relic hums with energy. Press [Enter].",
-    "The path splits here. Hit [Enter] to choose.",
-    "Something is watching from the code. Press [Enter].",
-    "A hidden chapter unlocks with [Enter].",
-    " Step across the threshold. Hit [Enter].",
+    "Step across the threshold. Hit [Enter].",
     "The mystery deepens. Press [Enter] to uncover truth.",
-    "A spark ignites in the dark. Hit [Enter].",
-    "The ultimate journey begins with [Enter]."
+    "Press [Enter] and let Jack's Mighty Quest begin!",
+	
+	// 211 - 230: Saving Aetheria & Celestia
+    "The fate of Aetheria hangs in the balance! Press [Enter] to save it!",
+    "Celestia is crying out for a hero! Hit [Enter] to answer the call!",
+    "Press [Enter] to protect Aetheria from Victor Schadenfreude!",
+    "Celestia's skies grow dark! Press [Enter] to bring back the light!",
+    "Victor Schadenfreude targets Celestia next! Hit [Enter] to stop him!",
+    "For the peace of Aetheria and Celestia, press [Enter] now!",
+    "Press [Enter] to launch Jack into the skies of Celestia!",
+    "Aetheria's magic is fading... Hit [Enter] to restore it!",
+    "Victor Schadenfreude shall not take Celestia! Smash [Enter]!",
+    "Jack's Mighty Quest reaches Aetheria! Press [Enter] to enter!",
+    "Celestia's ancient spell relies on you pressing [Enter]!",
+    "Press [Enter] to defend Aetheria's borders from Victor's army!",
+    "Stand firm for Celestia! Hit [Enter] to begin the siege!",
+    "Aetheria's realm awaits its savior! Press [Enter]!",
+    "Don't let Victor Schadenfreude burn Celestia to the ground! Hit [Enter]!",
+    "Press [Enter] to unleash the ancient guard of Aetheria!",
+    "Celestia's legends foretold a hero tapping [Enter]!",
+    "Aetheria isn't going to save itself! Smash [Enter]!",
+    "Press [Enter] to banish Schadenfreude from Celestia forever!",
+    "For Aetheria! For Celestia! Press [Enter] for ultimate glory!"
 ];
 
 randomize();

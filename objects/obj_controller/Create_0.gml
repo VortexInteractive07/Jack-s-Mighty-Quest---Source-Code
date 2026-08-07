@@ -92,7 +92,7 @@ pause_select_smooth = 0;
 pause_options       = ["RESUME", "RESTART LEVEL", "JUKEBOX", "RETURN TO MENU", "EXIT GAME"]; 
 pause_total         = array_length(pause_options);
 pause_surface       = -1; 
-pause_music_enabled = true; // Toggle true to keep music playing during pause menu
+pause_music_enabled = false; // Toggle true to keep music playing during pause menu
 
 // Global Variable Safety Initializations
 if (!variable_global_exists("player_lives"))       global.player_lives = 3;
@@ -105,7 +105,7 @@ audio_resume_all();
 
 // Set music mode default if not defined
 if (!variable_global_exists("music_mode") || global.music_mode == 0) {
-    global.music_mode = 1;
+    global.music_mode = 2;
 }
 
 audio_stop_all();

@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_world_clear",
+  "%Name":"mus_boss_victory",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -12,7 +12,7 @@
   "conversionMode":0,
   "duration":4.792109,
   "exportDir":"",
-  "name":"mus_world_clear",
+  "name":"mus_boss_victory",
   "parent":{
     "name":"Soundtrack",
     "path":"folders/Sounds/Soundtrack.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_world_clear.wav",
+  "soundFile":"mus_boss_victory.wav",
   "volume":1.0,
 }
