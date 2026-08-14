@@ -1,58 +1,20 @@
-// --- Global Initialization ---
-if (!variable_global_exists("language_mode")) { global.language_mode = 0; }
-if (!variable_global_exists("narrator_mode")) { global.narrator_mode = false; }
-if (!variable_global_exists("show_subtitles")) { global.show_subtitles = true; }
-if (!variable_global_exists("dark_mode"))      { global.dark_mode = false; }
+/// @description Initialize Splash Controller
+target_room = rm_title_screen; // Target room after splashes finish
 
-// --- Developer Settings ---
-show_dev_disclaimer = false; // Toggle spr_dev_disclaimer inclusion
-
-// --- Dynamic Splash Screen Sequence List ---
-// Add any additional splash screen sprites directly to this array!
-splash_screens = [
-    spr_disclaimer
+// Array of splash sprites to display sequentially
+splash_list = [
+    spr_disclaimer,
+    spr_vortex_logo_lightmode,
+	spr_vortex_presents
 ];
 
-if (show_dev_disclaimer) {
-    array_push(splash_screens, spr_dev_disclaimer);
-}
+splash_index = 0;           // Current splash image
+splash_hold_duration = 120; // Hold duration in frames (120 frames = 2 seconds @ 60 FPS)
+splash_timer = 0;           // Internal countdown timer
 
-// Select logo variant dynamically based on dark_mode setting
-var _logo_sprite = global.dark_mode ? spr_vortex_logo_darkmode : spr_vortex_logo_lightmode;
-array_push(splash_screens, _logo_sprite);
-array_push(splash_screens, spr_vortex_presents);
+// Fade Properties
+alpha = 0;                  // Current opacity (0 = invisible, 1 = fully visible)
+fade_speed = 0.02;          // Speed of fade in/out
+fade_state = 0;             // 0: Fade In | 1: Hold | 2: Fade Out
 
-// --- Sequence State Machine ---
-current_splash_index = 0; // Current index inside splash_screens array
-sub_state = 0;            // 0: Fade In | 1: Hold | 2: Fade Out
-is_loading = false;       // Set to true when transitioning to spr_loading
-is_skipping = false;      // Set to true for final global skip fade
-
-depth = 0;
-
-// --- Fade Timing Tuning ---
-fade_alpha = 0;
-fade_in_speed  = 0.02;  
-fade_out_speed = 0.02;  
-
-hold_timer = 0; 
-hold_duration = 162;
-
-target_room = rm_title;
-
-// --- Audio ---
-audio_stop_all();
-if (global.narrator_mode && !instance_exists(obj_narrator_controller)) {
-    instance_create_depth(0, 0, 0, obj_narrator_controller);
-} else if (!global.narrator_mode) {
-    audio_play_sound(mus_raalhehge_monaigaa, 10, false);
-}
-
-// Stats verification
-if (!variable_global_exists("stats")) {
-    global.stats = {
-        total_deaths: 0,
-        total_jumps: 0,
-        time_played_sec: 0
-    };
-}
+can_skip = true;            // Set to true to allow player input skip

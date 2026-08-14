@@ -6,8 +6,8 @@
   "name":"obj_wall",
   "overriddenProperties":[],
   "parent":{
-    "name":"Gameplay (NEW)",
-    "path":"folders/Objects/Gameplay (NEW).yy",
+    "name":"Main Game",
+    "path":"folders/Objects/Main Game.yy",
   },
   "parentObjectId":null,
   "persistent":false,
