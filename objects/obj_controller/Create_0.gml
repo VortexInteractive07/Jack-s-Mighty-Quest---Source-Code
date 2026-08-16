@@ -2,8 +2,8 @@
 
 // --- AUDIO INTEGRATION ---
 // Ensures mus_station loops continuously during gameplay
-if (asset_get_index("mus_station") != -1) {
-    if (!audio_is_playing(mus_station)) {
-        audio_play_sound(mus_station, 10, true);
+if (asset_get_index("mus_subway") != -1) {
+    if (!audio_is_playing(mus_subway)) {
+        audio_play_sound(mus_subway, 10, true);
     }
 }

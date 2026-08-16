@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_boss_victory",
+  "%Name":"mus_subway",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":4.792109,
+  "duration":70.28422,
   "exportDir":"",
-  "name":"mus_boss_victory",
+  "name":"mus_subway",
   "parent":{
     "name":"Soundtrack",
     "path":"folders/Sounds/Soundtrack.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_boss_victory.wav",
+  "soundFile":"mus_subway.wav",
   "volume":1.0,
 }

@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_raalhehge_monaigaa",
+  "%Name":"mus_monaigaa_alhaa",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":28.238367,
+  "duration":28.630203,
   "exportDir":"",
-  "name":"mus_raalhehge_monaigaa",
+  "name":"mus_monaigaa_alhaa",
   "parent":{
     "name":"Songs (Aetherian Dhivehi)",
     "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_raalhehge_monaigaa.mp3",
+  "soundFile":"mus_monaigaa_alhaa.mp3",
   "volume":1.0,
 }

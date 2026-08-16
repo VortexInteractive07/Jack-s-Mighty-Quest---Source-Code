@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_station",
+  "%Name":"mus_vortexlogo",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":70.28422,
+  "duration":102.24,
   "exportDir":"",
-  "name":"mus_station",
+  "name":"mus_vortexlogo",
   "parent":{
     "name":"Soundtrack",
     "path":"folders/Sounds/Soundtrack.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_station.wav",
+  "soundFile":"mus_vortexlogo.mp3",
   "volume":1.0,
 }

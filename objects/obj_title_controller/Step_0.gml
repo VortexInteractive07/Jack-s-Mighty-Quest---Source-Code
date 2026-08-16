@@ -1,20 +1,28 @@
 /// @description Title Screen Flow & Dialogue Control
 
 // ==========================================
-// OST PLAYLIST & TOAST ANIMATION
+// OST PLAYLIST & TOAST ANIMATION (AUTOMATIC RANDOM)
 // ==========================================
 var _track_count = array_length(ost_playlist);
 
 if (_track_count > 0 && fade_state != 3) {
-    var _manual_skip = keyboard_check_pressed(ord("M")) || keyboard_check_pressed(vk_tab);
     var _song_is_playing = audio_is_playing(current_sound_inst);
 
-    if (_manual_skip || !_song_is_playing) {
+    if (!_song_is_playing) {
         if (_song_is_playing) {
             audio_stop_sound(current_sound_inst);
         }
         
-        current_track_index = (current_track_index + 1) % _track_count;
+        // Pick a random next track, avoiding immediate repetition if possible
+        if (_track_count > 1) {
+            var _prev_index = current_track_index;
+            do {
+                current_track_index = irandom(_track_count - 1);
+            } until (current_track_index != _prev_index);
+        } else {
+            current_track_index = 0;
+        }
+
         var _next_track = ost_playlist[current_track_index];
         current_sound_inst = audio_play_sound(_next_track.sound, 10, false);
         toast_timer = 360; 

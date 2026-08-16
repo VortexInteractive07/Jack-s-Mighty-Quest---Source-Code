@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_logo_music",
+  "%Name":"mus_boss_clear",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.0393877,
+  "duration":4.792109,
   "exportDir":"",
-  "name":"mus_logo_music",
+  "name":"mus_boss_clear",
   "parent":{
     "name":"Soundtrack",
     "path":"folders/Sounds/Soundtrack.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_logo_music.wav",
+  "soundFile":"mus_boss_clear.wav",
   "volume":1.0,
 }

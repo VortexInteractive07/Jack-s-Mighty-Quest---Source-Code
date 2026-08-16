@@ -3,7 +3,7 @@
 display_set_gui_size(426, 240);
 
 // --- TARGET LEVEL ROOM ---
-var _station_room = (asset_get_index("rm_station") != -1) ? asset_get_index("rm_station") : room;
+var _station_room = (asset_get_index("rm_subway") != -1) ? asset_get_index("rm_subway") : room;
 target_room = _station_room;
 
 // --- AUDIO INTEGRATION ---

@@ -88,8 +88,9 @@ switch (fade_state) {
         if (fade_alpha >= 1) {
             fade_alpha = 1;
 
+            // Stop the intro track cleanly so the next room can start its BGM properly
             if (asset_get_index("mus_no_bridge_to_cross_ai") != -1 && audio_is_playing(mus_no_bridge_to_cross_ai)) {
-                audio_sound_gain(mus_no_bridge_to_cross_ai, 0, 500);
+                audio_stop_sound(mus_no_bridge_to_cross_ai);
             }
 
             room_goto(target_room);

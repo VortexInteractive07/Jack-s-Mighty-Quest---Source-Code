@@ -5,7 +5,7 @@ var _menu_room = (asset_get_index("rm_main_menu") != -1) ? asset_get_index("rm_m
 target_room = _menu_room;
 
 // --- SETTINGS / JSON CONFIGURATION ---
-enable_dialogue = true; // Fallback default toggle
+enable_dialogue = false; // Fallback default toggle
 
 if (file_exists("settings.json")) {
     var _file = file_text_open_read("settings.json");
@@ -49,7 +49,8 @@ dialogue_char_index = 0;
 dialogue_speed = 0.22; // Slowed down for smooth readability
 dialogue_current_text = "";
 
-// --- MUSIC NOTIFICATION (COMPACT TOAST) ---
+// --- MUSIC NOTIFICATION (COMPACT TOAST & RANDOMIZED) ---
+randomise(); // Seed the random number generator
 ost_playlist = scr_title_ost_playlist();
 current_track_index = (array_length(ost_playlist) > 0) ? irandom(array_length(ost_playlist) - 1) : 0;
 current_sound_inst = -1;
@@ -61,6 +62,7 @@ toast_lerp_speed = 0.15;
 
 if (array_length(ost_playlist) > 0) {
     var _track = ost_playlist[current_track_index];
+	audio_stop_all();
     current_sound_inst = audio_play_sound(_track.sound, 10, false);
 }
 

@@ -1,9 +1,10 @@
-/// @description Render Classic Menu GUI (Figure B Style)
+/// @description Render Multi-Mode Menu GUI (426x240 Resolution)
+
 var _gui_w = 426;
 var _gui_h = 240;
 
 // ==========================================
-// 1. MAIN BACKGROUND (426x240)
+// 1. MAIN BACKGROUND
 // ==========================================
 if (sprite_exists(spr_main_menu)) {
     draw_sprite_stretched(spr_main_menu, 0, 0, 0, _gui_w, _gui_h);
@@ -12,40 +13,103 @@ if (sprite_exists(spr_main_menu)) {
 }
 
 draw_set_font(fnt_bitmap);
-
-// Position menu left-aligned to fill open screen space
 var _text_x = 52;
 
 // ==========================================
-// 2. RENDER MENU OPTIONS & CURSOR
+// 2. RENDER MODE-SPECIFIC SUB-MENUS
 // ==========================================
 draw_set_halign(fa_left);
 draw_set_valign(fa_middle);
 
-for (var i = 0; i < menu_total; i++) {
-    var _item_y = start_y + (i * line_spacing);
-    var _text   = menu_options[i];
+switch (current_mode) {
 
-    if (i == menu_index) {
-        // Selected Item: Solid Yellow
-        draw_text_color(_text_x, _item_y, _text, c_yellow, c_yellow, c_yellow, c_yellow, 1);
-        
-        // Single Yellow Cursor '>'
-        var _cursor_x = _text_x - 14 + cursor_offset_x;
-        draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_yellow, c_yellow, 1);
-    } else {
-        // Unselected Items: Solid White
-        draw_text_color(_text_x, _item_y, _text, c_white, c_white, c_white, c_white, 1);
-    }
+    // --------------------------------------
+    // MODE 0: MAIN MENU
+    // --------------------------------------
+    case 0:
+        for (var i = 0; i < menu_total; i++) {
+            var _item_y = start_y + (i * line_spacing);
+            var _text   = menu_options[i];
+
+            if (i == menu_index) {
+                draw_text_color(_text_x, _item_y, _text, c_yellow, c_yellow, c_yellow, c_yellow, 1);
+                var _cursor_x = _text_x - 14 + cursor_offset_x;
+                draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_yellow, c_yellow, 1);
+            } else {
+                draw_text_color(_text_x, _item_y, _text, c_white, c_white, c_white, c_white, 1);
+            }
+        }
+        break;
+
+    // --------------------------------------
+    // MODE 1: SETTINGS / OPTIONS SUB-MENU
+    // --------------------------------------
+    case 1:
+        for (var i = 0; i < opt_total; i++) {
+            var _item_y = start_y + (i * line_spacing);
+            var _label  = opt_options[i];
+            var _val_str = "";
+
+            // Format settings values next to options
+            switch (i) {
+                case 0: _val_str = " < " + string(global.vol_bgm) + "% >"; break;
+                case 1: _val_str = " < " + string(global.vol_sfx) + "% >"; break;
+                case 2: _val_str = global.fullscreen ? " [ON]" : " [OFF]"; break;
+                case 3: _val_str = ""; break;
+            }
+
+            var _full_text = _label + _val_str;
+
+            if (i == opt_index) {
+                draw_text_color(_text_x, _item_y, _full_text, c_yellow, c_yellow, c_yellow, c_yellow, 1);
+                var _cursor_x = _text_x - 14 + cursor_offset_x;
+                draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_yellow, c_yellow, 1);
+            } else {
+                draw_text_color(_text_x, _item_y, _full_text, c_white, c_white, c_white, c_white, 1);
+            }
+        }
+        break;
+
+    // --------------------------------------
+    // MODE 2: JUKEBOX SUB-MENU
+    // --------------------------------------
+    case 2:
+        for (var i = 0; i < juke_total; i++) {
+            var _item_y = start_y + (i * line_spacing);
+            var _track_name = juke_tracks[i].title;
+            var _status_str = "";
+
+            // Add playing indicator tag
+            if (i < juke_total - 1) {
+                if (audio_is_playing(juke_tracks[i].asset)) {
+                    _status_str = " [PLAYING]";
+                }
+            }
+
+            var _full_text = _track_name + _status_str;
+
+            if (i == juke_index) {
+                draw_text_color(_text_x, _item_y, _full_text, c_yellow, c_yellow, c_yellow, c_yellow, 1);
+                var _cursor_x = _text_x - 14 + cursor_offset_x;
+                draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_yellow, c_yellow, 1);
+            } else {
+                draw_text_color(_text_x, _item_y, _full_text, c_white, c_white, c_white, c_white, 1);
+            }
+        }
+        break;
 }
 
 // ==========================================
-// 3. VERSION FOOTER (BOTTOM-LEFT)
+// 3. FOOTER (MODE INDICATOR & VERSION)
 // ==========================================
 draw_set_halign(fa_left);
 draw_set_valign(fa_bottom);
 
-draw_text_color(12, _gui_h - 10, "ALPHA v1.0", c_white, c_white, c_white, c_white, 1);
+var _mode_label = "MAIN MENU";
+if (current_mode == 1) _mode_label = "SETTINGS";
+if (current_mode == 2) _mode_label = "JUKEBOX";
+
+draw_text_color(12, _gui_h - 10, "ALPHA v1.0 | " + _mode_label, c_white, c_white, c_white, c_white, 1);
 
 // Reset Alignments
 draw_set_halign(fa_left);

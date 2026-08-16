@@ -126,19 +126,26 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
 }
 
 // ==========================================
-// 5. SLIDING MUSIC TOAST NOTIFICATION (COMPACT)
+// 5. SLIDING MUSIC TOAST NOTIFICATION (WITH COMPOSER SUPPORT)
 // ==========================================
 if (array_length(ost_playlist) > 0 && toast_y > -35) {
     var _safe_track = min(current_track_index, array_length(ost_playlist) - 1);
-    var _track_title = ost_playlist[_safe_track].title;
+    var _track = ost_playlist[_safe_track];
+    var _track_title = _track.title;
+    var _track_composer = struct_exists(_track, "composer") ? _track.composer : "";
+    
     var _main_str = "NOW PLAYING: " + _track_title;
-    var _sub_str = "[M/TAB] NEXT";
+    var _has_composer = (_track_composer != "");
+    var _sub_str = _has_composer ? ("COMPOSER: " + _track_composer) : "";
 
     var _padding_x = 8;
-    var _padding_y = 3;
-    var _text_w = max(string_width(_main_str), string_width(_sub_str));
+    var _padding_y = 5;
+    var _text_w = string_width(_main_str);
+    if (_has_composer) {
+        _text_w = max(_text_w, string_width(_sub_str));
+    }
     var _toast_w = _text_w + (_padding_x * 2);
-    var _toast_h = 22;
+    var _toast_h = _has_composer ? 30 : 20;
 
     var _toast_x2 = _gui_w - 8;
     var _toast_x1 = _toast_x2 - _toast_w;
@@ -161,7 +168,9 @@ if (array_length(ost_playlist) > 0 && toast_y > -35) {
     draw_set_valign(fa_top);
 
     draw_text_color(_toast_x1 + _padding_x, _toast_y1 + _padding_y, _main_str, c_yellow, c_yellow, c_white, c_white, 1);
-    draw_text_color(_toast_x1 + _padding_x, _toast_y1 + _padding_y + 10, _sub_str, c_gray, c_gray, c_silver, c_silver, 0.75);
+    if (_has_composer) {
+        draw_text_color(_toast_x1 + _padding_x, _toast_y1 + _padding_y + 10, _sub_str, c_gray, c_gray, c_silver, c_silver, 0.75);
+    }
 }
 
 // ==========================================

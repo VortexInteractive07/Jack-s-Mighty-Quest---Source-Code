@@ -1,13 +1,21 @@
-/// @description obj_jack - Create Event (Platformer Movement Variables)
+/// @description obj_jack - Create Event (Arrow Keys, Controls, Coyote Time & Void Check)
 
-// Movement Speeds
-move_speed = 3.5;
-jump_speed = -9.0;
-grav = 0.4;
+move_speed = 2.1;
+run_speed  = 6.0;
+jump_speed = -6.4;
+grav       = 0.4;
 
-// Velocity vectors
 hsp = 0;
 vsp = 0;
 
-// Ground state
-grounded = false;
+grounded   = false;
+jump_max   = 2;
+jumps_left = 2;
+
+// Coyote Time Variables (Grace frames after leaving a platform)
+coyote_timer = 0;
+coyote_max   = 8; 
+
+wall_slide_speed = 1.2;
+wall_jump_hsp    = 4.5;
+wall_jump_vsp    = -8.5;
