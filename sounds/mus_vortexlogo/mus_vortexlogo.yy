@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":102.24,
+  "duration":15.016712,
   "exportDir":"",
   "name":"mus_vortexlogo",
   "parent":{
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_vortexlogo.mp3",
+  "soundFile":"mus_vortexlogo.wav",
   "volume":1.0,
 }
