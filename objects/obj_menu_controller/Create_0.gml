@@ -3,7 +3,7 @@
 // Lock GUI canvas to exact 16:9 pixel-art display resolution (432x240)
 display_set_gui_size(432, 240);
 
-// Direct Asset Handle Initialization (Legacy string lookups removed)
+// Direct Asset Handle Initialization
 sfx_dialogue_asset = sfx_dialogue;
 sfx_continue_asset = sfx_dialogue_continue;
 mus_menu_asset     = mus_menu;
@@ -35,9 +35,14 @@ show_toast = function(_msg) {
 // 0 = MAIN MENU, 1 = OPTIONS, 2 = JUKEBOX, 3 = CHANGELOG, 4 = CHEATS, 5 = MANNEQUIN SELECT
 current_mode = 0;
 
-// Track active playing music handle from Jukebox / Menu
+// Track active playing music handle and asset ID
 menu_music = mus_menu_asset;
 current_playing_track = -1;
+current_playing_asset = -1;
+
+// Analog stick debounce flags
+gp_axis_pressed_v = false;
+gp_axis_pressed_h = false;
 
 // Set when the player selects "Exit to Title Screen", read once the fade-out completes.
 pending_exit_to_title = false;
@@ -215,10 +220,10 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
         var _arrow_y_center = 205;
         var _bob = round(sin(arrow_anim_timer) * 2);
 
-        if (_list.scroll_offset > 0) {
+        if (_list.scroll_offset > 0 && sprite_exists(spr_menu_arrow_up)) {
             draw_sprite_ext(spr_menu_arrow_up, 0, _arrow_x, _arrow_y_center - 8 + _bob, 1, 1, 0, c_white, _alpha);
         }
-        if (_list.scroll_offset + _list.visible_max < _list.total) {
+        if (_list.scroll_offset + _list.visible_max < _list.total && sprite_exists(spr_menu_arrow_down)) {
             draw_sprite_ext(spr_menu_arrow_down, 0, _arrow_x, _arrow_y_center + 8 - _bob, 1, 1, 0, c_white, _alpha);
         }
     }
@@ -240,14 +245,17 @@ play_jukebox_track = function(_asset) {
     if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
         audio_stop_sound(current_playing_track);
         current_playing_track = -1;
+        current_playing_asset = -1;
     }
 
-    if (_asset != -1) {
+    if (_asset != -1 && audio_exists(_asset)) {
+        current_playing_asset = _asset;
         current_playing_track = audio_play_sound(_asset, 1, true);
         audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
     } else {
         current_mode = 0;
-        if (menu_music != -1) {
+        current_playing_asset = menu_music;
+        if (menu_music != -1 && audio_exists(menu_music)) {
             current_playing_track = audio_play_sound(menu_music, 1, true);
             audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
         }
@@ -260,22 +268,20 @@ menu_list_main = make_menu_list([
         label: "Play Game", 
         action: function() { 
             io_clear();
-            target_room = rm_intro;
+            target_room = room_exists(rm_intro) ? rm_intro : room_next(room);
             fade_state = 2;
         } 
     },
     { 
         label: "Load Recent Game", 
         action: function() { 
-            show_toast("Option/Feature coming soon in " + target_version + "!");
+            show_toast("Load Recent Game coming soon in " + target_version + "!");
         } 
     },
     { 
         label: "Time Attack", 
         action: function() { 
-            io_clear();
-            target_room = rm_time_attack;
-            fade_state = 2;
+            show_toast("Time Attack coming soon in " + target_version + "!");
         } 
     },
     { label: "Cheats",          action: function() { current_mode = 4; menu_list_cheats.index = 0; } },
@@ -318,11 +324,11 @@ menu_list_options = make_menu_list([
 
 // --- JUKEBOX LIST (mode 2) ---
 menu_list_jukebox = make_menu_list([
-    { label: "MENU THEME",        get_value: function() { return (current_playing_track != -1 && audio_is_playing(current_playing_track) && audio_get_name(current_playing_track) == "mus_menu") ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_menu); } },
-    { label: "MAGE MAALADIVAINA", get_value: function() { return (current_playing_track != -1 && audio_is_playing(current_playing_track) && audio_get_name(current_playing_track) == "mus_mage_maaladivaina") ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_mage_maaladivaina); } },
-    { label: "SUBWAY STATION",    get_value: function() { return (current_playing_track != -1 && audio_is_playing(current_playing_track) && audio_get_name(current_playing_track) == "mus_subway") ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_subway); } },
-    { label: "CITYSCAPE",         get_value: function() { return (current_playing_track != -1 && audio_is_playing(current_playing_track) && audio_get_name(current_playing_track) == "mus_city") ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_city); } },
-    { label: "BOSS BATTLE",       get_value: function() { return (current_playing_track != -1 && audio_is_playing(current_playing_track) && audio_get_name(current_playing_track) == "mus_boss") ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_boss); } },
+    { label: "MENU THEME",        get_value: function() { return (current_playing_asset == mus_menu) ? " [PLAYING]" : ""; },            action: function() { play_jukebox_track(mus_menu); } },
+    { label: "MAGE MAALADIVAINA", get_value: function() { return (current_playing_asset == mus_mage_maaladivaina) ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_mage_maaladivaina); } },
+    { label: "SUBWAY STATION",    get_value: function() { return (current_playing_asset == mus_subway) ? " [PLAYING]" : ""; },           action: function() { play_jukebox_track(mus_subway); } },
+    { label: "CITYSCAPE",         get_value: function() { return (current_playing_asset == mus_city) ? " [PLAYING]" : ""; },             action: function() { play_jukebox_track(mus_city); } },
+    { label: "BOSS BATTLE",        get_value: function() { return (current_playing_asset == mus_boss) ? " [PLAYING]" : ""; },             action: function() { play_jukebox_track(mus_boss); } },
     { label: "BACK TO MENU",      action: function() { play_jukebox_track(-1); } }
 ], 8);
 
@@ -335,7 +341,7 @@ var _cheats_back     = function() { current_mode = 0; };
 menu_list_cheats = make_menu_list([
     { label: "GOD MODE",          get_value: function() { return global.cheat_godmode  ? " [ENABLED]" : " [DISABLED]"; }, action: _toggle_godmode,  on_left: _toggle_godmode,  on_right: _toggle_godmode,  adjust_sfx: sfx_continue_asset, confirm_sfx: sfx_continue_asset },
     { label: "INFINITE AMMO",     get_value: function() { return global.cheat_infammo  ? " [ENABLED]" : " [DISABLED]"; }, action: _toggle_infammo,  on_left: _toggle_infammo,  on_right: _toggle_infammo,  adjust_sfx: sfx_continue_asset, confirm_sfx: sfx_continue_asset },
-    { label: "UNLOCK ALL LEVELS", get_value: function() { return global.cheat_unlocked ? " [YES]" : " [NO]"; },           action: _toggle_unlocked, on_left: _toggle_unlocked, on_right: _toggle_unlocked, adjust_sfx: sfx_continue_asset, confirm_sfx: sfx_continue_asset },
+    { label: "UNLOCK ALL LEVELS", get_value: function() { return global.cheat_unlocked ? " [YES]" : " [NO]"; },            action: _toggle_unlocked, on_left: _toggle_unlocked, on_right: _toggle_unlocked, adjust_sfx: sfx_continue_asset, confirm_sfx: sfx_continue_asset },
     { label: "BACK TO MENU",      action: _cheats_back, on_left: _cheats_back, on_right: _cheats_back, adjust_sfx: sfx_continue_asset, confirm_sfx: sfx_continue_asset }
 ], 4);
 
@@ -350,7 +356,7 @@ menu_list_mannequin = make_menu_list([
 // --- CHANGELOG SUB-MENU DATA ---
 changelog_lines = [];
 if (script_exists(scr_changelog_details)) {
-    changelog_lines = scr_changelog_details();
+    changelog_lines = script_execute(scr_changelog_details);
 } else {
     changelog_lines = [
         "[v1.0.0 CHANGELOG]",
@@ -386,7 +392,8 @@ fade_speed = 0.04;
 fade_state = 0; // 0 = Fade In, 1 = Active, 2 = Fade Out Transition
 
 // --- INITIAL AUDIO SETUP ---
-if (menu_music != -1) {
+if (menu_music != -1 && audio_exists(menu_music)) {
+    current_playing_asset = menu_music;
     current_playing_track = audio_play_sound(menu_music, 1, true);
     audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
 }

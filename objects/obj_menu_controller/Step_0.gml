@@ -55,18 +55,49 @@ switch (fade_state) {
     case 1:
         // Input Abstraction (Keyboard + Gamepad Support)
         var _gp_num = 0;
-        var _gp_up    = gamepad_is_connected(_gp_num) && (gamepad_button_check_pressed(_gp_num, gp_padu) || (gamepad_axis_value(_gp_num, gp_axislv) < -0.5));
-        var _gp_down  = gamepad_is_connected(_gp_num) && (gamepad_button_check_pressed(_gp_num, gp_padd) || (gamepad_axis_value(_gp_num, gp_axislv) > 0.5));
-        var _gp_left  = gamepad_is_connected(_gp_num) && (gamepad_button_check_pressed(_gp_num, gp_padl) || (gamepad_axis_value(_gp_num, gp_axislh) < -0.5));
-        var _gp_right = gamepad_is_connected(_gp_num) && (gamepad_button_check_pressed(_gp_num, gp_padr) || (gamepad_axis_value(_gp_num, gp_axislh) > 0.5));
-        var _gp_conf  = gamepad_is_connected(_gp_num) && gamepad_button_check_pressed(_gp_num, gp_face1);
-        var _gp_canc  = gamepad_is_connected(_gp_num) && gamepad_button_check_pressed(_gp_num, gp_face2);
+        var _gp_connected = gamepad_is_connected(_gp_num);
+        var _gp_up = false, _gp_down = false, _gp_left = false, _gp_right = false;
+
+        if (_gp_connected) {
+            var _axis_v = gamepad_axis_value(_gp_num, gp_axislv);
+            var _axis_h = gamepad_axis_value(_gp_num, gp_axislh);
+
+            // Digital D-Pad checks
+            _gp_up    = gamepad_button_check_pressed(_gp_num, gp_padu);
+            _gp_down  = gamepad_button_check_pressed(_gp_num, gp_padd);
+            _gp_left  = gamepad_button_check_pressed(_gp_num, gp_padl);
+            _gp_right = gamepad_button_check_pressed(_gp_num, gp_padr);
+
+            // Analog Stick Latched Debounce (Prevents 60FPS Hyper-Scrolling)
+            if (abs(_axis_v) > 0.5) {
+                if (!gp_axis_pressed_v) {
+                    if (_axis_v < -0.5) _gp_up = true;
+                    if (_axis_v > 0.5)  _gp_down = true;
+                    gp_axis_pressed_v = true;
+                }
+            } else {
+                gp_axis_pressed_v = false;
+            }
+
+            if (abs(_axis_h) > 0.5) {
+                if (!gp_axis_pressed_h) {
+                    if (_axis_h < -0.5) _gp_left = true;
+                    if (_axis_h > 0.5)  _gp_right = true;
+                    gp_axis_pressed_h = true;
+                }
+            } else {
+                gp_axis_pressed_h = false;
+            }
+        }
+
+        var _gp_conf = _gp_connected && gamepad_button_check_pressed(_gp_num, gp_face1);
+        var _gp_canc = _gp_connected && gamepad_button_check_pressed(_gp_num, gp_face2);
 
         var _move_up    = keyboard_check_pressed(vk_up)    || keyboard_check_pressed(ord("W")) || _gp_up;
         var _move_down  = keyboard_check_pressed(vk_down)  || keyboard_check_pressed(ord("S")) || _gp_down;
         var _move_left  = keyboard_check_pressed(vk_left)  || keyboard_check_pressed(ord("A")) || _gp_left;
         var _move_right = keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("D")) || _gp_right;
-        var _confirm    = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || mouse_check_button_pressed(mb_left) || _gp_conf;
+        var _confirm    = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || _gp_conf;
         var _cancel     = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(vk_backspace) || _gp_canc;
 
         // --------------------------------------
@@ -147,9 +178,17 @@ switch (fade_state) {
             }
 
             if (pending_exit_to_title) {
-                room_goto(rm_title_screen);
+                if (room_exists(rm_title_screen)) {
+                    room_goto(rm_title_screen);
+                } else {
+                    game_restart();
+                }
             } else {
-                room_goto(target_room);
+                if (target_room != -1 && room_exists(target_room)) {
+                    room_goto(target_room);
+                } else {
+                    room_goto_next();
+                }
             }
         }
         break;
