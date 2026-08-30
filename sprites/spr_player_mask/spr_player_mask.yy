@@ -26,7 +26,7 @@
   "origin":7,
   "parent":{
     "name":"Collision Mask",
-    "path":"folders/Sprites/Characters/Jack/Collision Mask.yy",
+    "path":"folders/Sprites/Characters/Jack (Good Riddance, sorry Jim)/Collision Mask.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

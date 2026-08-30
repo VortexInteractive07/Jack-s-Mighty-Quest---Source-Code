@@ -26,7 +26,7 @@
   "origin":0,
   "parent":{
     "name":"ASTERIX",
-    "path":"folders/Sprites/Characters/Highly Confidential Cameo/Courtesy of Les Editions Albert Rene/Graphics by Bit Managers/ASTERIX.yy",
+    "path":"folders/Sprites/Characters/Highly Confidential Cameo/Suppose You'd Want to See the Sprites?/Excellent/Very Excellent/Name your Vessel/Choose their Hairstyle/Suppose their Favourite Color?/Blood Group?/Do you adhere your very creation?/Perchance, Doth Thou Answereth Correctly?/Would you Acknowledge the Possibility of Pain and Seizure?/Very well then! (wow, so much folders)/But before this, do you have the absolute worth of seeing this?/Again, Doth Thou Answereth in a way that thou dost telst the truth?/Are you really sure?/Very well then/Checking System Parameters/Memory Tests in Progress/Found Device at 0x2A03/Obelix could've been done for by now/Gaulish Village/Loading/Julius Caesar?/Let me sayeth/Hulhumale'/Mee dhen haadhahaa gina folders thakeh dho?/Antharees vaa varah vure gina/Saabahey! Kon irakun mikan nimeynee?/There seems to be no end to this existential loop of doom/Suppose there shoud be a way to go through a shortcut? Right?/*maybe not/Installing Software Update/Checking System Parameters #2/All done!/You sure about finding the truth?/See that heart? That is the very culmination of your being!/Ok ok, let's show it!/Here is the Hidden Truth:/Courtesy of Les Editions Albert Rene/Graphics by Bit Managers/ASTERIX.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

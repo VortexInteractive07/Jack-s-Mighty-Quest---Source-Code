@@ -29,7 +29,7 @@ var _splash_x = _gui_w * 0.50;
 var _splash_y = _gui_h * 0.54;
 
 if (splash_current_str != "") {
-    var _shadow_offset = 2;
+    var _shadow_offset = 1;
 
     // Drop Shadow
     draw_text_transformed_color(
@@ -59,7 +59,7 @@ if (splash_current_str != "") {
 // ==========================================
 if (show_start_text && fade_state == 1) {
     var _prompt_y = _gui_h * 0.74;
-    var _prompt_text = "- PRESS ENTER TO START -";
+    var _prompt_text = "PRESS [ENTER] KEY TO START";
 
     draw_text_color(_splash_x + 1, _prompt_y + 1, _prompt_text, c_black, c_black, c_black, c_black, 1);
     draw_text_color(_splash_x, _prompt_y, _prompt_text, c_white, c_white, c_white, c_white, 1);

@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"sfx_victor_laugh",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":1,
+  "compression":0,
+  "compressionQuality":0,
+  "conversionMode":0,
+  "duration":10.619291,
+  "exportDir":"",
+  "name":"sfx_victor_laugh",
+  "parent":{
+    "name":"Speaking SFX",
+    "path":"folders/Sounds/Speaking SFX.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"sfx_victor_laugh.wav",
+  "volume":1.0,
+}

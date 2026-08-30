@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_intro_dialogue",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_intro_dialogue",
+  "parent":{
+    "name":"group1",
+    "path":"folders/Scripts/group1.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

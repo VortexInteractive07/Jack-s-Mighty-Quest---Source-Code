@@ -1,21 +1,59 @@
-/// @description State Machine, Input, & Typewriter Engine
+/// @description State Machine, Input, Typewriter & Song Lyrics Engine
+
+// --- SONG LYRICS TIMING TRACKER & MUSIC MODE SYSTEM ---
+if (audio_is_playing(splash_sound_inst)) {
+    if (enable_lyrics && current_track_index != -1 && array_length(lyric_list) > 0) {
+        var _audio_pos = audio_sound_get_track_position(splash_sound_inst);
+        
+        if (current_lyric_index < array_length(lyric_list)) {
+            if (_audio_pos >= lyric_list[current_lyric_index].time) {
+                current_lyric_text = lyric_list[current_lyric_index].text;
+                current_lyric_index++;
+            }
+        }
+    }
+} else {
+    current_lyric_text = "";
+    
+    // --- BGM REPLAY LOGIC BASED ON MUSIC_MODE ---
+    switch (music_mode) {
+        case 0: // ONLY ONCE
+            break;
+            
+        case 1: // UNCOMMON (Long wait between tracks)
+            if (track_delay_timer <= 0) {
+                track_delay_timer = irandom_range(uncommon_min_delay, uncommon_max_delay);
+            } else {
+                track_delay_timer--;
+                if (track_delay_timer <= 0) {
+                    play_random_track();
+                }
+            }
+            break;
+            
+        case 2: // CONTINUOUS (Zero delay back-to-back)
+            play_random_track();
+            break;
+    }
+}
+
 if (splash_index >= array_length(splash_list) || is_exiting) exit;
 
 var _current_splash = splash_list[splash_index];
-var _is_text = is_struct(_current_splash);
+var _is_text_struct = is_struct(_current_splash);
+var _is_dialogue   = _is_text_struct && struct_exists(_current_splash, "text");
+var _is_standalone = _is_text_struct && struct_exists(_current_splash, "raw_text");
 
-// Active character speed for this splash frame
-var _active_char_speed = (_is_text && struct_exists(_current_splash, "speed")) 
+var _active_char_speed = (_is_text_struct && struct_exists(_current_splash, "speed")) 
     ? _current_splash.speed 
     : default_char_speed;
 
-// Text splashes show background frame immediately
-if (_is_text && fade_state == 0) {
+if (_is_dialogue && fade_state == 0) {
     alpha = 1;
     fade_state = 1;
 }
 
-// --- INPUT HANDLERS (Keyboard, Mouse, Gamepad) ---
+// --- INPUT HANDLERS ---
 var _gp_num = gamepad_get_device_count();
 var _gp_pressed = false;
 for (var i = 0; i < _gp_num; i++) {
@@ -39,7 +77,6 @@ var _advance_pressed = can_skip && (
     _gp_pressed
 );
 
-// Helper function to transition safely between splashes
 var _advance_splash = function() {
     splash_index++;
     char_count = 0;
@@ -48,7 +85,9 @@ var _advance_splash = function() {
     
     if (splash_index >= array_length(splash_list)) {
         is_exiting = true;
-        audio_sound_gain(mus_raalhehge_monaigaa, 0, 1000); // Smooth audio fade-out
+        if (audio_is_playing(splash_sound_inst)) {
+            audio_sound_gain(splash_sound_inst, 0, 1000);
+        }
         room_goto(target_room);
         return;
     }
@@ -60,7 +99,7 @@ var _advance_splash = function() {
         
     splash_timer = _next_hold;
     
-    if (is_struct(_next_splash)) {
+    if (is_struct(_next_splash) && struct_exists(_next_splash, "text")) {
         alpha = 1;
         fade_state = 1;
     } else {
@@ -69,16 +108,21 @@ var _advance_splash = function() {
     }
 };
 
-// --- HARD SKIP ALL ---
 if (_skip_all) {
     is_exiting = true;
+    if (audio_is_playing(splash_sound_inst)) {
+        audio_sound_gain(splash_sound_inst, 0, 500);
+    }
     room_goto(target_room);
     exit;
 }
 
 // --- TYPEWRITER & SFX LOGIC ---
-if (_is_text) {
-    var _full_text = struct_exists(_current_splash, "text") ? _current_splash.text : "";
+if (_is_text_struct) {
+    var _full_text = "";
+    if (_is_dialogue)   _full_text = _current_splash.text;
+    if (_is_standalone) _full_text = _current_splash.raw_text;
+    
     var _total_chars = string_length(_full_text);
     
     if (!typewriter_complete) {
@@ -100,7 +144,6 @@ if (_is_text) {
             typewriter_complete = true;
         }
     } else {
-        // Blink timer for the "continue" prompt
         prompt_blink_timer++;
         if (prompt_blink_timer >= 30) {
             prompt_visible = !prompt_visible;
@@ -111,7 +154,7 @@ if (_is_text) {
 
 // --- FADE & TRANSITION STATE MACHINE ---
 switch (fade_state) {
-    case 0: // Fade In (Sprites)
+    case 0:
         alpha += fade_speed;
         if (_advance_pressed) {
             alpha = 1;
@@ -123,16 +166,14 @@ switch (fade_state) {
         }
         break;
         
-    case 1: // Hold / Typing State
-        // Only countdown hold duration for graphic sprites (not text dialogue)
-        if (!_is_text) {
+    case 1:
+        if (!_is_dialogue) {
             splash_timer--;
         }
         
         if (_advance_pressed) {
-            if (_is_text && !typewriter_complete) {
-                // Instantly complete current text block
-                var _full_text = struct_exists(_current_splash, "text") ? _current_splash.text : "";
+            if (_is_text_struct && !typewriter_complete) {
+                var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
                 char_count = string_length(_full_text);
                 typewriter_complete = true;
                 
@@ -140,25 +181,26 @@ switch (fade_state) {
                     audio_play_sound(sfx_dialogue_continue, 5, false);
                 }
             } else {
-                if (audio_exists(sfx_dialogue_continue)) {
-                    audio_play_sound(sfx_dialogue_continue, 5, false);
-                }
-                
-                var _next_is_text = (splash_index + 1 < array_length(splash_list)) && is_struct(splash_list[splash_index + 1]);
-                if (_is_text && _next_is_text) {
+                var _next_is_dialogue = (splash_index + 1 < array_length(splash_list)) 
+                    && is_struct(splash_list[splash_index + 1]) 
+                    && struct_exists(splash_list[splash_index + 1], "text");
+
+                if (_is_dialogue && _next_is_dialogue) {
+                    if (audio_exists(sfx_dialogue_continue)) {
+                        audio_play_sound(sfx_dialogue_continue, 5, false);
+                    }
                     _advance_splash(); 
                 } else {
                     fade_state = 2; 
                 }
             }
         }
-        // Auto-advance ONLY triggers for graphic splash assets when their timer runs out
-        else if (!_is_text && splash_timer <= 0) {
+        else if (!_is_dialogue && splash_timer <= 0) {
             fade_state = 2;
         }
         break;
         
-    case 2: // Fade Out
+    case 2:
         alpha -= fade_speed;
         if (alpha <= 0) {
             alpha = 0;

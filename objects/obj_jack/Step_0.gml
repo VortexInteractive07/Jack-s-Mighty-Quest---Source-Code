@@ -37,6 +37,11 @@ if (_jump_press) {
         grounded = false;
         coyote_timer = 0; 
         jumps_left = jump_max - 1;
+        
+        // Add Jump Score (+10)
+        if (instance_exists(obj_controller)) {
+            obj_controller.game_score += 150;
+        }
     } 
     else if (_is_against_wall) {
         // Wall Jump
@@ -44,6 +49,11 @@ if (_jump_press) {
         if (_wall_right) hsp = -wall_jump_hsp;
         vsp = wall_jump_vsp;
         jumps_left = jump_max - 1;
+        
+        // Add Jump Score (+10)
+        if (instance_exists(obj_controller)) {
+            obj_controller.game_score += 200;
+        }
     } 
     else if (jumps_left > 0) {
         // Airborne Jumps
@@ -57,6 +67,11 @@ if (_jump_press) {
             // Double Press S: Higher Double Jump
             vsp = jump_speed * 1.1; 
             jumps_left--;
+        }
+        
+        // Add Jump Score (+10)
+        if (instance_exists(obj_controller)) {
+            obj_controller.game_score += 250;
         }
     }
 }

@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"sfx_seismic_rumble",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.0831746,
+  "exportDir":"",
+  "name":"sfx_seismic_rumble",
+  "parent":{
+    "name":"Sound FX",
+    "path":"folders/Sounds/Sound FX.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"sfx_seismic_rumble.wav",
+  "volume":1.0,
+}
