@@ -41,11 +41,11 @@ function scr_splash_ost_playback() {
                 { time: 4.300,  text: "Nila fen mathee," },
                 { time: 6.357,  text: "Alhavaa mi dhiyaa!" },
                 { time: 8.341,  text: "Monaigaa hithaa," },
-                { time: 10.106, text: "ge fenvee fashaa!" },
+                { time: 10.106, text: "ge fenvee ashaa!" },
                 { time: 12.417, text: "Handhuvaru therey," },
-                { time: 14.411, text: "Tharithah dhulhey!" },
-                { time: 16.513, text: "Vaarey feshuney," },
-                { time: 18.263, text: "Yageen veyegen ley!" },
+                { time: 14.411, text: "Tharithah dhul'hey!" },
+                { time: 16.513, text: "Vaa-ey feshuney," },
+                { time: 18.263, text: "Yageen vey-gen ley!" },
                 { time: 20.531, text: "Moanaigaa mulhi aalamey fenumey!" },
                 { time: 24.520, text: "Aaaaaah~ Alhavaaa~" },
                 { time: 28.133, text: "Hithuga!" }
@@ -65,7 +65,7 @@ function scr_splash_ost_playback() {
                 { time: 16.523, text: "Ahmed ge preethi," },
                 { time: 18.334, text: "Aisha ahlee vefaaiy dhey!" },
                 { time: 20.932, text: "Rey kanda gais," },
-                { time: 12.836, text: "Iru osseygen dhaashey," },
+                { time: 22.836, text: "Iru osseygen dhaashey," },
                 { time: 25.258, text: "(Rey kanda gaaa~is)" }
             ]
         },
@@ -126,6 +126,32 @@ function scr_splash_ost_playback() {
                 { time: 15.476, text: "Sihineka wa~ge," },
                 { time: 17.795, text: "Weli thala matha~ rala hadi" },
                 { time: 22.297, text: "Mihira handana thanikama mage~!" }
+            ]
+        },
+        /*
+         * =========================================================================
+         * DELTARUNE ARCADE EDITION (Fan Game)
+         * Original Track: "Seal the Fountain"
+         * Featured in DELTARUNE Arcade Edition — check out DELTARUNE by Toby Fox!
+         * Support the original game: https://deltarune.com
+         * =========================================================================
+        */
+        {
+            sound: mus_seal_the_fountain,
+            title: "Seal the Fountain",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.085,  text: "Cross the threshold where the darkness starts to rise," },
+                { time: 3.968,  text: "Fullfill the ancient prophecy before our very eyes!" },
+                { time: 7.827,  text: "This empty feeling's tearing me apart inside," },
+                { time: 11.470, text: "Am I a puppet dancing on a string you hide..." },
+                { time: 15.264, text: "But we will seal the fountain..." },
+                { time: 17.129, text: "restore the light and sound!" },
+                { time: 18.956, text: "And chase the roaring shadows..." },
+                { time: 20.922, text: "from this sacred ground" },
+                { time: 22.765, text: "Yeah, we'll seal the fountain..." },
+                { time: 24.646, text: "before the roaring comes!" },
+                { time: 26.525, text: "Before the roaring co~mes!" }
             ]
         }
     ];

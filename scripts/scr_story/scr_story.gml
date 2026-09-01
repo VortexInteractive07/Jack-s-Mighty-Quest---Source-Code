@@ -9,7 +9,7 @@
 function scr_story() {
     return [
         {
-            sprite: -1,
+            sprite: spr_celestia,
             speaker: "",
             sfx: asset_get_index("sfx_ambient_city") != -1 ? sfx_ambient_city : -1,
             text: "Celestia was never conceived as a mere urban sprawl. Nestled within the western suburbs of the Republic of Aetheria, it blossomed over decades into a sacred covenant — a sovereign haven where spires of emerald glass harvested the dawn."
@@ -166,7 +166,7 @@ function scr_story() {
             text: "'Charlotte! No, no, no—stay conscious! Focus on my voice!'"
         },
         {
-            sprite: -1,
+            sprite: spr_charlotte_mannequin_dust,
             speaker: "",
             sfx: asset_get_index("sfx_dialogue_narrative") != -1 ? sfx_dialogue_narrative : -1,
             text: "Despair threatened to break him, but as his hands gripped her shoulders, the illusion shattered. What lay in his arms was not biological tissue, but the cold synthetic shell of an articulated mannequin. Charlotte had been abducted."

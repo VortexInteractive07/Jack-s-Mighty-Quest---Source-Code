@@ -78,7 +78,7 @@ resolve_sfx = function(_sfx_val, _speaker_val) {
 // (only its gain is tweened, so playback position is never interrupted).
 // If the asset is missing, this entire feature safely no-ops and the
 // monologue plays exactly as it did before (typewriter + automated laugh).
-enable_victor_voice_sync_mode = true;
+enable_victor_voice_sync_mode = false;
 
 voice_sync_active               = false; // true only while a synced monologue is actively driving captions
 voice_sync_group_name           = "";    // voice_sync_group currently in progress, "" if none
