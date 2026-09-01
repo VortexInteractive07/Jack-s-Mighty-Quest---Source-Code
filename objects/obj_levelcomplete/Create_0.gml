@@ -6,15 +6,14 @@ target_level = rm_splash_screen;
 
 // Post-Tally Fade-Out Variables
 fade_timer = 0;
-fade_delay = 160;     // Wait duration in frames after tally finishes before fading
-fade_duration = 120;  // Fade duration in frames (2 seconds at 60 FPS)
+fade_delay = 120;     // Wait 2 seconds (120 frames at 60 FPS) after tally finishes before fading
+fade_duration = 60;   // Fade duration (1 second at 60 FPS)
 
-// Victory Jingle Setup with Safety Fallback
-if (asset_get_index("mus_levelcomplete") != -1) {
-    victory_jingle = mus_levelcomplete;
-} else {
-    victory_jingle = -1;
-}
+// Direct Sound & Music References
+victory_jingle = mus_levelcomplete;
+snd_tally_tick_asset = sfx_dialogue;
+snd_tally_done_asset = sfx_dialogue_continue;
+snd_tally_tick_handle = -1;
 
 // -----------------------------------------------------------------------------
 // SONIC-INSPIRED SCORE TOLL VARIABLES
@@ -24,19 +23,8 @@ score_tally_active = false;
 tally_finished = false;
 tally_timer = 0;
 tally_counter = 0;
-tally_rate = 100; // Amount added to total score per tick during tallying
+tally_rate = 100; // Amount deducted per tick during tallying
 
-// Sonic Tally Audio Asset Handles
-if (asset_get_index("sfx_dialogue") != -1) {
-    snd_tally_tick_asset = sfx_dialogue; // Asset for score ticking sound
-} else {
-    snd_tally_tick_asset = -1;
-}
-
-if (asset_get_index("sfx_dialogue_continue") != -1) {
-    snd_tally_done_asset = sfx_dialogue_continue; // Asset for final score completion tally sound
-} else {
-    snd_tally_done_asset = -1;
-}
-
-snd_tally_tick_handle = -1;
+// Slide-in Animation & Visual Polish
+card_slide = 0.0;     // Easing scalar for GUI entrance
+banner_skew = 12;     // Slanted pixel style skew

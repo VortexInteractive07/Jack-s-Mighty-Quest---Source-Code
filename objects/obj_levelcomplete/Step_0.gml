@@ -1,7 +1,12 @@
 /// @description Score Toll Logic & Tally Execution
 
+// Smooth slide-in transition for GUI presentation
+if (activated) {
+    card_slide = lerp(card_slide, 1.0, 0.1);
+}
+
 if (score_tally_active && !tally_finished) {
-    // Check if the victory jingle is still playing
+    // Check if victory jingle is still playing
     var _jingle_playing = false;
     if (level_audio_id != -1 && audio_exists(level_audio_id)) {
         if (audio_is_playing(level_audio_id)) {
@@ -9,61 +14,51 @@ if (score_tally_active && !tally_finished) {
         }
     }
 
-    // Only progress the tally timer once the victory music has finished playing
+    // Delay score counting until the victory jingle ends
     if (!_jingle_playing) {
         tally_timer++;
 
-        // Delay tally start slightly after victory music ends (30 frames / 0.5 sec delay)
+        // 30-frame initial delay before countdown starts
         if (tally_timer >= 30) {
             if (tallied_score > 0) {
                 var _deduct = min(tallied_score, tally_rate);
                 tallied_score -= _deduct;
                 tally_counter += _deduct;
 
-                // Play ticking sound effect for tally increment using sfx_dialogue
-                if (asset_get_index("sfx_dialogue") != -1) {
-                    var _snd_tick = asset_get_index("sfx_dialogue");
-                    if (audio_exists(_snd_tick)) {
-                        if (!audio_is_playing(_snd_tick)) {
-                            snd_tally_tick_handle = audio_play_sound(_snd_tick, 5, false);
-                        }
+                // Play ticking sound effect on loop/re-trigger
+                if (audio_exists(snd_tally_tick_asset)) {
+                    if (!audio_is_playing(snd_tally_tick_asset)) {
+                        snd_tally_tick_handle = audio_play_sound(snd_tally_tick_asset, 5, false);
                     }
                 }
             } else {
-                // Tally completed
+                // Tally Sequence Completed
                 tally_finished = true;
 
-                // Stop tick audio if playing
+                // Stop ticking audio
                 if (snd_tally_tick_handle != -1 && audio_is_playing(snd_tally_tick_handle)) {
                     audio_stop_sound(snd_tally_tick_handle);
                 }
 
-                // Play final completion chime sound using sfx_dialogue_continue
-                if (asset_get_index("sfx_dialogue_continue") != -1) {
-                    var _snd_cash = asset_get_index("sfx_dialogue_continue");
-                    if (audio_exists(_snd_cash)) {
-                        audio_play_sound(_snd_cash, 6, false);
-                    }
+                // Play completion chime
+                if (audio_exists(snd_tally_done_asset)) {
+                    audio_play_sound(snd_tally_done_asset, 6, false);
                 }
 
-                // Add tallied points back into controller score
+                // Sync final score into controller
                 if (instance_exists(obj_controller)) {
                     obj_controller.game_score = tally_counter;
                 }
 
-                // Set room transition delay (280 frames total)
-                alarm[0] = 280;
+                // Schedule room transition alarm (delay + fade time)
+                alarm[0] = fade_delay + fade_duration;
                 fade_timer = 0;
-                fade_delay = 160;     // Wait duration in frames before fading starts
-                fade_duration = 120;  // Fade duration in frames (2 seconds at 60 FPS)
             }
         }
     }
 }
 
-// Increment fade progress timer after tally completion
+// Increment fade progress timer post-tally
 if (tally_finished) {
-    if (variable_instance_exists(id, "fade_timer")) {
-        fade_timer++;
-    }
+    fade_timer++;
 }

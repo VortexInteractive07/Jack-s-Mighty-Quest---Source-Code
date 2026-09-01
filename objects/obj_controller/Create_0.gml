@@ -35,7 +35,7 @@ next_room   = -1;
 
 // --- 4. GAMEPLAY, HUD & LIFE SYSTEM ---
 game_paused               = false;
-pause_option              = 0; // 0: Resume, 1: Restart, 2: Quit to Menu
+pause_option              = 0; // 0: CONTINUE, 1: RESTART, 2: MAIN MENU
 show_debug_overlay_custom = false;
 game_score                = 0;
 player_lives              = 3;
@@ -46,12 +46,22 @@ is_game_over              = false;
 game_over_timer           = 0;
 game_over_delay           = game_get_speed(gamespeed_fps) * 3.0;
 
-// --- 5. TIMER & TIME LIMIT SYSTEM ---
+// Dynamic HUD Interpolation Variables
+hp_visual_current         = 0;
+hp_visual_catchup         = 0;
+
+// --- 5. SONIC MANIA PLUS PAUSE ANIMATION SYSTEM ---
+pause_slide               = 0.0; // 0.0 (Unpaused) to 1.0 (Fully Visible)
+pause_wave_timer          = 0;   // Dynamic wave shine for selected items
+pause_options_count       = 3;
+pause_labels              = ["CONTINUE", "RESTART", "MAIN MENU"];
+
+// --- 6. TIMER & TIME LIMIT SYSTEM ---
 game_timer_ticks = 0;
 max_time_seconds = 599; // 9 mins 59 secs
 time_exceeded    = false;
 
-// --- 6. PARTICLE SYSTEM INITIALIZATION ---
+// --- 7. PARTICLE SYSTEM INITIALIZATION ---
 sys_particles = part_system_create();
 part_system_depth(sys_particles, -100);
 
