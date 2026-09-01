@@ -1,48 +1,52 @@
 /// @description State Machine, Input, Typewriter & Song Lyrics Engine
 
 // --- SONG LYRICS TIMING TRACKER & MUSIC MODE SYSTEM ---
-if (audio_is_playing(splash_sound_inst)) {
-    if (enable_lyrics && current_track_index != -1 && array_length(lyric_list) > 0) {
-        var _audio_pos = audio_sound_get_track_position(splash_sound_inst);
-        
-        if (current_lyric_index < array_length(lyric_list)) {
-            if (_audio_pos >= lyric_list[current_lyric_index].time) {
-                current_lyric_text = lyric_list[current_lyric_index].text;
-                current_lyric_index++;
+if (enable_bgm) {
+    if (audio_is_playing(splash_sound_inst)) {
+        if (enable_lyrics && current_track_index != -1 && array_length(lyric_list) > 0) {
+            var _audio_pos = audio_sound_get_track_position(splash_sound_inst);
+            
+            if (current_lyric_index < array_length(lyric_list)) {
+                if (_audio_pos >= lyric_list[current_lyric_index].time) {
+                    current_lyric_text = lyric_list[current_lyric_index].text;
+                    current_lyric_index++;
+                }
             }
+        }
+    } else {
+        current_lyric_text = "";
+        
+        switch (music_mode) {
+            case 0: // ONLY ONCE
+                break;
+                
+            case 1: // UNCOMMON
+                if (track_delay_timer <= 0) {
+                    track_delay_timer = irandom_range(uncommon_min_delay, uncommon_max_delay);
+                } else {
+                    track_delay_timer--;
+                    if (track_delay_timer <= 0) {
+                        play_random_track();
+                    }
+                }
+                break;
+                
+            case 2: // CONTINUOUS
+                play_random_track();
+                break;
         }
     }
 } else {
     current_lyric_text = "";
-    
-    // --- BGM REPLAY LOGIC BASED ON MUSIC_MODE ---
-    switch (music_mode) {
-        case 0: // ONLY ONCE
-            break;
-            
-        case 1: // UNCOMMON (Long wait between tracks)
-            if (track_delay_timer <= 0) {
-                track_delay_timer = irandom_range(uncommon_min_delay, uncommon_max_delay);
-            } else {
-                track_delay_timer--;
-                if (track_delay_timer <= 0) {
-                    play_random_track();
-                }
-            }
-            break;
-            
-        case 2: // CONTINUOUS (Zero delay back-to-back)
-            play_random_track();
-            break;
-    }
 }
 
 if (splash_index >= array_length(splash_list) || is_exiting) exit;
 
 var _current_splash = splash_list[splash_index];
 var _is_text_struct = is_struct(_current_splash);
-var _is_dialogue   = _is_text_struct && struct_exists(_current_splash, "text");
-var _is_standalone = _is_text_struct && struct_exists(_current_splash, "raw_text");
+var _is_dialogue    = _is_text_struct && struct_exists(_current_splash, "text");
+var _is_standalone  = _is_text_struct && struct_exists(_current_splash, "raw_text");
+var _instant        = _is_text_struct && struct_exists(_current_splash, "instant_display") && _current_splash.instant_display;
 
 var _active_char_speed = (_is_text_struct && struct_exists(_current_splash, "speed")) 
     ? _current_splash.speed 
@@ -85,10 +89,12 @@ var _advance_splash = function() {
     
     if (splash_index >= array_length(splash_list)) {
         is_exiting = true;
-        if (audio_is_playing(splash_sound_inst)) {
+        if (enable_bgm && audio_is_playing(splash_sound_inst)) {
             audio_sound_gain(splash_sound_inst, 0, 1000);
         }
-        room_goto(target_room);
+        if (room_exists(target_room)) {
+            room_goto(target_room);
+        }
         return;
     }
     
@@ -110,10 +116,12 @@ var _advance_splash = function() {
 
 if (_skip_all) {
     is_exiting = true;
-    if (audio_is_playing(splash_sound_inst)) {
+    if (enable_bgm && audio_is_playing(splash_sound_inst)) {
         audio_sound_gain(splash_sound_inst, 0, 500);
     }
-    room_goto(target_room);
+    if (room_exists(target_room)) {
+        room_goto(target_room);
+    }
     exit;
 }
 
@@ -125,14 +133,17 @@ if (_is_text_struct) {
     
     var _total_chars = string_length(_full_text);
     
-    if (!typewriter_complete) {
+    if (_instant) {
+        char_count = _total_chars;
+        typewriter_complete = true;
+    } else if (!typewriter_complete) {
         char_count += _active_char_speed;
         
         var _current_char_idx = floor(char_count);
         if (_current_char_idx > last_sound_char && _current_char_idx <= _total_chars) {
             var _char_str = string_char_at(_full_text, _current_char_idx);
             if (_char_str != " " && _char_str != "\n" && _char_str != "\r") {
-                if (audio_exists(sfx_dialogue)) {
+                if (script_exists(scr_intro_dialogue) && audio_exists(sfx_dialogue)) {
                     audio_play_sound(sfx_dialogue, 5, false);
                 }
             }
@@ -158,7 +169,12 @@ switch (fade_state) {
         alpha += fade_speed;
         if (_advance_pressed) {
             alpha = 1;
-            fade_state = 2;
+            fade_state = 1;
+            if (_is_text_struct) {
+                var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
+                char_count = string_length(_full_text);
+                typewriter_complete = true;
+            }
         } 
         else if (alpha >= 1) {
             alpha = 1;
@@ -172,7 +188,7 @@ switch (fade_state) {
         }
         
         if (_advance_pressed) {
-            if (_is_text_struct && !typewriter_complete) {
+            if (_is_text_struct && !typewriter_complete && !_instant) {
                 var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
                 char_count = string_length(_full_text);
                 typewriter_complete = true;

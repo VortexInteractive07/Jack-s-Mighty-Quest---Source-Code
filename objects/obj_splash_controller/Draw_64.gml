@@ -11,17 +11,18 @@ draw_clear(c_black);
 // 1. STANDALONE RAW TEXT SPLASH
 // ==========================================
 if (is_struct(_current_splash) && struct_exists(_current_splash, "raw_text")) {
-    var _font   = struct_exists(_current_splash, "font") && font_exists(_current_splash.font) ? _current_splash.font : fnt_bitmap;
-    var _color  = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
-    var _scale  = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
-    var _shadow = struct_exists(_current_splash, "blue_shadow") ? _current_splash.blue_shadow : false;
+    var _font    = struct_exists(_current_splash, "font") && font_exists(_current_splash.font) ? _current_splash.font : fnt_bitmap;
+    var _color   = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
+    var _scale   = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
+    var _shadow  = struct_exists(_current_splash, "blue_shadow") ? _current_splash.blue_shadow : false;
+    var _instant = struct_exists(_current_splash, "instant_display") ? _current_splash.instant_display : false;
 
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     if (font_exists(_font)) draw_set_font(_font);
 
     var _full_text = _current_splash.raw_text;
-    var _displayed_text = string_copy(_full_text, 1, floor(char_count));
+    var _displayed_text = _instant ? _full_text : string_copy(_full_text, 1, floor(char_count));
 
     if (_shadow) {
         var _shadow_color = make_color_rgb(0, 80, 180);
@@ -87,19 +88,23 @@ else if (sprite_exists(_current_splash)) {
 }
 
 // ==========================================
-// 4. SONG LYRICS SUBTITLE OVERLAY (TOP OF SCREEN)
+// 4. SONG LYRICS SUBTITLE OVERLAY
 // ==========================================
 if (enable_lyrics && current_lyric_text != "") {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     if (font_exists(fnt_bitmap)) draw_set_font(fnt_bitmap);
 
-    var _lyric_y = 12; // Top margin padding
+    var _lyric_y = 12;
     var _shadow_c = c_black;
     var _text_c   = c_yellow;
 
-    // Drop Shadow
     draw_text_transformed_color((_gui_w / 2) + 1, _lyric_y + 1, current_lyric_text, 1, 1, 0, _shadow_c, _shadow_c, _shadow_c, _shadow_c, 0.8);
-    // Lyric Text
     draw_text_transformed_color(_gui_w / 2, _lyric_y, current_lyric_text, 1, 1, 0, _text_c, _text_c, _text_c, _text_c, 1.0);
 }
+
+// Reset Draw State Properties
+draw_set_alpha(1.0);
+draw_set_color(c_white);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
