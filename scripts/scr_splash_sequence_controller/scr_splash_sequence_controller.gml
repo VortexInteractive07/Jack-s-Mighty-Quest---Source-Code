@@ -40,7 +40,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     }
 
     var _pub_string = string_upper(_publisher_name);
-    var _disclaimer_text = "JACK'S MIGHTY QUEST\n\n(C) 2026, 2027 " + _pub_string + "\nALL RIGHTS RESERVED." + _licensing_text + "\n\nDEVELOPED AND PUBLISHED BY:\n" + _pub_string + "\n\nTHIS IS A WORK OF FICTION.";
+    var _disclaimer_text = "JACK'S MIGHTY QUEST (TM)\n\n(C) 2026, 2027 " + _pub_string + "\nALL RIGHTS RESERVED." + _licensing_text + "\n\nDEVELOPED AND PUBLISHED BY:\n" + _pub_string + "\n\nTHIS IS A WORK OF FICTION.";
 
     array_push(_sequence, {
         raw_text: _disclaimer_text,

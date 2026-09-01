@@ -6,7 +6,7 @@ target_room = rm_title_screen;
 // ==========================================
 // 1. SYSTEM TOGGLES & PLATFORM CONFIG
 // ==========================================
-enable_bgm      = false; // Set to false to disable background soundtrack
+enable_bgm      = true; // Set to false to disable background soundtrack
 enable_lyrics   = false; 
 enable_dialogue = true; 
 publisher_name  = "VORTEX Interactive";
