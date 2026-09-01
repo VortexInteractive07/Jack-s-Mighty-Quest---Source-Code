@@ -1,25 +1,22 @@
-/// @description Main Controller Logic - Fades, Inputs, Timer, & Audio Management
+/// @description Level Controller Step Logic - Pause, Audio, Timers & Transitions
 
-if keyboard_check_pressed(ord("0")) {
-	room_goto(rm_splash_screen);	
-}	
+if (keyboard_check_pressed(ord("0"))) {
+    if (room_exists(rm_splash_screen)) {
+        room_goto(rm_splash_screen);
+    }
+}
 
-// Define non-gameplay rooms where gameplay systems (pause, timer, HUD, music) should be dormant
-var _is_non_gameplay_room = (room == room_first) || 
-                            (string_pos("splash", string_lower(room_get_name(room))) > 0) || 
-                            (string_pos("title", string_lower(room_get_name(room))) > 0) || 
-                            (string_pos("menu", string_lower(room_get_name(room))) > 0) || 
-                            (string_pos("intro", string_lower(room_get_name(room))) > 0);
-
-// -----------------------------------------------------------------------------
-// 1. INPUT PROCESSING & PAUSE SYSTEM
-// -----------------------------------------------------------------------------
+// --- 1. INPUT PROCESSING & LOCAL PAUSE SYSTEM ---
 var _key_pause = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"));
 var _key_debug = keyboard_check_pressed(vk_f3);
 
-// Toggle Pause State (Only during actual gameplay rooms)
-if (!_is_non_gameplay_room && _key_pause && state == TRANSITION_STATE.IDLE) {
+if (_key_pause && state == TRANSITION_STATE.IDLE && !is_game_over) {
     game_paused = !game_paused;
+    pause_option = 0;
+    
+    if (audio_exists(snd_pause)) {
+        audio_play_sound(snd_pause, 5, false);
+    }
     
     if (game_paused) {
         instance_deactivate_all(true);
@@ -28,38 +25,83 @@ if (!_is_non_gameplay_room && _key_pause && state == TRANSITION_STATE.IDLE) {
     }
 }
 
-// Toggle Custom Debug Display
+// Pause Menu Navigation Controls
+if (game_paused) {
+    var _key_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
+    var _key_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
+    var _key_select = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
+    
+    if (_key_up) {
+        pause_option--;
+        if (pause_option < 0) pause_option = 2;
+    }
+    if (_key_down) {
+        pause_option++;
+        if (pause_option > 2) pause_option = 0;
+    }
+    
+    if (_key_select) {
+        if (pause_option == 0) { // Resume
+            game_paused = false;
+            instance_activate_all();
+        } else if (pause_option == 1) { // Restart
+            game_paused = false;
+            instance_activate_all();
+            room_restart();
+        } else if (pause_option == 2) { // Main Menu
+            game_paused = false;
+            instance_activate_all();
+            if (room_exists(rm_splash_screen)) {
+                room_goto(rm_splash_screen);
+            }
+        }
+    }
+    exit;
+}
+
 if (_key_debug) {
     show_debug_overlay_custom = !show_debug_overlay_custom;
 }
 
-// -----------------------------------------------------------------------------
-// 2. ASCENDING GAME TIMER & DEATH LIMIT LOGIC
-// -----------------------------------------------------------------------------
-if (!_is_non_gameplay_room && !game_paused && state == TRANSITION_STATE.IDLE) {
+// --- 2. GAME OVER MONITORING & RESTART CONTROLLER ---
+if (is_game_over) {
+    game_over_timer--;
+    if (game_over_timer <= 0) {
+        is_game_over = false;
+        player_lives = 3;
+        game_score = 0;
+        game_timer_ticks = 0;
+        if (room_exists(rm_splash_screen)) {
+            room_goto(rm_splash_screen);
+        } else {
+            room_restart();
+        }
+    }
+    exit;
+}
+
+// --- 3. ASCENDING GAME TIMER & DEATH LIMIT LOGIC ---
+if (!game_paused && state == TRANSITION_STATE.IDLE) {
     game_timer_ticks += 1;
     
     var _total_seconds = game_timer_ticks / game_get_speed(gamespeed_fps);
     
-    // Check if player has exceeded the death threshold (09:59)
     if (_total_seconds > max_time_seconds && !time_exceeded) {
         time_exceeded = true;
         player_lives = 0;
         
-        // Execute player elimination / life penalty logic safely
-        if (instance_exists(obj_player)) {
-            with (obj_player) {
-                // If the player object has a custom death method or event trigger
-                if (variable_instance_exists(id, "hp")) hp = 0;
-                instance_destroy();
+        if (instance_exists(obj_jack)) {
+            with (obj_jack) {
+                hp = 0;
+                if (script_exists(scr_trigger_player_death)) {
+                    scr_trigger_player_death();
+                }
             }
         }
     }
 }
 
-// -----------------------------------------------------------------------------
-// 3. ROOM TRANSITION & FADE STATE MACHINE
-// -----------------------------------------------------------------------------
+// --- 4. ROOM TRANSITION & FADE STATE MACHINE ---
 switch (state) {
     case TRANSITION_STATE.IDLE:
         fade_alpha = 0.0;
@@ -68,7 +110,6 @@ switch (state) {
     case TRANSITION_STATE.FADE_OUT:
         fade_alpha += fade_speed;
         
-        // Mute/lower audio on fade out
         if (bgm_handle != -1 && audio_is_playing(bgm_handle)) {
             audio_sound_gain(bgm_handle, max(0, 1 - fade_alpha), 0);
         }
@@ -87,7 +128,6 @@ switch (state) {
     case TRANSITION_STATE.FADE_IN:
         fade_alpha -= fade_speed;
         
-        // Restore music volume on fade in
         if (bgm_handle != -1 && audio_is_playing(bgm_handle)) {
             audio_sound_gain(bgm_handle, (1 - fade_alpha) * bgm_target_volume, 0);
         }
@@ -99,17 +139,10 @@ switch (state) {
         break;
 }
 
-// -----------------------------------------------------------------------------
-// 4. BACKGROUND MUSIC MONITORING
-// -----------------------------------------------------------------------------
-// Control subway audio playback specifically during active gameplay rooms
-if (!_is_non_gameplay_room && asset_get_index("mus_subway") != -1) {
+// --- 5. BACKGROUND MUSIC MONITORING ---
+if (audio_exists(mus_subway)) {
     if (!audio_is_playing(mus_subway) && state == TRANSITION_STATE.IDLE) {
         bgm_handle = audio_play_sound(mus_subway, 10, true);
         audio_sound_gain(bgm_handle, bgm_target_volume, 0);
     }
-} else if (_is_non_gameplay_room && bgm_handle != -1 && audio_is_playing(bgm_handle)) {
-    // Stop subway track if returning to menu/splash screen
-    audio_stop_sound(bgm_handle);
-    bgm_handle = -1;
 }

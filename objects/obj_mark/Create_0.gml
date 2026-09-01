@@ -1,17 +1,20 @@
-/// @description Initialize Mark (GM LTS 2026)
+/// @description obj_mark - Create Event (State Tracking & Emotion Engine)
 
 target = obj_jack;
 
-// Follow positioning
-follow_distance = 24;
-follow_height = 12;
-lerp_speed = 0.1;
+follow_distance = 28;
+follow_height = 16;
+lerp_speed = 0.12;
 
-// Combat & Cooldowns (GM LTS 2026 Timing)
 plasma_cooldown = 0;
-plasma_cooldown_max = game_get_speed(gamespeed_fps) * 0.4; // 400ms cooldown
-assistance_hp_threshold = 30; // Auto-assist threshold (30% HP)
+plasma_cooldown_max = game_get_speed(gamespeed_fps) * 0.4;
+assistance_hp_threshold = 30;
 
-// Visual Effects & State Tracking
+// Shock Reaction State Timers
+shock_timer = 0;
+shock_timer_max = game_get_speed(gamespeed_fps) * 0.6; // 600ms shock duration
+
 glow_alpha = 0;
 current_state = "IDLE";
+
+depth = -y;

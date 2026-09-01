@@ -3,7 +3,8 @@
 display_set_gui_size(426, 240);
 
 // Room Transition Target
-target_room = (room_exists(rm_subway)) ? rm_subway : room;
+target = rm_subway
+target_room = (room_exists(target)) ? target : room;
 
 // --- BACKGROUND MUSIC SYSTEM ---
 bgm_inst = -1;
