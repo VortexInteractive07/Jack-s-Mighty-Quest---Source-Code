@@ -1,7 +1,7 @@
 // ============================================================================
 // CONFIGURATION & DISPLAY CONTROL
 // ============================================================================
-enable_loading_bar = true;     // Set to false to instantly jump to splash room
+enable_loading_bar = false;     // Set to false to instantly jump to splash room
 load_time_seconds  = 1.0;      // Target duration in seconds
 load_max           = max(1, round(load_time_seconds * game_get_speed(gamespeed_fps)));
 load_timer         = 0;

@@ -1,19 +1,14 @@
-/// @description Title Screen Flow & Dialogue Control
+/// @description Title Screen Flow, Dialogue, & Level Select Control
 
 // ==========================================
-// OST PLAYLIST & TOAST ANIMATION (AUTOMATIC RANDOM)
+// OST PLAYLIST & TOAST ANIMATION
 // ==========================================
 var _track_count = array_length(ost_playlist);
 
-if (_track_count > 0 && fade_state != 3) {
+if (_track_count > 0 && fade_state != 4) {
     var _song_is_playing = audio_is_playing(current_sound_inst);
 
     if (!_song_is_playing) {
-        if (_song_is_playing) {
-            audio_stop_sound(current_sound_inst);
-        }
-        
-        // Pick a random next track, avoiding immediate repetition if possible
         if (_track_count > 1) {
             var _prev_index = current_track_index;
             do {
@@ -46,13 +41,28 @@ switch (fade_state) {
         fade_alpha -= fade_speed;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
-            fade_state = 1; // Title active
+            fade_state = 1;
         }
         break;
 
     // --- STATE 1: TITLE SCREEN ---
     case 1:
-        // Skip Splash Input ('S' or 'ESC')
+        // Secret Code Checker Logic
+        if (keyboard_check_pressed(vk_anykey) && !secret_code_unlocked) {
+            if (keyboard_check_pressed(secret_code_sequence[secret_code_index])) {
+                secret_code_index++;
+                if (secret_code_index >= array_length(secret_code_sequence)) {
+                    secret_code_unlocked = true;
+                    secret_code_index = 0;
+                    if (audio_exists(sfx_dialogue_continue)) {
+                        audio_play_sound(sfx_dialogue_continue, 8, false);
+                    }
+                }
+            } else {
+                secret_code_index = 0;
+            }
+        }
+
         var _skip_splash = keyboard_check_pressed(ord("S")) || keyboard_check_pressed(vk_escape);
 
         if (splash_type_index < string_length(title_splash_text)) {
@@ -67,14 +77,12 @@ switch (fade_state) {
             splash_current_str = title_splash_text;
         }
 
-        // Flashing "Press Start"
         flash_timer++;
         if (flash_timer >= flash_interval) {
             flash_timer = 0;
             show_start_text = !show_start_text;
         }
 
-        // Check Start Input
         var _start_pressed = (
             keyboard_check_pressed(vk_space)  || 
             keyboard_check_pressed(vk_enter)  || 
@@ -83,19 +91,32 @@ switch (fade_state) {
 
         if (_start_pressed) {
             show_start_text = false;
-            
-            if (enable_dialogue && array_length(dialogue_lines) > 0) {
-                fade_state = 2; // Move to Dialogue State
-                in_dialogue = true;
-                dialogue_index = 0;
-                dialogue_char_index = 0;
-                dialogue_current_text = "";
-                
-                if (asset_get_index("sfx_dialogue_continue") != -1) {
-                    audio_play_sound(sfx_dialogue_continue, 5, false);
-                }
+
+            if (secret_code_unlocked) {
+                // Secret mode: go to Level Select
+                fade_state = 3;
+                menu_index = 0;
+                menu_alpha = 0;
             } else {
-                fade_state = 3; // Fade Out directly to target_room
+                // Normal mode: target is rm_main_menu
+                target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
+                
+                if (enable_dialogue && array_length(dialogue_lines) > 0) {
+                    dialogue_phase = 0;
+                    fade_state = 2;
+                    in_dialogue = true;
+                    dialogue_index = 0;
+                    dialogue_char_index = 0;
+                    dialogue_current_text = "";
+                    char_count = 0;
+                    typewriter_complete = false;
+                    
+                    if (audio_exists(sfx_dialogue_continue)) {
+                        audio_play_sound(sfx_dialogue_continue, 5, false);
+                    }
+                } else {
+                    fade_state = 4;
+                }
             }
         }
         break;
@@ -104,33 +125,56 @@ switch (fade_state) {
     case 2:
         if (in_dialogue) {
             var _total_lines = array_length(dialogue_lines);
+            dialogue_arrow_timer++;
             
-            if (_total_lines > 0) {
-                var _raw_text = dialogue_lines[dialogue_index].text;
-                var _target_text = string_replace_all(_raw_text, "/n", "\n");
-                _target_text = string_replace_all(_target_text, "\\n", "\n");
+            var _skip_all_dialogue = keyboard_check_pressed(vk_escape);
+            
+            if (_skip_all_dialogue) {
+                in_dialogue = false;
+                if (audio_exists(sfx_dialogue_continue)) {
+                    audio_play_sound(sfx_dialogue_continue, 5, false);
+                }
                 
-                var _prev_char_count = floor(dialogue_char_index);
+                // Route to target_room directly (rm_main_menu or selected stage)
+                if (target_room != -1 && room_exists(target_room)) {
+                    fade_state = 4;
+                } else {
+                    target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
+                    fade_state = 4;
+                }
+                break;
+            }
 
-                if (dialogue_char_index < string_length(_target_text)) {
-                    dialogue_char_index += dialogue_speed;
-                    dialogue_current_text = string_copy(_target_text, 1, floor(dialogue_char_index));
+            if (_total_lines > 0) {
+                var _raw_text = struct_exists(dialogue_lines[dialogue_index], "text") ? dialogue_lines[dialogue_index].text : "";
+                
+                var _target_text = string_replace_all(_raw_text, "/n", chr(10));
+                _target_text = string_replace_all(_target_text, "\\n", chr(10));
+                
+                var _prev_char_count = floor(char_count);
+
+                if (char_count < string_length(_target_text)) {
+                    typewriter_complete = false;
+                    char_count += dialogue_speed;
+                    dialogue_char_index = char_count;
+                    dialogue_current_text = string_copy(_target_text, 1, floor(char_count));
                     
-                    var _curr_char_count = floor(dialogue_char_index);
+                    var _curr_char_count = floor(char_count);
 
-                    // --- LETTER-BY-LETTER SFX TRIGGER ---
                     if (_curr_char_count > _prev_char_count) {
                         var _char = string_char_at(_target_text, _curr_char_count);
 
-                        // Trigger sound on every letter (ignoring spaces & newlines)
-                        if (_char != " " && _char != "\n") {
-                            if (asset_get_index("sfx_dialogue") != -1) {
+                        if (_char != " " && _char != chr(10) && _char != "\n") {
+                            if (audio_exists(sfx_dialogue)) {
                                 audio_play_sound(sfx_dialogue, 1, false);
                             }
                         }
                     }
                 } else {
+                    char_count = string_length(_target_text);
+                    dialogue_char_index = char_count;
                     dialogue_current_text = _target_text;
+                    typewriter_complete = true;
                 }
 
                 var _advance_pressed = (
@@ -140,33 +184,114 @@ switch (fade_state) {
                 );
 
                 if (_advance_pressed) {
-                    if (asset_get_index("sfx_dialogue_continue") != -1) {
+                    if (audio_exists(sfx_dialogue_continue)) {
                         audio_play_sound(sfx_dialogue_continue, 5, false);
                     }
 
-                    if (dialogue_char_index < string_length(_target_text)) {
-                        dialogue_char_index = string_length(_target_text);
+                    if (char_count < string_length(_target_text)) {
+                        char_count = string_length(_target_text);
+                        dialogue_char_index = char_count;
                         dialogue_current_text = _target_text;
+                        typewriter_complete = true;
                     } else {
                         dialogue_index++;
+                        char_count = 0;
                         dialogue_char_index = 0;
                         dialogue_current_text = "";
+                        typewriter_complete = false;
 
                         if (dialogue_index >= _total_lines) {
                             in_dialogue = false;
-                            fade_state = 3; // Dialogue done -> Fade Out directly
+                            
+                            if (target_room != -1 && room_exists(target_room)) {
+                                fade_state = 4;
+                            } else {
+                                target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
+                                fade_state = 4;
+                            }
                         }
                     }
                 }
             } else {
                 in_dialogue = false;
-                fade_state = 3;
+                if (target_room != -1 && room_exists(target_room)) {
+                    fade_state = 4;
+                } else {
+                    target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
+                    fade_state = 4;
+                }
             }
         }
         break;
 
-    // --- STATE 3: FADE OUT & ROOM SWITCH ---
+    // --- STATE 3: LEVEL SELECT MENU ---
     case 3:
+        menu_alpha = min(menu_alpha + 0.05, 1);
+        
+        var _move_back = keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("W")) || keyboard_check_pressed(ord("A"));
+        var _move_fwd  = keyboard_check_pressed(vk_down) || keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("S")) || keyboard_check_pressed(ord("D"));
+        var _move      = _move_fwd - _move_back;
+
+        if (_move != 0) {
+            menu_index += _move;
+            var _opt_len = array_length(menu_options);
+            if (menu_index < 0) menu_index = _opt_len - 1;
+            if (menu_index >= _opt_len) menu_index = 0;
+            
+            if (audio_exists(sfx_dialogue)) {
+                audio_play_sound(sfx_dialogue, 1, false);
+            }
+        }
+        
+        // Escape returns back to standard Title Screen
+        if (keyboard_check_pressed(vk_escape)) {
+            fade_state = 1;
+            show_start_text = true;
+            break;
+        }
+
+        var _select = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
+        if (_select) {
+            var _selected = menu_options[menu_index];
+
+            if (audio_exists(sfx_dialogue_continue)) {
+                audio_play_sound(sfx_dialogue_continue, 5, false);
+            }
+            
+            var _target_dest = -1;
+            if (struct_exists(_selected, "target")) {
+                _target_dest = _selected.target;
+            } else if (struct_exists(_selected, "target_room")) {
+                _target_dest = _selected.target_room;
+            }
+
+            if (_target_dest == -3) { // Back to title action
+                fade_state = 1;
+                show_start_text = true;
+            } else if (_target_dest == -2) {
+                game_end();
+            } else if (_target_dest != -1 && room_exists(_target_dest)) {
+                // Set explicitly chosen level as target
+                target_room = _target_dest;
+                
+                if (enable_dialogue && array_length(dialogue_lines) > 0) {
+                    dialogue_phase = 1;
+                    fade_state = 2;
+                    in_dialogue = true;
+                    dialogue_index = 0;
+                    dialogue_char_index = 0;
+                    dialogue_current_text = "";
+                    char_count = 0;
+                    typewriter_complete = false;
+                } else {
+                    fade_state = 4;
+                }
+            }
+        }
+        break;
+
+    // --- STATE 4: FADE OUT & ROOM SWITCH ---
+    case 4:
         fade_alpha += fade_speed;
         
         if (audio_is_playing(current_sound_inst)) {
