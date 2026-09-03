@@ -2,6 +2,8 @@
 
 persistent = false;
 
+exit_room = rm_main_menu;
+
 // --- 1. AUDIO INTEGRATION & MUSIC MANAGEMENT ---
 bgm_handle = -1;
 bgm_target_volume = 1.0;

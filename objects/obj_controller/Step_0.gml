@@ -1,11 +1,5 @@
 /// @description Level Controller Step Logic - Pause, Audio, Timers & Transitions
 
-if (keyboard_check_pressed(ord("0"))) {
-    if (room_exists(rm_splash_screen)) {
-        room_goto(rm_splash_screen);
-    }
-}
-
 // --- 1. HUD VISUAL INTERPOLATION LOGIC ---
 var _target_hp = 0;
 var _target_max_hp = 100;
@@ -78,8 +72,8 @@ if (game_paused) {
         } else if (pause_option == 2) { // Main Menu
             game_paused = false;
             instance_activate_all();
-            if (room_exists(rm_splash_screen)) {
-                room_goto(rm_splash_screen);
+            if (room_exists(exit_room)) {
+                room_goto(exit_room);
             }
         }
     }

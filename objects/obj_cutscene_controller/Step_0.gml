@@ -1,4 +1,89 @@
-/// @description Controls Typewriter, Speech Audio, Voice-Sync Monologue, & Inputs
+/// @description Controls Typewriter, Speech Audio, Voice-Sync, Choices, Backlog, & Inputs
+
+// --- 1. BACKLOG TOGGLE & NAVIGATION ---
+var _toggle_backlog = keyboard_check_pressed(ord("H")) || keyboard_check_pressed(vk_tab);
+if (_toggle_backlog && fade_state == 1 && !choice_active) {
+    backlog_open = !backlog_open;
+    backlog_scroll_index = 0;
+    if (audio_exists(sfx_backlog_open)) {
+        audio_play_sound(sfx_backlog_open, 5, false);
+    }
+}
+
+if (backlog_open) {
+    var _scroll_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
+    var _scroll_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
+    
+    if (_scroll_up) backlog_scroll_index = min(backlog_scroll_index + 1, max(0, array_length(dialogue_history) - 5));
+    if (_scroll_down) backlog_scroll_index = max(backlog_scroll_index - 1, 0);
+    
+    if (keyboard_check_pressed(vk_escape) || _toggle_backlog) {
+        backlog_open = false;
+    }
+    exit; // Halt normal cutscene execution while reviewing backlog
+}
+
+// --- 2. INTERACTIVE CHOICE SELECTION HANDLING ---
+if (choice_active) {
+    var _choice_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
+    var _choice_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
+    var _choice_confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left);
+    
+    var _choice_count = array_length(choices_array);
+    if (_choice_count > 0) {
+        if (_choice_up) {
+            choice_selected_index = (choice_selected_index - 1 + _choice_count) % _choice_count;
+            if (audio_exists(sfx_choice_select)) audio_play_sound(sfx_choice_select, 5, false);
+        }
+        if (_choice_down) {
+            choice_selected_index = (choice_selected_index + 1) % _choice_count;
+            if (audio_exists(sfx_choice_select)) audio_play_sound(sfx_choice_select, 5, false);
+        }
+        
+        if (_choice_confirm) {
+            if (audio_exists(sfx_choice_confirm)) audio_play_sound(sfx_choice_confirm, 6, false);
+            var _selected_choice = choices_array[choice_selected_index];
+            
+            // Handle choice jump target or callback
+            if (variable_struct_exists(_selected_choice, "target_scene")) {
+                scene_index = _selected_choice.target_scene;
+            } else {
+                scene_index++;
+            }
+            
+            choice_active = false;
+            choices_array = [];
+            char_index = 0;
+            current_text = "";
+            text_finished = false;
+        }
+    }
+    exit;
+}
+
+// --- 3. SCREEN SHAKE & PARTICLE UPDATING ---
+if (shake_timer > 0) {
+    shake_timer--;
+    shake_x = random_range(-shake_intensity, shake_intensity);
+    shake_y = random_range(-shake_intensity, shake_intensity);
+    if (shake_timer <= 0) {
+        shake_intensity = 0;
+        shake_x = 0;
+        shake_y = 0;
+    }
+}
+
+for (var _p = 0; _p < array_length(particle_list); _p++) {
+    var _part = particle_list[_p];
+    _part.y -= _part.spd;
+    if (_part.y < 0) {
+        _part.y = 144;
+        _part.x = random(160);
+    }
+}
+
+portrait_bob_timer += 0.1;
+text_rainbow_offset += 0.05;
 
 var _advance = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left);
 var _skip    = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("S"));
@@ -9,21 +94,19 @@ if (_skip && fade_state != 2) {
     if (audio_exists(sfx_dialogue_continue)) {
         audio_play_sound(sfx_dialogue_continue, 5, false);
     }
-    // Clean up looping ambient SFX if active
     if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
         audio_stop_sound(sfx_static_glitch);
     }
     if (audio_exists(sfx_ambient_city) && audio_is_playing(sfx_ambient_city)) {
         audio_stop_sound(sfx_ambient_city);
     }
-    // Stop Victor's voice-sync monologue (if mid-playback) and restore music instantly
     if (voice_sync_inst != -1 && audio_is_playing(voice_sync_inst)) {
         audio_stop_sound(voice_sync_inst);
     }
     if (voice_sync_music_ducked && bgm_inst != -1 && audio_is_playing(bgm_inst)) {
         audio_sound_gain(bgm_inst, 1, 0);
     }
-    voice_sync_active      = false;
+    voice_sync_active       = false;
     voice_sync_music_ducked = false;
     voice_sync_group_name   = "";
     fade_state = 2;
@@ -49,7 +132,6 @@ if (string_pos("victor", _spk) > 0 || string_pos("sharp", _spk) > 0) {
     target_r = 15; target_g = 20; target_b = 35; // Default Void Navy
 }
 
-// Smoothly interpolate RGB values toward target color
 bg_r = lerp(bg_r, target_r, 0.08);
 bg_g = lerp(bg_g, target_g, 0.08);
 bg_b = lerp(bg_b, target_b, 0.08);
@@ -64,7 +146,6 @@ switch (fade_state) {
         break;
 
     case 1: // Active Cutscene
-        // Sanitize raw text to strip unmapped glyphs/em-dashes automatically
         var _raw_text = _slide.text;
         _raw_text = string_replace_all(_raw_text, "—", " - ");
         _raw_text = string_replace_all(_raw_text, "–", " - ");
@@ -77,84 +158,65 @@ switch (fade_state) {
         var _target_text = _raw_text;
         var _prev_count = floor(char_index);
 
-        // Is this slide part of a voice-sync group, and is that mode actually usable right now?
         var _has_voice_sync_group = variable_struct_exists(_slide, "voice_sync_group");
         var _voice_sync_ready     = enable_victor_voice_sync_mode && audio_exists(sfx_victor_monologue_vo);
         var _voice_sync_applies   = _has_voice_sync_group && _voice_sync_ready && (_slide.voice_sync_group != voice_sync_completed_group);
 
-        // True only on the exact frame the voice-sync monologue finishes and jumps
-        // scene_index forward — prevents the advance-input block below (further down
-        // this same event) from double-acting on stale data from the old slide.
         var _voice_sync_just_completed = false;
 
-        // --- ONE-TIME EVENT SFX TRIGGERS (PLAYS ONCE WHEN ARRIVING AT SLIDE) ---
-
-        // One-time Victor Laugh trigger — suppressed while/after the real VO covers this slide,
-        // since sfx_victor_monologue_vo already contains the laugh.
-        if (_slide.sfx == sfx_victor_laugh && !_voice_sync_applies) {
-            if (!variable_instance_exists(id, "laugh_played") || !laugh_played) {
-                if (audio_exists(sfx_victor_laugh)) {
-                    audio_play_sound(sfx_victor_laugh, 9, false);
+        if (variable_struct_exists(_slide, "sfx")) {
+            if (_slide.sfx == sfx_victor_laugh && !_voice_sync_applies) {
+                if (!variable_instance_exists(id, "laugh_played") || !laugh_played) {
+                    if (audio_exists(sfx_victor_laugh)) {
+                        audio_play_sound(sfx_victor_laugh, 9, false);
+                    }
+                    laugh_played = true;
                 }
-                laugh_played = true;
+            }
+
+            if (_slide.sfx == sfx_screen_off) {
+                if (!variable_instance_exists(id, "screen_off_played") || !screen_off_played) {
+                    if (audio_exists(sfx_screen_off)) {
+                        audio_play_sound(sfx_screen_off, 9, false);
+                    }
+                    screen_off_played = true;
+                }
+            }
+
+            if (_slide.sfx == sfx_siren_distant) {
+                if (!variable_instance_exists(id, "siren_played") || !siren_played) {
+                    if (audio_exists(sfx_siren_distant)) {
+                        audio_play_sound(sfx_siren_distant, 8, false);
+                    }
+                    siren_played = true;
+                }
+            }
+
+            if (_slide.sfx == sfx_static_glitch) {
+                if (!variable_instance_exists(id, "glitch_playing") || !glitch_playing) {
+                    if (audio_exists(sfx_static_glitch) && !audio_is_playing(sfx_static_glitch)) {
+                        audio_play_sound(sfx_static_glitch, 8, true);
+                    }
+                    glitch_playing = true;
+                }
+            }
+
+            if (_slide.sfx == sfx_ambient_city) {
+                if (!variable_instance_exists(id, "city_ambient_playing") || !city_ambient_playing) {
+                    if (audio_exists(sfx_ambient_city) && !audio_is_playing(sfx_ambient_city)) {
+                        audio_play_sound(sfx_ambient_city, 8, true);
+                    }
+                    city_ambient_playing = true;
+                }
             }
         }
-
-        // One-time Screen Off trigger
-        if (_slide.sfx == sfx_screen_off) {
-            if (!variable_instance_exists(id, "screen_off_played") || !screen_off_played) {
-                if (audio_exists(sfx_screen_off)) {
-                    audio_play_sound(sfx_screen_off, 9, false);
-                }
-                screen_off_played = true;
-            }
-        }
-
-        // One-time atmospheric siren trigger when arriving at a slide with sfx_siren_distant
-        if (_slide.sfx == sfx_siren_distant) {
-            if (!variable_instance_exists(id, "siren_played") || !siren_played) {
-                if (audio_exists(sfx_siren_distant)) {
-                    audio_play_sound(sfx_siren_distant, 8, false);
-                }
-                siren_played = true;
-            }
-        }
-
-        // Looping static glitch trigger when arriving at a slide with sfx_static_glitch
-        if (_slide.sfx == sfx_static_glitch) {
-            if (!variable_instance_exists(id, "glitch_playing") || !glitch_playing) {
-                if (audio_exists(sfx_static_glitch) && !audio_is_playing(sfx_static_glitch)) {
-                    audio_play_sound(sfx_static_glitch, 8, true);
-                }
-                glitch_playing = true;
-            }
-        }
-
-        // Looping ambient city trigger when arriving at a slide with sfx_ambient_city
-        if (_slide.sfx == sfx_ambient_city) {
-            if (!variable_instance_exists(id, "city_ambient_playing") || !city_ambient_playing) {
-                if (audio_exists(sfx_ambient_city) && !audio_is_playing(sfx_ambient_city)) {
-                    audio_play_sound(sfx_ambient_city, 8, true);
-                }
-                city_ambient_playing = true;
-            }
-        }
-
-        // --- TYPEWRITER / VOICE-SYNC CAPTION LOGIC ---
 
         if (_voice_sync_applies) {
-            // ---------------------------------------------------------------
-            // VOICE-SYNC MONOLOGUE PATH — captions are driven by real VO timing,
-            // not the char-by-char typewriter, and no per-character blip plays.
-            // ---------------------------------------------------------------
             if (!voice_sync_active) {
-                // First frame of this synced group: launch the VO, build the flattened
-                // lyric-timed caption timeline across every consecutive slide sharing
-                // this voice_sync_group, and duck the background music.
                 if (voice_sync_inst != -1 && audio_is_playing(voice_sync_inst)) {
                     audio_stop_sound(voice_sync_inst);
                 }
-                voice_sync_inst       = audio_play_sound(sfx_victor_monologue_vo, 10, false);
+                voice_sync_inst        = audio_play_sound(sfx_victor_monologue_vo, 10, false);
                 voice_sync_start_time = current_time;
                 voice_sync_duration   = audio_sound_length(sfx_victor_monologue_vo) * 1000;
                 voice_sync_group_name = _slide.voice_sync_group;
@@ -186,7 +248,6 @@ switch (fade_state) {
 
             var _vs_elapsed = (current_time - voice_sync_start_time) / 1000;
 
-            // Find whichever caption line is currently "live" on the timeline
             var _vs_active_txt = "";
             var _vs_active_offset = 0;
             for (var _vs_ti = 0; _vs_ti < array_length(voice_sync_timeline); _vs_ti++) {
@@ -204,10 +265,6 @@ switch (fade_state) {
 
             var _vs_vo_playing = (voice_sync_inst != -1) && audio_is_playing(voice_sync_inst);
             if (!_vs_vo_playing || _vs_elapsed >= (voice_sync_duration / 1000)) {
-                // FIX: the monologue ending is itself the cue to move on — jump straight
-                // past the whole synced group to the next story beat (the pitch-black
-                // blackout slide) instead of resting on the last synced slide's full
-                // caption and waiting for an extra advance press.
                 voice_sync_active = false;
                 voice_sync_completed_group = voice_sync_group_name;
                 voice_sync_group_name = "";
@@ -218,7 +275,6 @@ switch (fade_state) {
                 }
                 voice_sync_music_ducked = false;
 
-                // Reset one-time trigger flags, exactly as the normal advance path does
                 siren_played = false;
                 glitch_played = false;
                 city_ambient_played = false;
@@ -236,39 +292,31 @@ switch (fade_state) {
                 }
             }
         } else {
-            // --- STANDARD TYPEWRITER & SPEECH BLIP LOGIC (unchanged) ---
             if (char_index < string_length(_target_text)) {
-                char_index += char_speed;
+                char_index += (char_speed * text_speed_multiplier);
                 current_text = string_copy(_target_text, 1, floor(char_index));
                 text_finished = false;
 
                 var _curr_count = floor(char_index);
 
-                // Audio trigger on every new character step
                 if (_curr_count > _prev_count) {
-                    var _sfx = _slide.sfx;
-                    
-                    // First pass through resolve_sfx
+                    var _sfx = variable_struct_exists(_slide, "sfx") ? _slide.sfx : -1;
                     _sfx = resolve_sfx(_sfx, _slide.speaker);
                     
-                    // Check explicitly for Jack's dialogue lines first
                     if (string_pos("jack", _spk) > 0) {
                         if (_sfx == -1 || _sfx == sfx_dialogue || _sfx == sfx_dialogue_narrative || _sfx == sfx_siren_distant || _sfx == sfx_static_glitch || _sfx == sfx_ambient_city || _sfx == sfx_victor_laugh || _sfx == sfx_screen_off) {
                             _sfx = sfx_jack_speak;
                         }
                     } 
-                    // Check explicitly for Victor's dialogue lines when slide SFX is set to one-time event sounds
                     else if (string_pos("victor", _spk) > 0 || string_pos("sharp", _spk) > 0) {
                         if (_sfx == sfx_victor_laugh || _sfx == sfx_siren_distant || _sfx == sfx_static_glitch || _sfx == sfx_ambient_city || _sfx == sfx_screen_off) {
                             _sfx = sfx_sharp_speak;
                         }
                     }
-                    // Atmospheric SFX and Event SFX fallback to narrative dialogue blip for standard text typing
                     else if (_sfx == sfx_siren_distant || _sfx == sfx_static_glitch || _sfx == sfx_ambient_city || _sfx == sfx_victor_laugh || _sfx == sfx_screen_off) {
                         _sfx = sfx_dialogue_narrative;
                     }
                     
-                    // Play character blip if valid and not an event audio
                     if (_sfx != -1 && _sfx != sfx_victor_laugh && _sfx != sfx_screen_off && audio_exists(_sfx)) {
                         audio_stop_sound(_sfx);
                         audio_play_sound(_sfx, 10, false);
@@ -278,7 +326,6 @@ switch (fade_state) {
                 current_text = _target_text;
                 text_finished = true;
 
-                // Stop looping static glitch when typing completes
                 if (variable_instance_exists(id, "glitch_playing") && glitch_playing) {
                     if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
                         audio_stop_sound(sfx_static_glitch);
@@ -286,7 +333,6 @@ switch (fade_state) {
                     glitch_playing = false;
                 }
 
-                // Stop looping city ambient when typing completes
                 if (variable_instance_exists(id, "city_ambient_playing") && city_ambient_playing) {
                     if (audio_exists(sfx_ambient_city) && audio_is_playing(sfx_ambient_city)) {
                         audio_stop_sound(sfx_ambient_city);
@@ -296,21 +342,15 @@ switch (fade_state) {
             }
         }
 
-        // Advance input is ignored while a voice-sync monologue is actively playing, AND
-        // on the exact frame it just finished (that frame already performed its own
-        // scene_index jump above — letting this block also fire the same frame would act
-        // on stale _target_text/_prev_count captured for the slide that just ended).
         if (_advance && !voice_sync_active && !_voice_sync_just_completed) {
             if (audio_exists(sfx_dialogue_continue)) {
                 audio_play_sound(sfx_dialogue_continue, 5, false);
             }
 
-            // Stop static glitch immediately on advance
             if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
                 audio_stop_sound(sfx_static_glitch);
             }
 
-            // Stop city ambient immediately on advance
             if (audio_exists(sfx_ambient_city) && audio_is_playing(sfx_ambient_city)) {
                 audio_stop_sound(sfx_ambient_city);
             }
@@ -322,12 +362,29 @@ switch (fade_state) {
                 glitch_playing = false;
                 city_ambient_playing = false;
             } else {
-                scene_index++;
-                siren_played = false;         // Reset siren flag
-                glitch_played = false;        // Reset glitch flag
-                city_ambient_played = false;  // Reset city ambient flag
-                laugh_played = false;         // Reset laugh flag
-                screen_off_played = false;    // Reset screen off flag
+                // Add to dialogue history backlog before advancing
+                array_insert(dialogue_history, 0, {
+                    speaker: _slide.speaker,
+                    text: _target_text
+                });
+                if (array_length(dialogue_history) > max_backlog_entries) {
+                    array_pop(dialogue_history);
+                }
+
+                // Check if slide contains choices
+                if (variable_struct_exists(_slide, "choices") && is_array(_slide.choices) && array_length(_slide.choices) > 0) {
+                    choice_active = true;
+                    choices_array = _slide.choices;
+                    choice_selected_index = 0;
+                } else {
+                    scene_index++;
+                }
+
+                siren_played = false;
+                glitch_played = false;
+                city_ambient_played = false;
+                laugh_played = false;
+                screen_off_played = false;
                 
                 if (scene_index < scene_total) {
                     char_index = 0;
@@ -343,17 +400,14 @@ switch (fade_state) {
     case 2: // Fade Out & Change Room
         fade_alpha += fade_speed;
         
-        // Stop looping static glitch if still active on fade out
         if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
             audio_stop_sound(sfx_static_glitch);
         }
 
-        // Stop looping city ambient if still active on fade out
         if (audio_exists(sfx_ambient_city) && audio_is_playing(sfx_ambient_city)) {
             audio_stop_sound(sfx_ambient_city);
         }
 
-        // Safety: ensure Victor's voice-sync monologue instance is stopped if fade-out began mid-playback
         if (voice_sync_inst != -1 && audio_is_playing(voice_sync_inst)) {
             audio_stop_sound(voice_sync_inst);
         }
