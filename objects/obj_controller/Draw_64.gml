@@ -79,6 +79,16 @@ if (pause_slide < 1.0 && !is_game_over) {
     draw_set_color(make_color_rgb(255, 220, 0));
     draw_text(_life_x + 16, _life_y + (_bar_h / 2), "x" + string(player_lives));
 
+    // --- COLLECTIBLE READOUT ---
+    draw_set_color(make_color_rgb(120, 240, 255));
+    draw_text(_life_x + 42, _life_y + (_bar_h / 2), "G" + string(collectibles_collected));
+
+    if (global.arcade_mode) {
+        draw_set_halign(fa_left);
+        draw_set_color(make_color_rgb(255, 220, 0));
+        draw_text(8, 26, "CREDITS " + string(global.arcade_credits));
+    }
+
     // --- SCORE READOUT ---
     var _score_str = string(game_score);
     while (string_length(_score_str) < 6) _score_str = "0" + _score_str;
@@ -204,6 +214,15 @@ if (is_game_over) {
     draw_text((_gui_w / 2) + 1, (_gui_h / 2) + 1, "GAME OVER");
     draw_set_color(c_white);
     draw_text(_gui_w / 2, _gui_h / 2, "GAME OVER");
+
+    draw_set_color(c_yellow);
+    draw_text(_gui_w / 2, (_gui_h / 2) + 26, "PRESS START TO CONTINUE");
+    draw_set_color(c_aqua);
+    draw_text(_gui_w / 2, (_gui_h / 2) + 40, "ESC: TITLE");
+    if (global.arcade_mode && global.arcade_credits <= 0) {
+        draw_set_color(c_red);
+        draw_text(_gui_w / 2, (_gui_h / 2) + 54, "NO CREDITS - INSERT COIN AT TITLE");
+    }
 }
 
 // ============================================================================

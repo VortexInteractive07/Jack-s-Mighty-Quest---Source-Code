@@ -1,5 +1,16 @@
 /// @description obj_jack - Step Event (Solid Collision, Mario Wall Jump & Updated Controls)
 
+if (is_dead) {
+    vsp = min(vsp + grav, 8);
+    x += hsp;
+    y += vsp;
+
+    if (y > room_height + 32 && instance_exists(obj_controller)) {
+        obj_controller.resolve_player_death();
+    }
+    exit;
+}
+
 // --- 1. INPUT PROCESSING ---
 var _move_left  = keyboard_check(vk_left);
 var _move_right = keyboard_check(vk_right);
@@ -136,7 +147,8 @@ grounded = place_meeting(x, y + 1, obj_wall);
 
 // --- 8. VOID DEATH CHECK ---
 if (y > room_height + 64) {
-    room_restart();
+    hp = 0;
+    scr_trigger_player_death();
 }
 
 // --- 9. SPRITE FACING & ANIMATION STATE ---

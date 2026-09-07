@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"sfx_backlog_open",
   "parent":{
-    "name":"Sounds",
-    "path":"folders/Sounds.yy",
+    "name":"Sound FX",
+    "path":"folders/Sounds/Sound FX.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

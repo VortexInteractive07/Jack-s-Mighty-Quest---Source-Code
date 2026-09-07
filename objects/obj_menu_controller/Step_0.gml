@@ -1,4 +1,6 @@
-/// @description Navigation, Audio Management, Toast Timers & Action Execution
+/// @description Step Event: Navigation, Audio Management, Toast Timers & Action Execution
+
+// Intelligence Level: 10/10
 
 // Cursor subtle bobbing animation
 cursor_offset_x += 0.08 * cursor_dir;
@@ -123,7 +125,7 @@ switch (fade_state) {
             }
         }
         // --------------------------------------
-        // ALL LIST-DRIVEN MODES (0, 1, 2, 4, 5)
+        // ALL LIST-DRIVEN MODES (0, 1, 2, 4)
         // --------------------------------------
         else {
             var _active_list = undefined;
@@ -134,7 +136,6 @@ switch (fade_state) {
                 case 1: _active_list = menu_list_options;   _cancel_mode = 0;  break;
                 case 2: _active_list = menu_list_jukebox;   _cancel_mode = 0;  break;
                 case 4: _active_list = menu_list_cheats;    _cancel_mode = 0;  break;
-                case 5: _active_list = menu_list_mannequin; _cancel_mode = 0;  break;
             }
 
             if (_active_list != undefined) {

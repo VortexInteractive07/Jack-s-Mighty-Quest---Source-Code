@@ -58,10 +58,18 @@ if (splash_current_str != "") {
 // ==========================================
 if (show_start_text && fade_state == 1) {
     var _prompt_y = _gui_h * 0.74;
-    var _prompt_text = "PRESS [ENTER] KEY TO START";
+    var _prompt_text = global.arcade_mode
+        ? ((global.arcade_credits > 0) ? "PRESS START TO BEGIN" : "INSERT COIN(S) [C]")
+        : "PRESS [ENTER] KEY TO START";
 
     draw_text_color(_splash_x + 1, _prompt_y + 1, _prompt_text, c_black, c_black, c_black, c_black, 1);
     draw_text_color(_splash_x, _prompt_y, _prompt_text, c_white, c_white, c_white, c_white, 1);
+
+    if (global.arcade_mode) {
+        var _credits_text = "CREDITS " + string(global.arcade_credits);
+        draw_text_color(_splash_x + 1, _prompt_y + 18, _credits_text, c_black, c_black, c_black, c_black, 1);
+        draw_text_color(_splash_x, _prompt_y + 17, _credits_text, c_yellow, c_yellow, c_white, c_white, 1);
+    }
 }
 
 // ==========================================

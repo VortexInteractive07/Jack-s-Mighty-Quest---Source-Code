@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_title_theme",
   "parent":{
-    "name":"Soundtrack",
-    "path":"folders/Sounds/Soundtrack.yy",
+    "name":"Music",
+    "path":"folders/Sounds/Soundtrack/Music.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

@@ -1,4 +1,6 @@
-/// @description Render Multi-Mode Menu GUI (432x240 Resolution) — generic list-menu rendering & toast layer
+/// @description Draw GUI Event: Render Multi-Mode Menu GUI (432x240 Resolution) - generic list-menu rendering & toast layer
+
+// Intelligence Level: 10/10
 
 var _gui_w = 432;
 var _gui_h = 240;
@@ -30,7 +32,6 @@ if (_main_alpha > 0) {
         case 1: draw_menu_list(menu_list_options,   _text_x, start_y, line_spacing, _main_alpha); break;
         case 2: draw_menu_list(menu_list_jukebox,   _text_x, start_y, line_spacing, _main_alpha); break;
         case 4: draw_menu_list(menu_list_cheats,    _text_x, start_y, line_spacing, _main_alpha); break;
-        case 5: draw_menu_list(menu_list_mannequin, _text_x, start_y, line_spacing, _main_alpha); break;
     }
 
     var _mode_label = "MAIN MENU";
@@ -38,7 +39,6 @@ if (_main_alpha > 0) {
         case 1: _mode_label = "SETTINGS"; break;
         case 2: _mode_label = "JUKEBOX"; break;
         case 4: _mode_label = "CHEATS"; break;
-        case 5: _mode_label = "MANNEQUIN SELECT"; break;
     }
 
     draw_set_halign(fa_left);
@@ -56,7 +56,7 @@ if (changelog_fade_alpha > 0) {
     var _total_lines = array_length(changelog_lines);
 
     draw_set_halign(fa_left);
-    draw_set_top_valign = draw_set_valign(fa_top);
+    draw_set_valign(fa_top);
 
     for (var i = 0; i < changelog_visible_lines; i++) {
         var _line_idx = changelog_scroll + i;
@@ -73,7 +73,7 @@ if (changelog_fade_alpha > 0) {
             continue;
         }
 
-        // Color Formatting Parser (checks line prefixes to prevent false positives on inline hyphens)
+        // Color Formatting Parser
         var _c = c_white;
         if (string_starts_with(_line_text, "[")) {
             _c = c_yellow;

@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_options_new",
   "parent":{
-    "name":"Soundtrack",
-    "path":"folders/Sounds/Soundtrack.yy",
+    "name":"Music",
+    "path":"folders/Sounds/Soundtrack/Music.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.881894,
+  "duration":1.0329167,
   "exportDir":"",
   "name":"sfx_dead",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":5512,
+  "sampleRate":48000,
   "soundFile":"sfx_dead.mp3",
   "volume":1.0,
 }

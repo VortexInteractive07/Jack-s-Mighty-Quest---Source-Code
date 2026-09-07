@@ -36,3 +36,30 @@ start_y_far    = layer_exists(layer_bg_far) ? layer_get_y(layer_bg_far) : 0;
 
 start_x_sky    = layer_exists(layer_bg_sky) ? layer_get_x(layer_bg_sky) : 0;
 start_y_sky    = layer_exists(layer_bg_sky) ? layer_get_y(layer_bg_sky) : 0;
+
+weather_tint_active = false;
+
+apply_weather_tint = function(_enabled) {
+	var _tint = c_white;
+	if (_enabled) {
+		_tint = make_color_rgb(135, 145, 160);
+	}
+	var _background_layers = [
+		layer_bg_ground,
+		layer_bg_near_2,
+		layer_bg_near_1,
+		layer_bg_mid,
+		layer_bg_far,
+		layer_bg_sky
+	];
+
+	for (var i = 0; i < array_length(_background_layers); i++) {
+		var _layer_id = _background_layers[i];
+		if (layer_exists(_layer_id)) {
+			layer_background_blend(_layer_id, _tint);
+		}
+	}
+
+	weather_tint_active = _enabled;
+};
+

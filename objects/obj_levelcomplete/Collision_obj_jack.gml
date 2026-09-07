@@ -13,7 +13,7 @@ if (!activated) {
         if (!audio_is_playing(victory_jingle)) {
             level_audio_id = audio_play_sound(victory_jingle, 10, false);
             if (level_audio_id != -1) {
-                audio_sound_gain(level_audio_id, 1.0, 0);
+                audio_sound_gain(level_audio_id, global.vol_sfx / 100, 0);
             }
         }
     }

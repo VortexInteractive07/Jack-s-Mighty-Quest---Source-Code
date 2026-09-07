@@ -1,4 +1,5 @@
 /// @description Initialize State, Display, Subtitle System, Choices, Backlog, & FX
+scr_load_settings();
 
 display_set_gui_size(432, 240);
 
@@ -18,7 +19,7 @@ if (audio_exists(mus_cutscene)) {
     if (!audio_is_playing(mus_cutscene)) {
         bgm_inst = audio_play_sound(mus_cutscene, 1, true);
         audio_sound_gain(bgm_inst, 0, 0);
-        audio_sound_gain(bgm_inst, 1, 1000);
+        audio_sound_gain(bgm_inst, global.vol_bgm / 100, 1000);
         
         if (audio_is_playing(bgm_inst)) {
             audio_sound_loop_start(bgm_inst, 10.649);

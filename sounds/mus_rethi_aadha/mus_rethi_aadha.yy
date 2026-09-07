@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_rethi_aadha",
   "parent":{
-    "name":"Sounds",
-    "path":"folders/Sounds.yy",
+    "name":"Songs (Aetherian Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
   },
   "preload":false,
   "resourceType":"GMSound",

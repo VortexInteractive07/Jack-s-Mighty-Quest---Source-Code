@@ -20,6 +20,7 @@ if (_track_count > 0 && fade_state != 4) {
 
         var _next_track = ost_playlist[current_track_index];
         current_sound_inst = audio_play_sound(_next_track.sound, 10, false);
+        audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
         toast_timer = 360; 
     }
 }
@@ -89,7 +90,26 @@ switch (fade_state) {
             mouse_check_button_pressed(mb_left)
         );
 
+        var _coin_pressed = keyboard_check_pressed(ord("C"));
+        if (global.arcade_mode && _coin_pressed) {
+            global.arcade_credits = min(global.arcade_credits + 1, 99);
+            show_start_text = true;
+            if (audio_exists(sfx_coin)) {
+                audio_play_sound(sfx_coin, 5, false);
+            }
+        }
+
         if (_start_pressed) {
+            if (global.arcade_mode && global.arcade_credits <= 0) {
+                if (audio_exists(sfx_menu_blip)) {
+                    audio_play_sound(sfx_menu_blip, 5, false);
+                }
+                break;
+            }
+
+            if (global.arcade_mode) {
+                global.arcade_credits--;
+            }
             show_start_text = false;
 
             if (secret_code_unlocked) {

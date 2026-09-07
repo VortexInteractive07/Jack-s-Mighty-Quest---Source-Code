@@ -57,7 +57,8 @@ if (needs_help && plasma_cooldown <= 0) {
     var dir = image_xscale;
     var wave_sprite = (dir > 0) ? spr_pwave_right : spr_pwave_left;
     
-    var wave = instance_create_layer(x + (12 * dir), y, "Projectiles", obj_plasma_wave);
+    var _projectile_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
+    var wave = instance_create_layer(x + (12 * dir), y, _projectile_layer, obj_plasma_wave);
     if (instance_exists(wave)) {
         wave.sprite_index = wave_sprite;
         wave.hspeed = 8 * dir;

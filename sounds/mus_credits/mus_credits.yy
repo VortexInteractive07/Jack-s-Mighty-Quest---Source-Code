@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_credits",
   "parent":{
-    "name":"Soundtrack",
-    "path":"folders/Sounds/Soundtrack.yy",
+    "name":"Music",
+    "path":"folders/Sounds/Soundtrack/Music.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

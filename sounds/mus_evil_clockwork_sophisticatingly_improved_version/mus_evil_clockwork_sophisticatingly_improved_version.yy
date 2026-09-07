@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_evil_clockwork_sophisticatingly_improved_version",
   "parent":{
-    "name":"Soundtrack",
-    "path":"folders/Sounds/Soundtrack.yy",
+    "name":"Music",
+    "path":"folders/Sounds/Soundtrack/Music.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

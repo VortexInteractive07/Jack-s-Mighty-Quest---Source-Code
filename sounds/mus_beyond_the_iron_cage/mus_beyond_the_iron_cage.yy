@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"mus_beyond_the_iron_cage",
   "parent":{
-    "name":"Sounds",
-    "path":"folders/Sounds.yy",
+    "name":"Songs (English)",
+    "path":"folders/Sounds/Soundtrack/Songs (English).yy",
   },
   "preload":false,
   "resourceType":"GMSound",

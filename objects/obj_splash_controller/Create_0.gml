@@ -1,4 +1,6 @@
 /// @description Initialize Splash Controller, Console Targets & Soundtrack Engine
+scr_load_settings();
+
 randomise();
 
 target_room = rm_title_screen;
@@ -6,9 +8,9 @@ target_room = rm_title_screen;
 // ==========================================
 // 1. SYSTEM TOGGLES & PLATFORM CONFIG
 // ==========================================
-enable_bgm      = true; // Set to false to disable background soundtrack
+enable_bgm      = (global.vol_bgm > 0); // Set to false to disable background soundtrack
 enable_lyrics   = true; 
-enable_dialogue = true; 
+enable_dialogue = global.enable_splash_dialogue;
 publisher_name  = "VORTEX Interactive";
 
 // Platform Licensing Configuration: "pc", "ps", "switch", "xbox", "deck_machine"
@@ -57,6 +59,7 @@ play_random_track = function() {
     
     if (struct_exists(_selected, "sound") && audio_exists(_selected.sound)) {
         splash_sound_inst = audio_play_sound(_selected.sound, 10, false);
+        audio_sound_gain(splash_sound_inst, global.vol_bgm / 100, 0);
     }
 };
 

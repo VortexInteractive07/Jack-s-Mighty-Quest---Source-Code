@@ -1,4 +1,5 @@
 /// @description Initialize Level Trigger Variables
+scr_load_settings();
 
 activated = false;
 level_audio_id = -1;

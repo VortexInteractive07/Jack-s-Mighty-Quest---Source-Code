@@ -19,21 +19,9 @@ secret_code_index = 0;
 dialogue_phase = 0; // 0 = Initial Title Dialogue | 1 = Post-Level Select Dialogue
 
 // --- SETTINGS / JSON CONFIGURATION ---
-enable_dialogue = false;
-
-if (file_exists("settings.json")) {
-    var _file = file_text_open_read("settings.json");
-    var _json_str = "";
-    while (!file_text_eof(_file)) {
-        _json_str += file_text_readln(_file);
-    }
-    file_text_close(_file);
-    
-    var _data = json_parse(_json_str);
-    if (is_struct(_data) && struct_exists(_data, "enable_dialogue")) {
-        enable_dialogue = _data.enable_dialogue;
-    }
-}
+scr_load_settings();
+enable_dialogue = global.enable_title_dialogue;
+if (!variable_global_exists("arcade_credits")) global.arcade_credits = 0;
 
 // Retrieve random title splash text & game version
 title_splash_text = scr_get_random_splash();
@@ -91,6 +79,7 @@ if (array_length(ost_playlist) > 0) {
     var _track = ost_playlist[current_track_index];
     audio_stop_all();
     current_sound_inst = audio_play_sound(_track.sound, 10, false);
+    audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
 }
 
 // --- STATE MACHINE ---

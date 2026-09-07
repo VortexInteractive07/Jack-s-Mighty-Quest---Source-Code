@@ -1,6 +1,10 @@
 /// @description Level Controller Step Logic - Pause, Audio, Timers & Transitions
 
 // --- 1. HUD VISUAL INTERPOLATION LOGIC ---
+if (total_collectibles <= 0 && instance_exists(obj_gem)) {
+    total_collectibles = instance_number(obj_gem);
+}
+
 var _target_hp = 0;
 var _target_max_hp = 100;
 
@@ -66,9 +70,7 @@ if (game_paused) {
             game_paused = false;
             instance_activate_all();
         } else if (pause_option == 1) { // Restart
-            game_paused = false;
-            instance_activate_all();
-            room_restart();
+            restart_level();
         } else if (pause_option == 2) { // Main Menu
             game_paused = false;
             instance_activate_all();
@@ -84,19 +86,60 @@ if (_key_debug) {
     show_debug_overlay_custom = !show_debug_overlay_custom;
 }
 
+// Weather keeps simulating during player death and game-over presentation.
+if (weather_enabled && !game_paused) {
+    weather_timer++;
+    weather_flash_alpha = max(0, weather_flash_alpha - 0.08);
+
+    var _weather_view_w = camera_get_view_width(view_camera[0]);
+    var _weather_view_h = camera_get_view_height(view_camera[0]);
+    var _weather_wind = weather_wind ? 0.8 : 0.0;
+
+    for (var _weather_i = 0; _weather_i < array_length(weather_drops); _weather_i++) {
+        var _drop = weather_drops[_weather_i];
+        _drop.y += _drop.speed;
+        _drop.x -= _weather_wind;
+        if (_drop.y > _weather_view_h + 20 || _drop.x < -20) {
+            _drop.x = random(_weather_view_w + 32);
+            _drop.y = random_range(-40, -5);
+        }
+    }
+
+    if (irandom(720) == 0) {
+        weather_flash_alpha = 0.45;
+        if (audio_exists(sfx_thunder)) {
+            var _thunder_id = audio_play_sound(sfx_thunder, 8, false);
+            audio_sound_gain(_thunder_id, global.vol_sfx / 100, 0);
+        }
+    }
+}
+
 // --- 3. GAME OVER MONITORING & RESTART CONTROLLER ---
 if (is_game_over) {
-    game_over_timer--;
-    if (game_over_timer <= 0) {
-        is_game_over = false;
-        player_lives = 3;
-        game_score = 0;
-        game_timer_ticks = 0;
-        if (room_exists(rm_splash_screen)) {
-            room_goto(rm_splash_screen);
-        } else {
-            room_restart();
-        }
+    var _continue_pressed = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space);
+    var _exit_pressed = keyboard_check_pressed(vk_escape);
+
+    if (_continue_pressed) {
+        continue_after_game_over();
+    } else if (_exit_pressed) {
+        global.game_session_active = false;
+        if (room_exists(rm_title_screen)) room_goto(rm_title_screen);
+    }
+    exit;
+}
+
+if (game_over_pending) {
+    if (life_lost_audio_id == -1 || !audio_is_playing(life_lost_audio_id)) {
+        trigger_game_over();
+    }
+    exit;
+}
+
+if (life_lost_pending_restart) {
+    if (life_lost_audio_id == -1 || !audio_is_playing(life_lost_audio_id)) {
+        life_lost_pending_restart = false;
+        death_resolution_active = false;
+        room_restart();
     }
     exit;
 }
@@ -161,7 +204,7 @@ switch (state) {
 }
 
 // --- 6. BACKGROUND MUSIC MONITORING ---
-if (audio_exists(mus_subway)) {
+if (bgm_enabled && audio_exists(mus_subway)) {
     if (!audio_is_playing(mus_subway) && state == TRANSITION_STATE.IDLE) {
         bgm_handle = audio_play_sound(mus_subway, 10, true);
         audio_sound_gain(bgm_handle, bgm_target_volume, 0);

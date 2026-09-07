@@ -1,6 +1,9 @@
 // ============================================================================
 // CONFIGURATION & DISPLAY CONTROL
 // ============================================================================
+scr_load_settings();
+window_set_fullscreen(global.fullscreen);
+
 enable_loading_bar = true;     // Set to false to instantly jump to splash room
 load_time_seconds  = 1.5;      // Target duration in seconds
 load_max           = max(1, round(load_time_seconds * game_get_speed(gamespeed_fps)));
@@ -70,4 +73,5 @@ toast_text  = "Copied Text!";
 // 5. AUDIO INITIALIZATION
 // ============================================================================
 audio_stop_all();
-audio_play_sound(mus_menu, 1, true);
+var _menu_music_inst = audio_play_sound(mus_menu, 1, true);
+audio_sound_gain(_menu_music_inst, global.vol_bgm / 100, 0);

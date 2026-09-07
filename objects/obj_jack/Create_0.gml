@@ -3,6 +3,10 @@
 // Health Variables
 hp = 100;
 max_hp = 100;
+is_dead = false;
+death_timer = 0;
+death_delay_max = round(game_get_speed(gamespeed_fps) * 0.75);
+damage_multiplier = 1.0;
 
 // Movement Speeds
 move_speed   = 2.1;

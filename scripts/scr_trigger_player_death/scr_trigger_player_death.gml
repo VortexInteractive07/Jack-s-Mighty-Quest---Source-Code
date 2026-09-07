@@ -7,22 +7,16 @@ function scr_trigger_player_death() {
             death_timer = death_delay_max;
             vsp = -6.0;
             hsp = -image_xscale * 2.0;
-            sprite_index = spr_die;
-            
+            // The project has no dedicated Jack death sprite yet.
+            sprite_index = spr_player_jump;
+            image_speed = 0;
+
+            if (instance_exists(obj_controller)) {
+                obj_controller.stop_level_audio();
+            }
+
             if (audio_exists(sfx_dead)) {
                 audio_play_sound(sfx_dead, 10, false);
-            }
-            
-            if (instance_exists(obj_controller)) {
-                obj_controller.player_lives--;
-                
-                if (obj_controller.player_lives <= 0) {
-                    obj_controller.is_game_over = true;
-                    obj_controller.game_over_timer = obj_controller.game_over_delay;
-                    if (audio_exists(mus_gameover)) {
-                        audio_play_sound(mus_gameover, 10, false);
-                    }
-                }
             }
         }
     }
