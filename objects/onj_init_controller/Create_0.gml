@@ -1,8 +1,8 @@
 // ============================================================================
 // CONFIGURATION & DISPLAY CONTROL
 // ============================================================================
-enable_loading_bar = false;     // Set to false to instantly jump to splash room
-load_time_seconds  = 1.0;      // Target duration in seconds
+enable_loading_bar = true;     // Set to false to instantly jump to splash room
+load_time_seconds  = 1.5;      // Target duration in seconds
 load_max           = max(1, round(load_time_seconds * game_get_speed(gamespeed_fps)));
 load_timer         = 0;
 load_progress_smooth = 0;      // Interpolated progress for spring easing
@@ -16,7 +16,7 @@ gloss_offset  = 0;
 exception_unhandled_handler(function(_e) {
     var _file = file_text_open_write("crash_log.txt");
     if (_file != -1) {
-        file_text_write_string(_file, "=== Unexpected anomaly detected! ===\n");
+        file_text_write_string(_file, "=== CRASH REPORT ===\n");
         file_text_write_string(_file, "TIMESTAMP: " + string(date_datetime_string(date_current_datetime())) + "\n");
         file_text_write_string(_file, "ROOM: " + room_get_name(room) + "\n");
         file_text_write_string(_file, "DETAILS:\n" + string(_e.longMessage) + "\n");

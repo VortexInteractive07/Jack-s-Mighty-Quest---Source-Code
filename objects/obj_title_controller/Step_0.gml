@@ -99,6 +99,7 @@ switch (fade_state) {
                 menu_alpha = 0;
             } else {
                 // Normal mode: target is rm_main_menu
+				audio_play_sound(sfx_dialogue_continue, 1, false);
                 target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
                 
                 if (enable_dialogue && array_length(dialogue_lines) > 0) {

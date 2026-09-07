@@ -7,7 +7,8 @@ function scr_splash_ost_playback() {
             title: "Monaigaa Alhavaa",
             composer: "Pixel",
             lyrics: [
-                { time: 0.000,  text: "(Aaahh~)" },
+                { time: 0.293,  text: "(Aaahh~)" },
+				{ time: 3.664,  text: "(Mhmmm~)" },
                 { time: 6.150,  text: "Moonaigaa Alhavaa" },
                 { time: 9.580,  text: "Raalhehege Monaigaa" },
                 { time: 12.531, text: "Feyn vaa kul'ha-daana" },
@@ -18,6 +19,38 @@ function scr_splash_ost_playback() {
                 { time: 27.000, text: "" }
             ]
         },
+        {
+            sound: mus_oafaraaiy_thah_ginavefaa,
+            title: "Oafaraaiy thah ginavefa (Groove)",
+            composer: "Pixel",
+            lyrics: []
+        },
+//		{
+//            sound: mus_beyond_the_iron_cage,
+//            title: "Beyond the Iron Cage",
+//            composer: "Pixel",
+//            lyrics: []
+//        },		
+		{
+		    sound: mus_rethi_aadha,
+		    title: "Reythi Aadha",
+		    composer: "Pixel",
+		    lyrics: [
+		        { time: 0.000,  text: "(Music)" },
+		        { time: 3.279,  text: "Rethi aadha ey, ahh, Rethi aadha ey," },
+		        { time: 7.322,  text: "Moonaigaa alhavaa, thibaa ge rangalhu adhu!" },
+		        { time: 11.998, text: "Hithugaa shifaa ey, libi ey meethi hithun," },
+		        { time: 16.292, text: "Oh reythi aadhaige alhavaa!" },
+		        { time: 20.590, text: "Rey~thi aadhaige alhavaa!" },
+		        { time: 23.870, text: "(Music)" }
+		    ]
+		},
+		{
+            sound: mus_beru_alhavaa,
+            title: "Beyond the Iron Cage",
+            composer: "Pixel",
+            lyrics: []
+        },		
         {
             sound: mus_raalhehge_monaigaa,
             title: "Raalhehge Monaigaa",

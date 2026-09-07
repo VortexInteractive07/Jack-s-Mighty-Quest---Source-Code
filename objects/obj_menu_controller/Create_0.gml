@@ -6,7 +6,7 @@ display_set_gui_size(432, 240);
 // Direct Asset Handle Initialization
 sfx_dialogue_asset = sfx_dialogue;
 sfx_continue_asset = sfx_dialogue_continue;
-mus_menu_asset     = mus_menu;
+mus_menu_asset     = mus_wonk;
 
 // --- TARGET ROOM & STATE SETUP INITIALIZATION ---
 target_room = rm_intro;
