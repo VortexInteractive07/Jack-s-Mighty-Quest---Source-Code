@@ -10,7 +10,6 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     // ==========================================
     // 0. ATTRIBUTION & MEME SPLASH ROLL (1 in 378)
     // ==========================================
-    randomise();
     var _meme_roll = irandom_range(1, 378);
     
     if (_meme_roll == 1 && sprite_exists(spr_GameMaker_G_MEME)) {
@@ -68,7 +67,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     // ==========================================
     // 2. OPTIONAL DIALOGUE SEQUENCE
     // ==========================================
-    if (_enable_dialogue && script_exists(scr_intro_dialogue)) {
+    if (_enable_dialogue && asset_get_type("scr_intro_dialogue") == asset_script) {
         var _dialogue_list = scr_intro_dialogue();
         for (var i = 0; i < array_length(_dialogue_list); i++) {
             array_push(_sequence, _dialogue_list[i]);

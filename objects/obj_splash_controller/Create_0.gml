@@ -16,7 +16,7 @@ enable_dialogue = variable_global_exists("enable_splash_dialogue") ? global.enab
 publisher_name  = "VORTEX Interactive";
 
 // Platform Licensing Configuration: "pc", "ps", "switch", "xbox", "deck_machine"
-console_type    = "pc"; 
+console_type    = "xbox"; 
 
 // Region config for Nintendo Switch: "AMERICA" or "JP"
 switch_region   = "AMERICA"; 
