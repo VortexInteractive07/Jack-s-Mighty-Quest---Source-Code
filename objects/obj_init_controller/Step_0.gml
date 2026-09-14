@@ -1,5 +1,3 @@
-/// @description Step Event - obj_init_controller
-
 // 1. Handle Transition Fades & State Logic
 if (fade_state == 0) {
     // Fade In from Black
@@ -8,45 +6,14 @@ if (fade_state == 0) {
         fade_alpha = 0;
         fade_state = 1;
         
-        // Skip load state entirely if disabled and no active blockers present
-        if (!enable_loading_bar && !has_crash_log && !is_pirated && !show_passcode_prompt) {
+        // Skip load state entirely if disabled
+        if (!enable_loading_bar && !has_crash_log) {
             fade_state = 2;
         }
     }
 } else if (fade_state == 1) {
-    // Active Loading, Passcode Challenge, Piracy Trap, or Crash Screen Display
-    if (show_passcode_prompt) {
-        // Keyboard buffer capture for security code
-        if (string_length(keyboard_string) <= max_code_length) {
-            user_input_code = keyboard_string;
-        } else {
-            keyboard_string = user_input_code;
-        }
-
-        // Handle Backspace
-        if (keyboard_check_pressed(vk_backspace)) {
-            user_input_code = string_copy(user_input_code, 1, max(0, string_length(user_input_code) - 1));
-            keyboard_string = user_input_code;
-        }
-
-        // Code Validation on ENTER
-        if (keyboard_check_pressed(vk_enter)) {
-            if (user_input_code == correct_code) {
-                show_passcode_prompt = false;
-                is_pirated           = false;
-                passcode_failed      = false;
-            } else {
-                show_passcode_prompt = false;
-                is_pirated           = true;
-                piracy_reason        = "INVALID SECURITY CODE ENTERED.\nUNAUTHORIZED ACCESS DENIED.";
-            }
-        }
-    } else if (is_pirated) {
-        // Anti-Piracy soft lock state - prevents game progression
-        if (keyboard_check_pressed(vk_escape)) {
-            game_end();
-        }
-    } else if (has_crash_log) {
+    // Active Loading or Crash Screen Display
+    if (has_crash_log) {
         // Dismiss Log & Continue
         if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space)) {
             file_delete("crash_log.txt");

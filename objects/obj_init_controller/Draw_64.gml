@@ -1,7 +1,5 @@
-/// @description Draw GUI Event - obj_init_controller
-
-var _gui_w = display_get_gui_width();  // Target resolution 432
-var _gui_h = display_get_gui_height(); // Target resolution 240
+var _gui_w = display_get_gui_width();  // 432
+var _gui_h = display_get_gui_height(); // 240
 
 // Clear Base Canvas
 draw_clear(c_black);
@@ -16,74 +14,9 @@ var _blue_shadow   = make_color_rgb(0, 50, 120);
 var _glass_navy    = make_color_rgb(8, 16, 28);
 var _border_cyan   = make_color_rgb(0, 180, 255);
 
-if (show_passcode_prompt) {
+if (has_crash_log) {
     // ------------------------------------------------------------------------
-    // KEY-CODE ENTER PROMPT OVERLAY
-    // ------------------------------------------------------------------------
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    
-    // Background Dark Plate
-    draw_set_color(_glass_navy);
-    draw_rectangle(24, 24, _gui_w - 24, _gui_h - 24, false);
-    
-    draw_set_color(_border_cyan);
-    draw_rectangle(24, 24, _gui_w - 24, _gui_h - 24, true);
-
-    // Header Prompt
-    draw_set_color(_blue_shadow);
-    draw_text(_cx + _shadow_offset, _cy - 40 + _shadow_offset, "ENTER SECURITY PASSCODE");
-    draw_set_color(c_white);
-    draw_text(_cx, _cy - 40, "ENTER SECURITY PASSCODE");
-
-    // Input Field Box
-    var _box_w = 120;
-    var _box_h = 18;
-    var _bx1 = _cx - (_box_w / 2);
-    var _by1 = _cy - 8;
-    var _bx2 = _bx1 + _box_w;
-    var _by2 = _by1 + _box_h;
-
-    draw_set_color(c_black);
-    draw_rectangle(_bx1, _by1, _bx2, _by2, false);
-    draw_set_color(_border_cyan);
-    draw_rectangle(_bx1, _by1, _bx2, _by2, true);
-
-    // Render Typed Text with Blinking Cursor Effect
-    var _cursor = ((current_time / 350) % 2 == 0) ? "_" : "";
-    draw_set_color(c_yellow);
-    draw_text(_cx, _cy + 1, user_input_code + _cursor);
-
-    // Instructions
-    draw_set_color(c_gray);
-    draw_set_valign(fa_top);
-    draw_text(_cx, _by2 + 10, "PRESS ENTER TO CONFIRM");
-} else if (is_pirated) {
-    // ------------------------------------------------------------------------
-    // ANTI-PIRACY SCREEN VIEWPORT
-    // ------------------------------------------------------------------------
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    
-    draw_set_color(make_color_rgb(180, 0, 0));
-    draw_rectangle(0, 0, _gui_w, _gui_h, false);
-    
-    draw_set_color(c_black);
-    draw_rectangle(8, 8, _gui_w - 8, _gui_h - 8, false);
-    
-    draw_set_color(c_red);
-    draw_text(_cx + _shadow_offset, _cy - 30 + _shadow_offset, "PIRACY DETECTED");
-    draw_set_color(c_white);
-    draw_text(_cx, _cy - 30, "PIRACY DETECTED");
-    
-    draw_set_color(c_yellow);
-    draw_text_ext(_cx, _cy + 5, piracy_reason, 11, _gui_w - 32);
-    
-    draw_set_color(c_gray);
-    draw_text(_cx, _gui_h - 16, "PRESS ESC TO EXIT");
-} else if (has_crash_log) {
-    // ------------------------------------------------------------------------
-    // CRASH SCREEN VIEWPORT
+    // CRASH SCREEN VIEWPORT (432x240 PROPORTIONAL)
     // ------------------------------------------------------------------------
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
@@ -94,7 +27,7 @@ if (show_passcode_prompt) {
     draw_set_color(make_color_rgb(255, 90, 90));
     draw_text(_cx, 8, "CRASH REPORT DETECTED");
 
-    // Terminal Frame
+    // Terminal Outer Frame
     var _pad_x = 12;
     var _pad_y_top = 22;
     var _pad_y_bot = 22;
@@ -105,7 +38,7 @@ if (show_passcode_prompt) {
     draw_set_color(_glass_navy);
     draw_rectangle(_pad_x, _pad_y_top, _pad_x + _frame_w, _pad_y_top + _frame_h, false);
     
-    // Glass Panel
+    // Glass Highlight Panel
     draw_set_color(c_white);
     draw_set_alpha(0.05);
     draw_rectangle(_pad_x, _pad_y_top, _pad_x + _frame_w, _pad_y_top + (_frame_h / 2), false);
@@ -115,7 +48,7 @@ if (show_passcode_prompt) {
     draw_set_color(_border_cyan);
     draw_rectangle(_pad_x, _pad_y_top, _pad_x + _frame_w, _pad_y_top + _frame_h, true);
 
-    // Text Log Output
+    // Text Log Output (Clamped inside frame)
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(make_color_rgb(240, 240, 240));
@@ -124,6 +57,7 @@ if (show_passcode_prompt) {
     var _text_y = _pad_y_top + 5 - crash_log_scroll;
     var _text_w = _frame_w - 12;
     
+    // Render bounded log text
     draw_text_ext(_text_x, _text_y, crash_log_text, 9, _text_w);
 
     // Footer Prompts
@@ -155,7 +89,7 @@ if (show_passcode_prompt) {
     var _pct = clamp(load_progress_smooth, 0, 1);
     var _fill_x2 = _bar_x1 + (_bar_w * _pct);
 
-    // Dark Glass Base
+    // Dark Glass Base Container
     draw_set_color(_glass_navy);
     draw_rectangle(_bar_x1, _bar_y1, _bar_x2, _bar_y2, false);
 

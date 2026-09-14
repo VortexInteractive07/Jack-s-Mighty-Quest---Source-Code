@@ -11,7 +11,7 @@ draw_clear(c_black);
 // 1. STANDALONE RAW TEXT SPLASH
 // ==========================================
 if (is_struct(_current_splash) && struct_exists(_current_splash, "raw_text")) {
-    var _font    = struct_exists(_current_splash, "font") && font_exists(_current_splash.font) ? _current_splash.font : fnt_bitmap;
+    var _font    = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_bitmap;
     var _color   = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
     var _scale   = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
     var _shadow  = struct_exists(_current_splash, "blue_shadow") ? _current_splash.blue_shadow : false;
@@ -39,7 +39,7 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
         draw_sprite_ext(spr_dialogue, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
     }
 
-    var _font  = struct_exists(_current_splash, "font") && font_exists(_current_splash.font) ? _current_splash.font : fnt_bitmap;
+    var _font  = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_bitmap;
     var _color = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
     var _scale = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
 
@@ -65,14 +65,11 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
                 ? (get_timer() / 1000000) * _btn_spd
                 : (get_timer() / 1000000) * (game_get_speed(gamespeed_fps) * _btn_spd);
 
-            var _btn_x = _gui_w - 20;
-            var _btn_y = _gui_h - 16;
-            
             draw_sprite_ext(
                 spr_dialogue_continue_btn, 
                 _subimg, 
-                _btn_x, 
-                _btn_y, 
+                _gui_w - 20, 
+                _gui_h - 16, 
                 1.0, 1.0, 0, 
                 c_white, 
                 1.0
@@ -103,7 +100,7 @@ if (enable_lyrics && current_lyric_text != "") {
     draw_text_transformed_color(_gui_w / 2, _lyric_y, current_lyric_text, 1, 1, 0, _text_c, _text_c, _text_c, _text_c, 1.0);
 }
 
-// Reset Draw State Properties
+// Reset Draw State
 draw_set_alpha(1.0);
 draw_set_color(c_white);
 draw_set_halign(fa_left);

@@ -3,45 +3,51 @@
 ================================================================================
 Project: Jack's Mighty Quest [TM]
 Developer: Vortex Interactive
-Target Runtime Environment: GameMaker LTS 2026.0.0.16
+Parent Company: VORTEX Corporation Maldives Private Limited
+Target Runtime Environment: GameMaker LTS 2026.0+
 ================================================================================
 
-I see that you've painstakingly tried to rip all of the assets from Jack's 
-Mighty Quest [TM], didn't you? 
+NOTICE TO UNAUTHORIZED INDIVIDUALS AND DATA-MINING ENTITIES:
 
-Let's be entirely clear about what you are looking at right now. Every single 
-sprite, script, audio track, room layout, and line of code inside this compiled 
-package didn't just appear out of thin air. I used all of my blood, sweat, 
-dedication, and tears to make this game possible. It represents countless hours 
-of calculation, debugging, and creative design to construct a functional engine.
+This compiled software package, including all embedded assets—comprising, but 
+not limited to, source code, scripts, raw audio streams, sound effects, sprite 
+atlases, vector graphics, map binaries, and structural database files—is the 
+exclusive intellectual property of Vortex Interactive.
 
-Yet, despite that effort, you guys managed to steal all of my content without 
-my permission, thinking you could simply mine the file directory, bypass the 
-executable layer, and extract the assets without anyone noticing.
+Extracting, decompiling, datamining, reverse-engineering, or retrieving any 
+component of this software using automated extraction tools (including, without 
+limitation, UndertaleModTool, Decompiler utilities, or custom resource dumpers) 
+is strictly prohibited under international copyright laws and applicable 
+intellectual property regulations.
 
-Extracting, distributing, or repurposing these materials without an explicit 
-license or written authorization from Vortex Interactive is a direct violation 
-of intellectual property law. 
+UNAUTHORIZED EXTRACTION AND REDISTRIBUTION CONSEQUENCES:
 
-And know this: you might get DMCAed immediately. 
+1. INTELLECTUAL PROPERTY VIOLATION: Accessing the inner directory structures 
+   without explicit written authorization constitutes willful infringement of 
+   our protected property rights.
+   
+2. DIGITAL TAKEDOWN ENFORCEMENT: Vortex Interactive actively monitors public 
+   code repositories, file-sharing hosts, community forums, and mirror networks. 
+   Any unauthorized distribution or integration of extracted assets into third-
+   party projects will result in immediate, non-negotiable DMCA Takedown 
+   Notices submitted to hosting providers, network operators, and domain registrars.
+   
+3. INFRASTRUCTURE & LEGAL CONSEQUENCES: Infringing repositories will be 
+   flagged, hosting accounts terminated, and formal civil actions pursued to 
+   the maximum extent permitted by law for commercial or non-commercial damages.
 
-We monitor file-sharing repositories, community forums, and distribution 
-networks closely. If these ripped assets are hosted, re-uploaded, or utilized 
-in unauthorized projects anywhere on the internet, formal digital takedown 
-notices will be deployed to your host, repository provider, or service provider 
-without prior warning. Your infrastructure will be flagged, and your access 
-will be terminated.
+If you have obtained this directory through asset dumping or binary extraction, 
+you are instructed to immediately cease execution, close all extraction software, 
+and delete the extracted files permanently.
 
-If you respect the medium of game development, close the extractor, delete 
-the ripped directory, and support the project through legitimate channels. 
-Otherwise, be prepared to face the legal boundaries established to protect 
-independent creation.
+Respect independent game development. Support creators through legitimate channels.
 
 --------------------------------------------------------------------------------
-Written and Signed by:
-Ibrahim Aayan bin Abdullah
+Authorized and Issued by:
+Ibrahim Aayan Bin Abdulla
 Founder & Lead Developer, Vortex Interactive
 
-© 2026 Vortex Interactive. All rights reserved. Unauthorized distribution, 
-modification, or extraction of compiled binaries and assets is strictly prohibited.
+© 2026-2027 Vortex Interactive. All rights reserved. 
+Unauthorized extraction, modification, reverse engineering, or redistribution 
+of compiled binaries and assets is strictly prohibited.
 ================================================================================

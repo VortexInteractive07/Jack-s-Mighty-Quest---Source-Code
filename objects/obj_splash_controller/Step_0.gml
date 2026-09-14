@@ -58,8 +58,8 @@ if (_is_dialogue && fade_state == 0) {
 }
 
 // --- INPUT HANDLERS ---
-var _gp_num = gamepad_get_device_count();
 var _gp_pressed = false;
+var _gp_num = gamepad_get_device_count();
 for (var i = 0; i < _gp_num; i++) {
     if (gamepad_is_connected(i)) {
         if (gamepad_button_check_pressed(i, gp_face1) || gamepad_button_check_pressed(i, gp_start)) {
@@ -90,7 +90,7 @@ var _advance_splash = function() {
     if (splash_index >= array_length(splash_list)) {
         is_exiting = true;
         if (enable_bgm && audio_is_playing(splash_sound_inst)) {
-            audio_sound_gain(splash_sound_inst, 0, 1000);
+            audio_sound_gain(splash_sound_inst, 0, 500);
         }
         if (room_exists(target_room)) {
             room_goto(target_room);
@@ -114,10 +114,11 @@ var _advance_splash = function() {
     }
 };
 
+// --- SKIP ALL SPLASHES ---
 if (_skip_all) {
     is_exiting = true;
     if (enable_bgm && audio_is_playing(splash_sound_inst)) {
-        audio_sound_gain(splash_sound_inst, 0, 500);
+        audio_sound_gain(splash_sound_inst, 0, 300);
     }
     if (room_exists(target_room)) {
         room_goto(target_room);
@@ -127,10 +128,7 @@ if (_skip_all) {
 
 // --- TYPEWRITER & SFX LOGIC ---
 if (_is_text_struct) {
-    var _full_text = "";
-    if (_is_dialogue)   _full_text = _current_splash.text;
-    if (_is_standalone) _full_text = _current_splash.raw_text;
-    
+    var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
     var _total_chars = string_length(_full_text);
     
     if (_instant) {
@@ -143,7 +141,7 @@ if (_is_text_struct) {
         if (_current_char_idx > last_sound_char && _current_char_idx <= _total_chars) {
             var _char_str = string_char_at(_full_text, _current_char_idx);
             if (_char_str != " " && _char_str != "\n" && _char_str != "\r") {
-                if (script_exists(scr_intro_dialogue) && audio_exists(sfx_dialogue)) {
+                if (audio_exists(sfx_dialogue)) {
                     audio_play_sound(sfx_dialogue, 5, false);
                 }
             }
@@ -154,18 +152,12 @@ if (_is_text_struct) {
             char_count = _total_chars;
             typewriter_complete = true;
         }
-    } else {
-        prompt_blink_timer++;
-        if (prompt_blink_timer >= 30) {
-            prompt_visible = !prompt_visible;
-            prompt_blink_timer = 0;
-        }
     }
 }
 
 // --- FADE & TRANSITION STATE MACHINE ---
 switch (fade_state) {
-    case 0:
+    case 0: // FADE IN
         alpha += fade_speed;
         if (_advance_pressed) {
             alpha = 1;
@@ -182,12 +174,13 @@ switch (fade_state) {
         }
         break;
         
-    case 1:
+    case 1: // DISPLAY / HOLD
         if (!_is_dialogue) {
             splash_timer--;
         }
         
         if (_advance_pressed) {
+            // Priority 1: Finish typewriter text instantly if still printing
             if (_is_text_struct && !typewriter_complete && !_instant) {
                 var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
                 char_count = string_length(_full_text);
@@ -196,19 +189,17 @@ switch (fade_state) {
                 if (audio_exists(sfx_dialogue_continue)) {
                     audio_play_sound(sfx_dialogue_continue, 5, false);
                 }
-            } else {
-                var _next_is_dialogue = (splash_index + 1 < array_length(splash_list)) 
-                    && is_struct(splash_list[splash_index + 1]) 
-                    && struct_exists(splash_list[splash_index + 1], "text");
-
-                if (_is_dialogue && _next_is_dialogue) {
-                    if (audio_exists(sfx_dialogue_continue)) {
-                        audio_play_sound(sfx_dialogue_continue, 5, false);
-                    }
-                    _advance_splash(); 
-                } else {
-                    fade_state = 2; 
+            } 
+            // Priority 2: Advance dialogue frame instantly without fading out
+            else if (_is_dialogue) {
+                if (audio_exists(sfx_dialogue_continue)) {
+                    audio_play_sound(sfx_dialogue_continue, 5, false);
                 }
+                _advance_splash();
+            } 
+            // Priority 3: Trigger fade-out for non-dialogue splashes
+            else {
+                fade_state = 2; 
             }
         }
         else if (!_is_dialogue && splash_timer <= 0) {
@@ -216,7 +207,7 @@ switch (fade_state) {
         }
         break;
         
-    case 2:
+    case 2: // FADE OUT
         alpha -= fade_speed;
         if (alpha <= 0) {
             alpha = 0;
