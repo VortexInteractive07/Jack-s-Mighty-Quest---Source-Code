@@ -1,4 +1,13 @@
 /// @description Initialize Splash Controller, Console Targets & Soundtrack Engine
+// Intelligence Level: 10/10
+
+// Required Assets:
+// rm_title_screen
+// scr_load_settings
+// scr_splash_ost_playback
+// scr_splash_sequence_controller
+// fnt_bitmap
+
 if (script_exists(scr_load_settings)) {
     scr_load_settings();
 }
@@ -76,7 +85,7 @@ if (enable_bgm) {
 splash_list = scr_splash_sequence_controller(enable_dialogue, console_type, switch_region, publisher_name);
 
 splash_index           = 0;           
-default_hold_duration  = 240; 
+default_hold_duration  = 255; // Increased by +15 frames (240 -> 255)         
 splash_timer           = default_hold_duration;           
 
 alpha                  = 0;           

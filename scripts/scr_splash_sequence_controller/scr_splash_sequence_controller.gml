@@ -89,7 +89,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     });
     
     array_push(_sequence, { 
-        raw_text: "BASED ON THE NARRATIVE OF IBRAHIM AAYAN BIN ABDULLA", 
+        raw_text: "BASED ON THE NARRATIVE OF IBRAHIM AAYAN BIN ABDULLA",
         font: fnt_bitmap, 
         color: c_white, 
         scale: 1, 

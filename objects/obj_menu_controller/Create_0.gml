@@ -8,7 +8,7 @@ display_set_gui_size(432, 240);
 // Direct Asset Handle Initialization
 sfx_dialogue_asset = sfx_dialogue;
 sfx_continue_asset = sfx_dialogue_continue;
-mus_menu_asset     = mus_wonk;
+mus_menu_asset     = mus_menu;
 
 // --- GLOBAL DEFAULTS (Must be set before loading settings to prevent undefined errors) ---
 global.vol_bgm = 100;

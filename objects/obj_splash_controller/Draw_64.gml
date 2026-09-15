@@ -1,4 +1,12 @@
 /// @description Render Graphics, Dialogue Layout, Standalone Text & Subtitle Overlay
+// Intelligence Level: 10/10
+
+// Required Assets:
+// spr_dialogue
+// spr_dialogue_continue_btn
+// spr_gamemaker_attribution
+// fnt_bitmap
+
 if (splash_index >= array_length(splash_list)) exit;
 
 var _current_splash = splash_list[splash_index];
@@ -61,13 +69,13 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
         if (sprite_exists(spr_dialogue_continue_btn)) {
             var _btn_spd  = sprite_get_speed(spr_dialogue_continue_btn);
             var _btn_type = sprite_get_speed_type(spr_dialogue_continue_btn);
-            var _subimg   = (_btn_type == spritespeed_framespersecond)
+            var _btn_subimg = (_btn_type == spritespeed_framespersecond)
                 ? (get_timer() / 1000000) * _btn_spd
                 : (get_timer() / 1000000) * (game_get_speed(gamespeed_fps) * _btn_spd);
 
             draw_sprite_ext(
                 spr_dialogue_continue_btn, 
-                _subimg, 
+                _btn_subimg, 
                 _gui_w - 20, 
                 _gui_h - 16, 
                 1.0, 1.0, 0, 
@@ -81,8 +89,51 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
 // 3. CENTERED FULLSCREEN GRAPHIC SPRITES
 // ==========================================
 else if (sprite_exists(_current_splash)) {
-    draw_sprite_ext(_current_splash, 0, _gui_w / 2, _gui_h / 2, 1.0, 1.0, 0, c_white, alpha);
+    var _total_frames = sprite_get_number(_current_splash);
+    
+    // Initialize object-level frame counter if not present
+    if (!variable_instance_exists(id, "splash_frame")) {
+        splash_frame = 0;
+    }
+
+    // Fetch the target speed set in the Sprite Editor
+    var _target_spd = sprite_get_speed(_current_splash);
+    var _spd_type   = sprite_get_speed_type(_current_splash);
+    
+    // Calculate precise step increment relative to 60 FPS room speed
+    var _frame_increment = 0;
+    if (_spd_type == spritespeed_framespersecond) {
+        _frame_increment = _target_spd / game_get_speed(gamespeed_fps);
+    } else {
+        _frame_increment = _target_spd;
+    }
+
+    // Allow override via custom splash_anim_speed if defined on instance
+    if (variable_instance_exists(id, "splash_anim_speed")) {
+        _frame_increment *= splash_anim_speed;
+    }
+
+    if (_total_frames > 1) {
+        splash_frame += _frame_increment;
+        
+        // Loop ONLY spr_gamemaker_attribution; freeze all other sprites on their final frame
+        if (sprite_exists(spr_gamemaker_attribution) && _current_splash == spr_gamemaker_attribution) {
+            splash_frame %= _total_frames;
+        } else {
+            splash_frame = min(splash_frame, _total_frames - 1);
+        }
+    } else {
+        splash_frame = 0;
+    }
+
+    draw_sprite_ext(_current_splash, floor(splash_frame), _gui_w / 2, _gui_h / 2, 1.0, 1.0, 0, c_white, alpha);
 }
+
+// Reset frame index when moving between splash elements
+if (variable_instance_exists(id, "last_splash_index") && last_splash_index != splash_index) {
+    splash_frame = 0;
+}
+last_splash_index = splash_index;
 
 // ==========================================
 // 4. SONG LYRICS SUBTITLE OVERLAY

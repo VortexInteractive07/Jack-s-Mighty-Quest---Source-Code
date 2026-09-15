@@ -144,6 +144,7 @@
     {"name":"mus_credits_new","order":6,"path":"sounds/mus_credits_new/mus_credits_new.yy",},
     {"name":"mus_credits","order":5,"path":"sounds/mus_credits/mus_credits.yy",},
     {"name":"mus_cutscene","order":7,"path":"sounds/mus_cutscene/mus_cutscene.yy",},
+    {"name":"mus_dad_bestfriend_minorkey","order":25,"path":"sounds/mus_dad_bestfriend_minorkey/mus_dad_bestfriend_minorkey.yy",},
     {"name":"mus_death","order":2,"path":"sounds/mus_death/mus_death.yy",},
     {"name":"mus_dungeons","order":8,"path":"sounds/mus_dungeons/mus_dungeons.yy",},
     {"name":"mus_ending_theme","order":1,"path":"sounds/mus_ending_theme/mus_ending_theme.yy",},

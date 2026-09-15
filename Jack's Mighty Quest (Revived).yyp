@@ -199,6 +199,7 @@
     {"id":{"name":"mus_credits_new","path":"sounds/mus_credits_new/mus_credits_new.yy",},},
     {"id":{"name":"mus_credits","path":"sounds/mus_credits/mus_credits.yy",},},
     {"id":{"name":"mus_cutscene","path":"sounds/mus_cutscene/mus_cutscene.yy",},},
+    {"id":{"name":"mus_dad_bestfriend_minorkey","path":"sounds/mus_dad_bestfriend_minorkey/mus_dad_bestfriend_minorkey.yy",},},
     {"id":{"name":"mus_death","path":"sounds/mus_death/mus_death.yy",},},
     {"id":{"name":"mus_dungeons","path":"sounds/mus_dungeons/mus_dungeons.yy",},},
     {"id":{"name":"mus_ending_theme","path":"sounds/mus_ending_theme/mus_ending_theme.yy",},},
