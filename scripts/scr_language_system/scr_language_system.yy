@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_language_system",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_language_system",
+  "parent":{
+    "name":"group2",
+    "path":"folders/Scripts/group2.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

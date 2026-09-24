@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_beru_alhavaa",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":29.936327,
+  "exportDir":"",
+  "name":"mus_beru_alhavaa",
+  "parent":{
+    "name":"Songs (Aetherian Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_beru_alhavaa.mp3",
+  "volume":1.0,
+}

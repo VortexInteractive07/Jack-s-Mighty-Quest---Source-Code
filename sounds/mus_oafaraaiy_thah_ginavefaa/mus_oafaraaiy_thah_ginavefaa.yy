@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_oafaraaiy_thah_ginavefaa",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":30.093061,
+  "exportDir":"",
+  "name":"mus_oafaraaiy_thah_ginavefaa",
+  "parent":{
+    "name":"Songs (Aetherian Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_oafaraaiy_thah_ginavefaa.mp3",
+  "volume":1.0,
+}

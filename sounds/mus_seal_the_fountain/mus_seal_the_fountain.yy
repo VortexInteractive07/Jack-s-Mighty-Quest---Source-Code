@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_seal_the_fountain",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":30.772245,
+  "exportDir":"",
+  "name":"mus_seal_the_fountain",
+  "parent":{
+    "name":"Songs (English)",
+    "path":"folders/Sounds/Soundtrack/Songs (English).yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_seal_the_fountain.mp3",
+  "volume":1.0,
+}

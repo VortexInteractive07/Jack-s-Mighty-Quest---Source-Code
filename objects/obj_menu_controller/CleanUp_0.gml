@@ -1,0 +1,7 @@
+/// @description Clean Up Event: Prevent Audio Leaks
+
+// Intelligence Level: 10/10
+
+if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+    audio_stop_sound(current_playing_track);
+}

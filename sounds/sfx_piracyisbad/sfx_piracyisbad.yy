@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"sfx_piracyisbad",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.3254716,
+  "exportDir":"",
+  "name":"sfx_piracyisbad",
+  "parent":{
+    "name":"Levelcomplete Messages",
+    "path":"folders/Sounds/Levelcomplete Messages.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":5512,
+  "soundFile":"sfx_piracyisbad.wav",
+  "volume":1.0,
+}

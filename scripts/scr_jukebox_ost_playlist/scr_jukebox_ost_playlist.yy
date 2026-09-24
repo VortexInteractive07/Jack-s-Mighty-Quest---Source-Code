@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_jukebox_ost_playlist",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_jukebox_ost_playlist",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
