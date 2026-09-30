@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":15.016712,
+  "duration":10.619297,
   "exportDir":"",
   "name":"mus_vortexlogo",
   "parent":{

@@ -15,6 +15,7 @@ function scr_title_ost_playlist() {
         { sound: mus_moodhu_raalhahge_taalam,    title: "Moodhu Ralhahge Taalam",             composer: "Pixel" },
         { sound: mus_mage_maaladivaina,          title: "Mage Maaladivaina (Sinhala)",        composer: "Pixel" },
         { sound: mus_the_last_march,             title: "The Last March to Aetheria - Inst.", composer: "Pixel" },
-        { sound: mus_no_bridge_to_cross,         title: "No Bridge to Cross",	    		  composer: "Pixel" }
+        { sound: mus_no_bridge_to_cross,         title: "No Bridge to Cross",	    		  composer: "Pixel" },
+		{ sound: mus_handuvaruge_race,           title: "Handhuvaruge Race",	    		  composer: "Pixel" }
 	];
 }

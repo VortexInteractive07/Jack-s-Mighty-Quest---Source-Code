@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"mus_credits_new",
+  "%Name":"mus_handuvaruge_race",
   "audioGroupId":{
     "name":"audiogroup_default",
     "path":"audiogroups/audiogroup_default",
@@ -10,17 +10,17 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":24.000046,
+  "duration":29.962448,
   "exportDir":"",
-  "name":"mus_credits_new",
+  "name":"mus_handuvaruge_race",
   "parent":{
-    "name":"Music",
-    "path":"folders/Sounds/Soundtrack/Music.yy",
+    "name":"Songs (Aetherian Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Aetherian Dhivehi).yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"mus_credits_new.wav",
+  "soundFile":"mus_handuvaruge_race.mp3",
   "volume":1.0,
 }

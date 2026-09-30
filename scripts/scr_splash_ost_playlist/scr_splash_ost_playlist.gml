@@ -131,21 +131,6 @@ function scr_splash_ost_playback() {
             ]
         },
         {
-            sound: mus_fraying_string,
-            title: "Fraying String",
-            composer: "Pixel",
-            lyrics: [
-                { time: 0.365,  text: "Another step across the fading threshold," },
-                { time: 4.148,  text: "This quiet world is turning pale and cold," },
-                { time: 7.742,  text: "A heavy static echoes from the fountain," },
-                { time: 11.457, text: "A perfect role on which I haven't counted!" },
-                { time: 15.317, text: "Just a puppet and a fraying string," },
-                { time: 19.026, text: "Heading for the roaring that the shadows bring," },
-                { time: 22.707, text: "My choice is just an echo in the void!" },
-                { time: 26.494, text: "(An echo in the void)" }
-            ]
-        },
-        {
             sound: mus_nil_diyawela,
             title: "Nil Diyaweyla",
             composer: "Pixel",
@@ -157,32 +142,6 @@ function scr_splash_ost_playback() {
                 { time: 15.476, text: "සිහිනෙක වා~ගේ," },
                 { time: 17.795, text: "වැලි තලා මත~ රැළ හැඩී" },
                 { time: 22.297, text: "මිහිර හඬන තනිකම මගේ~!" }
-            ]
-        },
-        /*
-         * =========================================================================
-         * DELTARUNE ARCADE EDITION (Fan Game)
-         * Original Track: "Seal the Fountain"
-         * Featured in DELTARUNE Arcade Edition — check out DELTARUNE by Toby Fox!
-         * Support the original game: https://deltarune.com
-         * =========================================================================
-        */
-        {
-            sound: mus_seal_the_fountain,
-            title: "Seal the Fountain",
-            composer: "Pixel",
-            lyrics: [
-                { time: 0.085,  text: "Cross the threshold where the darkness starts to rise," },
-                { time: 3.968,  text: "Fullfill the ancient prophecy before our very eyes!" },
-                { time: 7.827,  text: "This empty feeling's tearing me apart inside," },
-                { time: 11.470, text: "Am I a puppet dancing on a string you hide..." },
-                { time: 15.264, text: "But we will seal the fountain..." },
-                { time: 17.129, text: "restore the light and sound!" },
-                { time: 18.956, text: "And chase the roaring shadows..." },
-                { time: 20.922, text: "from this sacred ground" },
-                { time: 22.765, text: "Yeah, we'll seal the fountain..." },
-                { time: 24.646, text: "before the roaring comes!" },
-                { time: 26.525, text: "Before the roaring co~mes!" }
             ]
         },
         {

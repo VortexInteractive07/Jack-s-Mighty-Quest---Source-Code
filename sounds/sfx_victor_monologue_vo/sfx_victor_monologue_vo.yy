@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":40.960182,
+  "duration":40.96027,
   "exportDir":"",
   "name":"sfx_victor_monologue_vo",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":11025,
+  "sampleRate":5512,
   "soundFile":"sfx_victor_monologue_vo.wav",
   "volume":1.0,
 }
