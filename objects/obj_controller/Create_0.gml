@@ -16,28 +16,17 @@ exit_room = rm_main_menu;
 
 // Game Over & Life State Initialization (Declared FIRST to avoid scope errors in functions)
 is_game_over              = false;
-game_over_timer           = 0;
-game_over_delay           = game_get_speed(gamespeed_fps) * 3.0;
 game_paused               = false;
 pause_option              = 0; // 0: CONTINUE, 1: RESTART, 2: MAIN MENU
 show_debug_overlay_custom = false;
 game_score                = global.game_score;
 player_lives              = global.game_lives;
-max_lives                 = 5;
 collectibles_collected    = 0;
 total_collectibles        = 0;
 level_state               = "ACTIVE";
 
 // Dynamic HUD Interpolation Variables
 hp_visual_current         = 0;
-hp_visual_catchup         = 0;
-
-// Life Counter Flip HUD Anim
-prev_player_lives         = player_lives;
-flip_timer                = 0;
-flip_duration             = 20; // total frames for flip animation
-flip_old_str              = "0" + string(player_lives);
-flip_new_str              = "0" + string(player_lives);
 
 // Timer & Time Limit System
 game_timer_ticks          = 0;
@@ -50,6 +39,8 @@ life_lost_pending_restart = false;
 game_over_pending         = false;
 death_resolution_active   = false;
 game_over_music_id        = -1;
+death_notice_timer        = 0;
+death_notice_duration     = round(game_get_speed(gamespeed_fps) * 1.25);
 
 // --- 1. AUDIO INTEGRATION & EXTERNAL MUSIC SYSTEM ---
 bgm_handle = -1;
@@ -85,39 +76,7 @@ fade_speed  = 0.04;
 fade_color  = c_black;
 next_room   = -1;
 
-// --- 4. WEATHER SYSTEM CONFIGURATION ---
-weather_enabled     = global.experimental_weather;
-weather_type        = global.weather_type;
-weather_intensity   = global.weather_intensity;
-weather_wind        = global.weather_wind;
-weather_drops       = [];
-weather_flash_alpha = 0;
-weather_timer       = 0;
-
-var _weather_view_w = camera_get_view_width(view_camera[0]);
-var _weather_view_h = camera_get_view_height(view_camera[0]);
-var _weather_drop_count = 120;
-
-if (weather_intensity == "LOW") _weather_drop_count = 48;
-if (weather_intensity == "HIGH") _weather_drop_count = 240;
-if (weather_intensity == "EXTREME") _weather_drop_count = 420;
-
-for (var _weather_i = 0; _weather_i < _weather_drop_count; _weather_i++) {
-    var _weather_speed = random_range(4, 8);
-    if (weather_intensity == "LOW") _weather_speed = random_range(2, 4);
-    if (weather_intensity == "HIGH") _weather_speed = random_range(5, 9);
-    if (weather_intensity == "EXTREME") _weather_speed = random_range(7, 12);
-    
-    array_push(weather_drops, {
-        x: random(_weather_view_w),
-        y: random(_weather_view_h),
-        speed: _weather_speed,
-        length: random_range(8, 18),
-        size: random_range(1, 2)
-    });
-}
-
-// --- 5. GAMEPLAY METHODS & CONTROLLER FUNCTIONS ---
+// --- 4. GAMEPLAY METHODS & CONTROLLER FUNCTIONS ---
 add_score = function(_amount) {
     game_score = max(0, game_score + max(0, _amount));
     global.game_score = game_score;
@@ -129,7 +88,7 @@ register_collectible = function(_value) {
 };
 
 damage_player = function(_amount) {
-    if (!instance_exists(obj_jack) || is_game_over) return;
+    if (!instance_exists(obj_jack) || is_game_over || global.cheat_godmode) return;
 
     var _player = instance_find(obj_jack, 0);
     if (_player.is_dead) return;
@@ -159,33 +118,10 @@ trigger_game_over = function() {
 
     stop_level_audio();
 
-    instance_deactivate_object(obj_jack);
-    instance_deactivate_object(obj_mark);
-    instance_deactivate_object(obj_camera);
-    instance_deactivate_object(obj_laser);
-    instance_deactivate_object(obj_gem);
-    instance_deactivate_object(obj_plasma_wave);
+        instance_deactivate_all(true); // Freeze all gameplay objects during game over
 
     game_over_music_id = audio_play_sound(mus_gameover, 10, false);
     audio_sound_gain(game_over_music_id, global.vol_bgm / 100, 0);
-};
-
-resolve_player_death = function() {
-    if (death_resolution_active || is_game_over) return;
-
-    death_resolution_active = true;
-    player_lives = max(0, player_lives - 1);
-    global.game_lives = player_lives;
-    global.game_score = game_score;
-
-    life_lost_audio_id = audio_play_sound(mus_life_lost, 10, false);
-    audio_sound_gain(life_lost_audio_id, global.vol_bgm / 100, 0);
-
-    if (player_lives <= 0) {
-        game_over_pending = true;
-    } else {
-        life_lost_pending_restart = true;
-    }
 };
 
 continue_after_game_over = function() {
@@ -217,9 +153,8 @@ continue_after_game_over = function() {
 
 // --- 6. PAUSE ANIMATION SYSTEM ---
 pause_slide          = 0.0; // 0.0 (Unpaused) to 1.0 (Fully Visible)
-pause_wave_timer     = 0;   // Dynamic wave shine for selected items
 pause_options_count  = 3;
-pause_labels         = ["CONTINUE", "RESTART", "MAIN MENU"];
+pause_labels         = [get_localized_text("continue"), get_localized_text("restart"), get_localized_text("main_menu")];
 
 // --- 7. PARTICLE SYSTEM INITIALIZATION ---
 sys_particles = part_system_create();

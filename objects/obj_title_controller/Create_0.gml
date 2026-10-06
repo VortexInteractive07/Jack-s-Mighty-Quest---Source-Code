@@ -12,7 +12,7 @@ if (room_exists(rm_main_menu)) {
 target_room = _menu_room;
 
 // --- SECRET CODE & FLOW TRACKING ---
-secret_code_unlocked = false; // Code must be entered to access Level Select
+secret_code_unlocked = global.cheat_unlocked; // Cheats may unlock Level Select immediately
 secret_code_sequence = [vk_up, vk_up, vk_down, vk_down, vk_left, vk_right, vk_left, vk_right];
 secret_code_index = 0;
 

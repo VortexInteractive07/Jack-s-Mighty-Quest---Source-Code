@@ -28,7 +28,7 @@ if (score_tally_active && !tally_finished) {
                 // Play ticking sound effect on loop/re-trigger
                 if (audio_exists(snd_tally_tick_asset)) {
                     if (!audio_is_playing(snd_tally_tick_asset)) {
-                        snd_tally_tick_handle = audio_play_sound(snd_tally_tick_asset, 5, false);
+                        snd_tally_tick_handle = scr_play_sfx(snd_tally_tick_asset, 5, false);
                     }
                 }
             } else {
@@ -42,12 +42,13 @@ if (score_tally_active && !tally_finished) {
 
                 // Play completion chime
                 if (audio_exists(snd_tally_done_asset)) {
-                    audio_play_sound(snd_tally_done_asset, 6, false);
+                    scr_play_sfx(snd_tally_done_asset, 6, false);
                 }
 
                 // Sync final score into controller
                 if (instance_exists(obj_controller)) {
                     obj_controller.game_score = tally_counter;
+                    global.game_score = tally_counter;
                 }
 
                 // Schedule room transition alarm (delay + fade time)

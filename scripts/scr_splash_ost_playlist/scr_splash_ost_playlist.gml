@@ -193,6 +193,12 @@ function scr_splash_ost_playback() {
                 { time: 21.228, text: "Ahh, monaigaa-veyn alhavaa monaigaa!" },
                 { time: 25.204, text: "(Music)" }
             ]
-        }
+        },
+        {
+            sound: mus_ranga_dhun_yeh,
+            title: "Ranga Dhun Yeh",
+            composer: "Pixel",
+            lyrics: []
+        }		
     ];
 }

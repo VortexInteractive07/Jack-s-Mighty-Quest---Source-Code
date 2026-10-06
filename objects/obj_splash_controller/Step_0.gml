@@ -142,7 +142,7 @@ if (_is_text_struct) {
             var _char_str = string_char_at(_full_text, _current_char_idx);
             if (_char_str != " " && _char_str != "\n" && _char_str != "\r") {
                 if (audio_exists(sfx_dialogue)) {
-                    audio_play_sound(sfx_dialogue, 5, false);
+                    scr_play_sfx(sfx_dialogue, 5, false);
                 }
             }
             last_sound_char = _current_char_idx;
@@ -187,13 +187,13 @@ switch (fade_state) {
                 typewriter_complete = true;
                 
                 if (audio_exists(sfx_dialogue_continue)) {
-                    audio_play_sound(sfx_dialogue_continue, 5, false);
+                    scr_play_sfx(sfx_dialogue_continue, 5, false);
                 }
             } 
             // Priority 2: Advance dialogue frame instantly without fading out
             else if (_is_dialogue) {
                 if (audio_exists(sfx_dialogue_continue)) {
-                    audio_play_sound(sfx_dialogue_continue, 5, false);
+                    scr_play_sfx(sfx_dialogue_continue, 5, false);
                 }
                 _advance_splash();
             } 

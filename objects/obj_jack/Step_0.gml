@@ -4,18 +4,36 @@ if (is_dead) {
     vsp = min(vsp + grav, 8);
     x += hsp;
     y += vsp;
-
-    if (y > room_height + 32 && instance_exists(obj_controller)) {
-        obj_controller.resolve_player_death();
-    }
     exit;
 }
 
 // --- 1. INPUT PROCESSING ---
-var _move_left  = keyboard_check(vk_left);
-var _move_right = keyboard_check(vk_right);
+var _gp_connected = gamepad_is_connected(0);
+var _gp_axis_h = _gp_connected ? gamepad_axis_value(0, gp_axislh) : 0;
+var _move_left  = keyboard_check(vk_left) || (_gp_connected && (gamepad_button_check(0, gp_padl) || _gp_axis_h < -0.5));
+var _move_right = keyboard_check(vk_right) || (_gp_connected && (gamepad_button_check(0, gp_padr) || _gp_axis_h > 0.5));
 var _run_hold   = keyboard_check(ord("S"));                       // S to Run / Sprint / Dash
-var _jump_press = keyboard_check_pressed(ord("D"));               // D to Jump / Wall Jump
+var _jump_press = keyboard_check_pressed(ord("D")) || (_gp_connected && gamepad_button_check_pressed(0, gp_face1));
+var _shoot_press = keyboard_check_pressed(ord("F"));
+
+if (_gp_connected && gamepad_button_check_pressed(0, gp_face2)) {
+    _shoot_press = true;
+}
+
+if (shot_cooldown > 0) {
+    shot_cooldown--;
+}
+
+if (_shoot_press && shot_cooldown <= 0) {
+    var _projectile_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
+    var _shot = instance_create_layer(x + (image_xscale * 10), y - 4, _projectile_layer, obj_projectile);
+    if (instance_exists(_shot)) {
+        _shot.shot_direction = sign(image_xscale);
+        _shot.damage = max(1, damage_multiplier);
+        _shot.image_angle = (_shot.shot_direction > 0) ? 90 : 270;
+    }
+    shot_cooldown = 12;
+}
 
 var _move = _move_right - _move_left;
 
@@ -87,7 +105,7 @@ if (_jump_press) {
         coyote_timer = 0;
         
         if (instance_exists(obj_controller)) {
-            obj_controller.game_score += 200;
+            obj_controller.add_score(200);
         }
     }
     // B. STANDARD GROUND JUMP (Or Coyote Jump)
@@ -98,7 +116,7 @@ if (_jump_press) {
         jumps_left = jump_max - 1;
         
         if (instance_exists(obj_controller)) {
-            obj_controller.game_score += 150;
+            obj_controller.add_score(150);
         }
     } 
     // C. DOUBLE / AIR JUMP
@@ -113,7 +131,7 @@ if (_jump_press) {
         jumps_left--;
         
         if (instance_exists(obj_controller)) {
-            obj_controller.game_score += 250;
+            obj_controller.add_score(250);
         }
     }
 }
@@ -153,7 +171,7 @@ y += vsp;
 grounded = place_meeting(x, y + 1, obj_wall);
 
 // --- 8. VOID DEATH CHECK ---
-if (y > room_height + 64) {
+if (y > room_height + 64 && !global.cheat_godmode) {
     hp = 0;
     scr_trigger_player_death();
 }

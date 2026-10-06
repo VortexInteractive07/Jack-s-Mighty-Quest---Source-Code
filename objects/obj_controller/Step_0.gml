@@ -6,28 +6,24 @@ if (total_collectibles <= 0 && instance_exists(obj_gem)) {
 }
 
 var _target_hp = 0;
-var _target_max_hp = 100;
 
 if (instance_exists(obj_jack)) {
     if (variable_instance_exists(obj_jack, "hp")) {
         _target_hp = obj_jack.hp;
     }
-    if (variable_instance_exists(obj_jack, "max_hp")) {
-        _target_max_hp = obj_jack.max_hp;
-    }
 }
 
-// Smooth dual-layer health bar motion
+// Smooth the displayed health value toward Jack's current HP.
 hp_visual_current = lerp(hp_visual_current, _target_hp, 0.25);
-hp_visual_catchup = lerp(hp_visual_catchup, hp_visual_current, 0.08);
 
 // Direct Asset Reference
 var _snd_continue = sfx_dialogue_continue;
-var _snd_thunder  = sfx_thunder;
-var _snd_death    = sfx_death;
+var _snd_death    = mus_life_lost;
 
 // --- 2. INPUT PROCESSING & LOCAL PAUSE SYSTEM ---
-var _key_pause = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"));
+var _gp_connected = gamepad_is_connected(0);
+var _key_pause = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"))
+    || (_gp_connected && gamepad_button_check_pressed(0, gp_start));
 var _key_debug = keyboard_check_pressed(vk_f3);
 
 if (_key_pause && state == TRANSITION_STATE.IDLE && !is_game_over && !game_over_pending && !life_lost_pending_restart) {
@@ -35,7 +31,7 @@ if (_key_pause && state == TRANSITION_STATE.IDLE && !is_game_over && !game_over_
     pause_option = 0;
     
     if (audio_exists(_snd_continue)) {
-        audio_play_sound(_snd_continue, 5, false);
+        scr_play_sfx(_snd_continue, 5, false);
     }
     
     if (game_paused) {
@@ -47,26 +43,28 @@ if (_key_pause && state == TRANSITION_STATE.IDLE && !is_game_over && !game_over_
 
 // Animate pause menu entry/exit slide
 pause_slide = lerp(pause_slide, game_paused ? 1.0 : 0.0, 0.2);
-pause_wave_timer += 0.08;
 
 // Pause Menu Navigation Controls
 if (game_paused) {
-    var _key_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
-    var _key_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
-    var _key_select = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
+    var _key_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"))
+        || (_gp_connected && gamepad_button_check_pressed(0, gp_padu));
+    var _key_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"))
+        || (_gp_connected && gamepad_button_check_pressed(0, gp_padd));
+    var _key_select = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter)
+        || (_gp_connected && gamepad_button_check_pressed(0, gp_face1));
     
     if (_key_up) {
         pause_option--;
         if (pause_option < 0) pause_option = pause_options_count - 1;
         if (audio_exists(_snd_continue)) {
-            audio_play_sound(_snd_continue, 3, false);
+            scr_play_sfx(_snd_continue, 3, false);
         }
     }
     if (_key_down) {
         pause_option++;
         if (pause_option >= pause_options_count) pause_option = 0;
         if (audio_exists(_snd_continue)) {
-            audio_play_sound(_snd_continue, 3, false);
+            scr_play_sfx(_snd_continue, 3, false);
         }
     }
     
@@ -91,53 +89,24 @@ if (_key_debug) {
     show_debug_overlay_custom = !show_debug_overlay_custom;
 }
 
-// Weather keeps simulating during player death and game-over presentation.
-if (weather_enabled && !game_paused) {
-    weather_timer++;
-    weather_flash_alpha = max(0, weather_flash_alpha - 0.08);
-
-    var _weather_view_w = camera_get_view_width(view_camera[0]);
-    var _weather_view_h = camera_get_view_height(view_camera[0]);
-    var _weather_wind = weather_wind ? 0.8 : 0.0;
-
-    for (var _weather_i = 0; _weather_i < array_length(weather_drops); _weather_i++) {
-        var _drop = weather_drops[_weather_i];
-        _drop.y += _drop.speed;
-        _drop.x -= _weather_wind;
-        if (_drop.y > _weather_view_h + 20 || _drop.x < -20) {
-            _drop.x = random(_weather_view_w + 32);
-            _drop.y = random_range(-40, -5);
-        }
-    }
-
-    if (irandom(720) == 0) {
-        weather_flash_alpha = 0.45;
-        if (audio_exists(_snd_thunder)) {
-            var _thunder_id = audio_play_sound(_snd_thunder, 8, false);
-            audio_sound_gain(_thunder_id, global.vol_sfx / 100, 0);
-        }
-    }
-}
-
 // --- 3. PLAYER DEATH MONITORING & RESTART CONTROLLER ---
 if (instance_exists(obj_jack)) {
     if (obj_jack.is_dead && !death_resolution_active) {
         death_resolution_active = true;
         
         // Decrement remaining life count once upon death registration
-        player_lives -= 1;
+        player_lives = max(0, player_lives - 1);
+        global.game_lives = player_lives;
+        global.game_score = game_score;
+        death_notice_timer = death_notice_duration;
         
-        // Stop level BGM on death
-        if (bgm_handle != -1 && audio_is_playing(bgm_handle)) {
-            audio_stop_sound(bgm_handle);
-            bgm_handle = -1;
-        }
+        stop_level_audio();
 
-        // Track active audio instance handle directly or play if not already active
-        if (audio_is_playing(_snd_death)) {
-            life_lost_audio_id = _snd_death;
-        } else if (audio_exists(_snd_death)) {
+        if (audio_exists(_snd_death)) {
             life_lost_audio_id = audio_play_sound(_snd_death, 10, false);
+            if (life_lost_audio_id != -1) {
+                audio_sound_gain(life_lost_audio_id, global.vol_bgm / 100, 0);
+            }
         } else {
             life_lost_audio_id = -1;
         }
@@ -153,8 +122,10 @@ if (instance_exists(obj_jack)) {
 
 // Handle Game Over Screen
 if (is_game_over) {
-    var _continue_pressed = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space);
-    var _exit_pressed = keyboard_check_pressed(vk_escape);
+    var _continue_pressed = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space)
+        || (_gp_connected && (gamepad_button_check_pressed(0, gp_face1) || gamepad_button_check_pressed(0, gp_start)));
+    var _exit_pressed = keyboard_check_pressed(vk_escape)
+        || (_gp_connected && gamepad_button_check_pressed(0, gp_face2));
 
     if (_continue_pressed) {
         continue_after_game_over();
@@ -192,17 +163,20 @@ if (!game_paused && state == TRANSITION_STATE.IDLE && !death_resolution_active) 
     
     if (_total_seconds > max_time_seconds && !time_exceeded) {
         time_exceeded = true;
-        player_lives = 0;
-        
-        if (instance_exists(obj_jack)) {
-            with (obj_jack) {
-                hp = 0;
-                if (script_exists(scr_trigger_player_death)) {
-                    scr_trigger_player_death();
+        if (!global.cheat_godmode) {
+            if (instance_exists(obj_jack)) {
+                with (obj_jack) {
+                    if (script_exists(scr_trigger_player_death)) {
+                        scr_trigger_player_death();
+                    }
                 }
             }
         }
     }
+}
+
+if (death_notice_timer > 0) {
+    death_notice_timer--;
 }
 
 // --- 5. ROOM TRANSITION & FADE STATE MACHINE ---

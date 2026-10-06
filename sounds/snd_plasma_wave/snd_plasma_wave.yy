@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"snd_plasma_wave",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.4005215,
+  "exportDir":"",
+  "name":"snd_plasma_wave",
+  "parent":{
+    "name":"Sound FX",
+    "path":"folders/Sounds/Sound FX.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"snd_plasma_wave.wav",
+  "volume":1.0,
+}

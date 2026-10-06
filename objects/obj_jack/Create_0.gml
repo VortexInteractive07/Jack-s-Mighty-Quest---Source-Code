@@ -4,8 +4,6 @@
 hp = 100;
 max_hp = 100;
 is_dead = false;
-death_timer = 0;
-death_delay_max = round(game_get_speed(gamespeed_fps) * 0.75);
 damage_multiplier = 1.0;
 
 // Movement Speeds
@@ -44,3 +42,5 @@ is_wall_sliding  = false;
 // Horizontal Momentum Control (Prevents wall jump overwrite)
 wall_jump_lock   = 0;
 wall_jump_lock_max = 12;
+
+shot_cooldown = 0;

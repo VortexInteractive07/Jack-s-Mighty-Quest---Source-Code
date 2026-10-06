@@ -28,10 +28,10 @@ if (_main_alpha > 0) {
         case 2: draw_menu_list(menu_list_cheats,  _text_x, start_y, line_spacing, _main_alpha); break;
     }
 
-    var _mode_label = "MAIN MENU";
+    var _mode_label = get_localized_text("main_menu");
     switch (current_mode) {
-        case 1: _mode_label = "SETTINGS"; break;
-        case 2: _mode_label = "CHEATS"; break;
+        case 1: _mode_label = get_localized_text("settings"); break;
+        case 2: _mode_label = get_localized_text("cheats_title"); break;
     }
 
     draw_set_halign(fa_left);

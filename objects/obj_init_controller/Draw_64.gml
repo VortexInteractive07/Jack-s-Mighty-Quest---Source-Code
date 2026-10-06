@@ -63,6 +63,37 @@ if (has_crash_log) {
     draw_set_color(c_yellow);
     draw_text(_cx, _gui_h - 4, "ENTER/SPACE: CONTINUE  |  C: COPY LOG");
 } 
+else if (language_selection_required) {
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_top);
+
+    draw_set_color(_blue_shadow);
+    draw_text(_cx + _shadow_offset, 28 + _shadow_offset, get_localized_text("language_select"));
+    draw_set_color(c_white);
+    draw_text(_cx, 28, get_localized_text("language_select"));
+
+    var _choice_w = 132;
+    var _choice_h = 38;
+    var _choice_gap = 12;
+    var _choice_y = 92;
+    var _choice_0_x = _cx - _choice_w - (_choice_gap / 2);
+    var _choice_1_x = _cx + (_choice_gap / 2);
+
+    for (var _language_i = 0; _language_i < 2; _language_i++) {
+        var _choice_x = (_language_i == 0) ? _choice_0_x : _choice_1_x;
+        var _selected = (_language_i == language_selection_index);
+        draw_set_color(_selected ? make_color_rgb(0, 50, 120) : _glass_navy);
+        draw_rectangle(_choice_x, _choice_y, _choice_x + _choice_w, _choice_y + _choice_h, false);
+        draw_set_color(_selected ? _border_cyan : make_color_rgb(60, 60, 60));
+        draw_rectangle(_choice_x, _choice_y, _choice_x + _choice_w, _choice_y + _choice_h, true);
+        draw_set_color(_selected ? c_yellow : c_white);
+        draw_text(_choice_x + (_choice_w / 2), _choice_y + 12, get_localized_text((_language_i == 0) ? "english" : "japanese"));
+    }
+
+    draw_set_valign(fa_bottom);
+    draw_set_color(c_white);
+    draw_text(_cx, _gui_h - 12, get_localized_text("language_instruction"));
+}
 else if (!drm_passed) {
     var _shake_x = 0;
     if (drm_shake_timer > 0) {
@@ -73,9 +104,9 @@ else if (!drm_passed) {
     draw_set_valign(fa_top);
     
     draw_set_color(_blue_shadow);
-    draw_text(_cx + _shadow_offset + _shake_x, 6 + _shadow_offset, "EDUCATIONAL DRM SYSTEM");
+    draw_text(_cx + _shadow_offset + _shake_x, 6 + _shadow_offset, get_localized_text("challenge_title"));
     draw_set_color(make_color_rgb(0, 235, 255));
-    draw_text(_cx + _shake_x, 6, "EDUCATIONAL DRM SYSTEM");
+    draw_text(_cx + _shake_x, 6, get_localized_text("challenge_title"));
 
     var _box_w = _gui_w - 32;
     var _box_h = 178;
@@ -106,20 +137,20 @@ else if (!drm_passed) {
     draw_set_color((drm_difficulty == 0) ? c_yellow : make_color_rgb(60, 60, 60));
     draw_rectangle(_b1_x, _badge_y, _b1_x + _badge_w, _badge_y + _badge_h, true);
     draw_set_color((drm_difficulty == 0) ? c_yellow : c_gray);
-    draw_text(_b1_x + (_badge_w / 2), _badge_y + 1, "KIDS");
+    draw_text(_b1_x + (_badge_w / 2), _badge_y + 1, get_localized_text("difficulty_kids"));
 
     draw_set_color((drm_difficulty == 1) ? make_color_rgb(0, 120, 200) : c_black);
     draw_rectangle(_b2_x, _badge_y, _b2_x + _badge_w, _badge_y + _badge_h, false);
     draw_set_color((drm_difficulty == 1) ? c_yellow : make_color_rgb(60, 60, 60));
     draw_rectangle(_b2_x, _badge_y, _b2_x + _badge_w, _badge_y + _badge_h, true);
     draw_set_color((drm_difficulty == 1) ? c_yellow : c_gray);
-    draw_text(_b2_x + (_badge_w / 2), _badge_y + 1, "ADULTS");
+    draw_text(_b2_x + (_badge_w / 2), _badge_y + 1, get_localized_text("difficulty_adults"));
 
     draw_set_color(make_color_rgb(255, 180, 0));
     draw_text(_cx + _shake_x, _box_y1 + 22, drm_topic_title);
 
     draw_set_color(c_yellow);
-    draw_text(_cx + _shake_x, _box_y1 + 35, "SOLVE THE CHALLENGE:");
+    draw_text(_cx + _shake_x, _box_y1 + 35, get_localized_text("challenge_solve"));
     
     draw_set_color(make_color_rgb(0, 40, 80));
     draw_rectangle(_box_x1 + 20, _box_y1 + 48, _box_x2 - 20, _box_y1 + 72, false);
@@ -154,7 +185,7 @@ else if (!drm_passed) {
 
     draw_set_valign(fa_bottom);
     draw_set_color(c_yellow);
-    draw_text(_cx, _gui_h - 4, "TAB: MODE | ARROWS: REROLL | NUMBERS: TYPE | ENTER: SUBMIT");
+    draw_text(_cx, _gui_h - 4, get_localized_text("challenge_controls"));
 } 
 else {
     draw_set_halign(fa_center);

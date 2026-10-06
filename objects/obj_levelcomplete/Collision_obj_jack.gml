@@ -1,6 +1,10 @@
 /// @description Trigger Level Complete Sequence on Contact
 
 if (!activated) {
+    if (room == rm_boss && instance_exists(obj_boss_pumpkin)) {
+        exit;
+    }
+
     activated = true;
 
     // 1. Smoothly fade out stage BGM
@@ -11,10 +15,7 @@ if (!activated) {
     // 2. Play victory jingle
     if (audio_exists(victory_jingle)) {
         if (!audio_is_playing(victory_jingle)) {
-            level_audio_id = audio_play_sound(victory_jingle, 10, false);
-            if (level_audio_id != -1) {
-                audio_sound_gain(level_audio_id, global.vol_sfx / 100, 0);
-            }
+            level_audio_id = scr_play_sfx(victory_jingle, 10, false);
         }
     }
 

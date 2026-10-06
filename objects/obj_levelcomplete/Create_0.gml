@@ -3,7 +3,7 @@ scr_load_settings();
 
 activated = false;
 level_audio_id = -1;
-target_level = rm_splash_screen;
+target_level = (room == rm_boss) ? rm_title_screen : rm_boss;
 
 // Post-Tally Fade-Out Variables
 fade_timer = 0;

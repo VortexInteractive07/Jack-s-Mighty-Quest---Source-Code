@@ -8,14 +8,12 @@ function scr_load_settings() {
     if (!variable_global_exists("enable_splash_dialogue")) global.enable_splash_dialogue = global.enable_dialogue;
     if (!variable_global_exists("enable_title_dialogue"))  global.enable_title_dialogue = global.enable_dialogue;
     if (!variable_global_exists("arcade_mode"))        global.arcade_mode = false;
-    if (!variable_global_exists("experimental_weather")) global.experimental_weather = false;
-    if (!variable_global_exists("weather_type"))       global.weather_type = "RAIN";
-    if (!variable_global_exists("weather_intensity"))  global.weather_intensity = "MID";
-    if (!variable_global_exists("weather_wind"))       global.weather_wind = false;
     if (!variable_global_exists("cheat_godmode"))     global.cheat_godmode = false;
-    if (!variable_global_exists("cheat_infammo"))     global.cheat_infammo = false;
     if (!variable_global_exists("cheat_unlocked"))    global.cheat_unlocked = false;
     if (!variable_global_exists("selected_mannequin")) global.selected_mannequin = 0;
+    if (!variable_global_exists("language")) global.language = "EN";
+    if (!variable_global_exists("startup_challenge_enabled")) global.startup_challenge_enabled = false;
+    global.language_selected = false;
 
     var _settings_file_name = "settings.json";
     if (!file_exists(_settings_file_name)) {
@@ -63,31 +61,24 @@ function scr_load_settings() {
         if (variable_struct_exists(_data, "arcade_mode") && is_bool(_data.arcade_mode)) {
             global.arcade_mode = _data.arcade_mode;
         }
-        if (variable_struct_exists(_data, "experimental_weather") && is_bool(_data.experimental_weather)) {
-            global.experimental_weather = _data.experimental_weather;
-        }
-        if (variable_struct_exists(_data, "weather_type") && is_string(_data.weather_type)) {
-            var _weather_type = string_upper(_data.weather_type);
-            if (_weather_type == "RAIN" || _weather_type == "SNOW") global.weather_type = _weather_type;
-        }
-        if (variable_struct_exists(_data, "weather_intensity") && is_string(_data.weather_intensity)) {
-            var _weather_intensity = string_upper(_data.weather_intensity);
-            if (_weather_intensity == "LOW" || _weather_intensity == "MID" || _weather_intensity == "HIGH" || _weather_intensity == "EXTREME") global.weather_intensity = _weather_intensity;
-        }
-        if (variable_struct_exists(_data, "weather_wind") && is_bool(_data.weather_wind)) {
-            global.weather_wind = _data.weather_wind;
-        }
         if (variable_struct_exists(_data, "cheat_godmode") && is_bool(_data.cheat_godmode)) {
             global.cheat_godmode = _data.cheat_godmode;
-        }
-        if (variable_struct_exists(_data, "cheat_infammo") && is_bool(_data.cheat_infammo)) {
-            global.cheat_infammo = _data.cheat_infammo;
         }
         if (variable_struct_exists(_data, "cheat_unlocked") && is_bool(_data.cheat_unlocked)) {
             global.cheat_unlocked = _data.cheat_unlocked;
         }
         if (variable_struct_exists(_data, "selected_mannequin") && is_real(_data.selected_mannequin)) {
             global.selected_mannequin = clamp(floor(_data.selected_mannequin), 0, 2);
+        }
+        if (variable_struct_exists(_data, "language") && is_string(_data.language)) {
+            var _language = string_upper(_data.language);
+            if (_language == "EN" || _language == "JP") {
+                global.language = _language;
+                global.language_selected = true;
+            }
+        }
+        if (variable_struct_exists(_data, "startup_challenge_enabled") && is_bool(_data.startup_challenge_enabled)) {
+            global.startup_challenge_enabled = _data.startup_challenge_enabled;
         }
     } catch (_err) {
         show_debug_message("ERROR: could not parse '" + _settings_file_name + "' (" + string(_err.message) + ").");

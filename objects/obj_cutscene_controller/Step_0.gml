@@ -2,23 +2,30 @@
 /// Intelligence Level: 10/10
 
 // --- 1. BACKLOG TOGGLE & NAVIGATION ---
-var _toggle_backlog = keyboard_check_pressed(ord("H")) || keyboard_check_pressed(vk_tab);
+var _gp_connected = gamepad_is_connected(0);
+var _gp_up = _gp_connected && gamepad_button_check_pressed(0, gp_padu);
+var _gp_down = _gp_connected && gamepad_button_check_pressed(0, gp_padd);
+var _gp_confirm = _gp_connected && (gamepad_button_check_pressed(0, gp_face1) || gamepad_button_check_pressed(0, gp_start));
+var _gp_cancel = _gp_connected && gamepad_button_check_pressed(0, gp_face2);
+var _gp_history = _gp_connected && gamepad_button_check_pressed(0, gp_face4);
+
+var _toggle_backlog = keyboard_check_pressed(ord("H")) || keyboard_check_pressed(vk_tab) || _gp_history;
 if (_toggle_backlog && fade_state == 1 && !choice_active) {
     backlog_open = !backlog_open;
     backlog_scroll_index = 0;
     if (audio_exists(sfx_backlog_open)) {
-        audio_play_sound(sfx_backlog_open, 5, false);
+        scr_play_sfx(sfx_backlog_open, 5, false);
     }
 }
 
 if (backlog_open) {
-    var _scroll_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
-    var _scroll_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
+    var _scroll_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W")) || _gp_up;
+    var _scroll_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S")) || _gp_down;
     
     if (_scroll_up) backlog_scroll_index = min(backlog_scroll_index + 1, max(0, array_length(dialogue_history) - 5));
     if (_scroll_down) backlog_scroll_index = max(backlog_scroll_index - 1, 0);
     
-    if (keyboard_check_pressed(vk_escape) || _toggle_backlog) {
+    if (keyboard_check_pressed(vk_escape) || _gp_cancel || _toggle_backlog) {
         backlog_open = false;
     }
     exit; 
@@ -26,23 +33,23 @@ if (backlog_open) {
 
 // --- 2. INTERACTIVE CHOICE SELECTION HANDLING ---
 if (choice_active) {
-    var _choice_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
-    var _choice_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
-    var _choice_confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left);
+    var _choice_up = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W")) || _gp_up;
+    var _choice_down = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S")) || _gp_down;
+    var _choice_confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left) || _gp_confirm;
     
     var _choice_count = is_array(choices_array) ? array_length(choices_array) : 0;
     if (_choice_count > 0) {
         if (_choice_up) {
             choice_selected_index = (choice_selected_index - 1 + _choice_count) % _choice_count;
-            if (audio_exists(sfx_choice_select)) audio_play_sound(sfx_choice_select, 5, false);
+            if (audio_exists(sfx_choice_select)) scr_play_sfx(sfx_choice_select, 5, false);
         }
         if (_choice_down) {
             choice_selected_index = (choice_selected_index + 1) % _choice_count;
-            if (audio_exists(sfx_choice_select)) audio_play_sound(sfx_choice_select, 5, false);
+            if (audio_exists(sfx_choice_select)) scr_play_sfx(sfx_choice_select, 5, false);
         }
         
         if (_choice_confirm) {
-            if (audio_exists(sfx_choice_confirm)) audio_play_sound(sfx_choice_confirm, 6, false);
+            if (audio_exists(sfx_choice_confirm)) scr_play_sfx(sfx_choice_confirm, 6, false);
             var _selected_choice = choices_array[choice_selected_index];
             
             if (variable_struct_exists(_selected_choice, "target_scene")) {
@@ -84,14 +91,14 @@ if (is_array(particle_list)) {
     }
 }
 
-var _advance = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left);
-var _skip    = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("S"));
+var _advance = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter) || mouse_check_button_pressed(mb_left) || _gp_confirm;
+var _skip    = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("S")) || _gp_cancel;
 
 // Global Cutscene Skip
 if (_skip && fade_state != 2) {
     io_clear();
     if (audio_exists(sfx_dialogue_continue)) {
-        audio_play_sound(sfx_dialogue_continue, 5, false);
+        scr_play_sfx(sfx_dialogue_continue, 5, false);
     }
     if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
         audio_stop_sound(sfx_static_glitch);
@@ -167,26 +174,26 @@ switch (fade_state) {
         if (variable_struct_exists(_slide, "sfx")) {
             if (_slide.sfx == sfx_victor_laugh && !_voice_sync_applies) {
                 if (!variable_instance_exists(id, "laugh_played") || !laugh_played) {
-                    if (audio_exists(sfx_victor_laugh)) audio_play_sound(sfx_victor_laugh, 9, false);
+                    if (audio_exists(sfx_victor_laugh)) scr_play_sfx(sfx_victor_laugh, 9, false);
                     laugh_played = true;
                 }
             }
             if (_slide.sfx == sfx_screen_off) {
                 if (!variable_instance_exists(id, "screen_off_played") || !screen_off_played) {
-                    if (audio_exists(sfx_screen_off)) audio_play_sound(sfx_screen_off, 9, false);
+                    if (audio_exists(sfx_screen_off)) scr_play_sfx(sfx_screen_off, 9, false);
                     screen_off_played = true;
                 }
             }
             if (_slide.sfx == sfx_siren_distant) {
                 if (!variable_instance_exists(id, "siren_played") || !siren_played) {
-                    if (audio_exists(sfx_siren_distant)) audio_play_sound(sfx_siren_distant, 8, false);
+                    if (audio_exists(sfx_siren_distant)) scr_play_sfx(sfx_siren_distant, 8, false);
                     siren_played = true;
                 }
             }
             if (_slide.sfx == sfx_static_glitch) {
                 if (!variable_instance_exists(id, "glitch_playing") || !glitch_playing) {
                     if (audio_exists(sfx_static_glitch) && !audio_is_playing(sfx_static_glitch)) {
-                        audio_play_sound(sfx_static_glitch, 8, true);
+                        scr_play_sfx(sfx_static_glitch, 8, true);
                     }
                     glitch_playing = true;
                 }
@@ -194,7 +201,7 @@ switch (fade_state) {
             if (_slide.sfx == sfx_ambient_city) {
                 if (!variable_instance_exists(id, "city_ambient_playing") || !city_ambient_playing) {
                     if (audio_exists(sfx_ambient_city) && !audio_is_playing(sfx_ambient_city)) {
-                        audio_play_sound(sfx_ambient_city, 8, true);
+                        scr_play_sfx(sfx_ambient_city, 8, true);
                     }
                     city_ambient_playing = true;
                 }
@@ -206,7 +213,7 @@ switch (fade_state) {
                 if (voice_sync_inst != -1 && audio_is_playing(voice_sync_inst)) {
                     audio_stop_sound(voice_sync_inst);
                 }
-                voice_sync_inst       = audio_play_sound(sfx_victor_monologue_vo, 10, false);
+                voice_sync_inst       = scr_play_sfx(sfx_victor_monologue_vo, 10, false);
                 voice_sync_start_time = current_time;
                 voice_sync_duration   = audio_sound_length(sfx_victor_monologue_vo) * 1000;
                 voice_sync_group_name = _slide.voice_sync_group;
@@ -297,7 +304,7 @@ switch (fade_state) {
                     
                     if (_sfx != -1 && _sfx != sfx_victor_laugh && _sfx != sfx_screen_off && audio_exists(_sfx)) {
                         audio_stop_sound(_sfx);
-                        audio_play_sound(_sfx, 10, false);
+                        scr_play_sfx(_sfx, 10, false);
                     }
                 }
             } else {
@@ -322,7 +329,7 @@ switch (fade_state) {
 
         if (_advance && !voice_sync_active && !_voice_sync_just_completed) {
             if (audio_exists(sfx_dialogue_continue)) {
-                audio_play_sound(sfx_dialogue_continue, 5, false);
+                scr_play_sfx(sfx_dialogue_continue, 5, false);
             }
             if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
                 audio_stop_sound(sfx_static_glitch);

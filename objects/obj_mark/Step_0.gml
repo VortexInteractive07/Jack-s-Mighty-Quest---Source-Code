@@ -65,7 +65,7 @@ if (needs_help && plasma_cooldown <= 0) {
     }
     
     if (audio_exists(snd_plasma_wave)) {
-        audio_play_sound(snd_plasma_wave, 8, false);
+        scr_play_sfx(snd_plasma_wave, 8, false);
     }
     
     plasma_cooldown = plasma_cooldown_max;

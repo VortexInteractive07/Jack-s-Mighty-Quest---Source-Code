@@ -6,192 +6,90 @@ var _gui_h = display_get_gui_height();
 draw_set_font(fnt_bitmap);
 
 // ============================================================================
-// 1. CLASSIC SMB1 NES HUD
+// 1. GAMEPLAY STATUS BAR
 // ============================================================================
 if (pause_slide < 1.0 && !is_game_over) {
     var _hud_alpha = 1.0 - pause_slide;
-    draw_set_alpha(_hud_alpha);
-    
-    // HUD Layout Columns
-    var _col1_x = 16;   // JACK x03 / SCORE / ASCII HP
-    var _col2_x = 128;  // COIN ICON + COUNT
-    var _col3_x = 240;  // WORLD
-    var _col4_x = 352;  // TIME
-    
-    var _row1_y = 8;    // JACK x03
-    var _row2_y = 18;   // 000800
-    var _row3_y = 28;   // HP [|||||||-]
-    
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-
-    // --- COLUMN 1: JACK & LIVES & SCORE & ASCII HP ---
-    
-    // --- MECHANICAL FLIP-CLOCK LIVES RENDERING ---
-    var _jack_header = "JACK x";
-    
-    // Draw Header Shadow + Text
-    draw_set_color(c_black);
-    draw_text(_col1_x + 1, _row1_y + 1, _jack_header);
-    draw_set_color(c_white);
-    draw_text(_col1_x, _row1_y, _jack_header);
-    
-    var _digit_x = _col1_x + string_width(_jack_header);
-    
-    // Check and update life counter change triggers
-    if (player_lives != prev_player_lives) {
-        flip_timer = flip_duration;
-        
-        var _old = string(prev_player_lives);
-        if (string_length(_old) < 2) _old = "0" + _old;
-        flip_old_str = _old;
-        
-        var _new = string(player_lives);
-        if (string_length(_new) < 2) _new = "0" + _new;
-        flip_new_str = _new;
-        
-        prev_player_lives = player_lives;
-    }
-
-    if (flip_timer <= 0) {
-        // Static Digit Draw
-        var _curr_str = string(player_lives);
-        if (string_length(_curr_str) < 2) _curr_str = "0" + _curr_str;
-        
-        draw_set_color(c_black);
-        draw_text(_digit_x + 1, _row1_y + 1, _curr_str);
-        draw_set_color(c_white);
-        draw_text(_digit_x, _row1_y, _curr_str);
-    } else {
-        // Active Flip Clock Animation Processing
-        flip_timer--;
-        var _progress = 1.0 - (flip_timer / flip_duration);
-        var _char_w = string_width("00");
-        var _char_h = string_height("0");
-        var _half_h = floor(_char_h / 2);
-
-        // 1. Mechanical Card Backing
-        draw_set_color(c_black);
-        draw_rectangle(_digit_x - 1, _row1_y - 1, _digit_x + _char_w + 1, _row1_y + _char_h + 1, false);
-
-        // 2. Base Static Digit Display
-        // Shows OLD digit before mid-flip, NEW digit after mid-flip
-        var _base_str = (_progress < 0.5) ? flip_old_str : flip_new_str;
-        draw_set_color(c_black);
-        draw_text(_digit_x + 1, _row1_y + 1, _base_str);
-        draw_set_color(c_white);
-        draw_text(_digit_x, _row1_y, _base_str);
-
-        // 3. Animated Flipping Flap Overlay
-        var _scale_y = cos(_progress * pi);
-        var _flip_str = (_progress < 0.5) ? flip_old_str : flip_new_str;
-        var _draw_y = _row1_y + _half_h - (_half_h * _scale_y);
-
-        // Shadow & Flap Text using cosine scale flip centered on the seam
-        draw_set_color(c_black);
-        draw_text_transformed(_digit_x + 1, _draw_y + 1, _flip_str, 1.0, _scale_y, 0);
-        draw_set_color(c_white);
-        draw_text_transformed(_digit_x, _draw_y, _flip_str, 1.0, _scale_y, 0);
-
-        // 4. Mechanical Seam Separator Line
-        draw_set_color(c_dkgray);
-        draw_line(_digit_x - 1, _row1_y + _half_h, _digit_x + _char_w + 1, _row1_y + _half_h);
-        draw_set_color(c_white);
-    }
-
-    // --- SCORE (6 DIGITS) ---
-    var _score_str = string(game_score);
-    while (string_length(_score_str) < 6) {
-        _score_str = "0" + _score_str;
-    }
-    draw_set_color(c_black);
-    draw_text(_col1_x + 1, _row2_y + 1, _score_str);
-    draw_set_color(c_white);
-    draw_text(_col1_x, _row2_y, _score_str);
-
-    // --- RETRO ASCII HP COUNTER ---
+    var _panel_x = 6;
+    var _panel_y = 5;
+    var _panel_w = _gui_w - 12;
+    var _panel_h = 38;
+    var _hp = 0;
     var _max_hp = 100;
-    if (instance_exists(obj_jack) && variable_instance_exists(obj_jack, "max_hp")) {
+    var _world_text = variable_instance_exists(id, "world_text") ? world_text : "1-1";
+    var _seconds_left = max(0, max_time_seconds - floor(game_timer_ticks / game_get_speed(gamespeed_fps)));
+    var _score_display = min(999999, max(0, game_score));
+    var _score_text = string(_score_display);
+    var _lives_text = string(max(0, player_lives));
+    var _coin_text = string(collectibles_collected);
+
+    if (instance_exists(obj_jack)) {
+        _hp = max(0, obj_jack.hp);
         _max_hp = max(1, obj_jack.max_hp);
     }
-    
-    var _hp_ratio     = clamp(hp_visual_current / _max_hp, 0, 1);
-    var _total_blocks = 8;
-    var _filled_blocks = floor(_hp_ratio * _total_blocks);
-    var _empty_blocks  = _total_blocks - _filled_blocks;
-    
-    var _hp_ascii = "HP [" + string_repeat("|", _filled_blocks) + string_repeat("-", _empty_blocks) + "]";
-    
-    var _hp_col = c_white;
-    if (_hp_ratio <= 0.25) {
-        _hp_col = ((floor(game_timer_ticks / 10) % 2 == 0) ? c_red : c_white);
-    }
-    
-    draw_set_color(c_black);
-    draw_text(_col1_x + 1, _row3_y + 1, _hp_ascii);
-    draw_set_color(_hp_col);
-    draw_text(_col1_x, _row3_y, _hp_ascii);
+    while (string_length(_score_text) < 6) _score_text = "0" + _score_text;
+    while (string_length(_lives_text) < 2) _lives_text = "0" + _lives_text;
+    while (string_length(_coin_text) < 2) _coin_text = "0" + _coin_text;
 
-    // --- COLUMN 2: COINS ---
-    var _coin_str = string(collectibles_collected);
-    if (string_length(_coin_str) < 2) {
-        _coin_str = "0" + _coin_str;
-    }
-    
-    var _coin_w = sprite_get_width(spr_coin);
-    var _coin_draw_x = _col2_x + sprite_get_xoffset(spr_coin);
-    var _coin_draw_y = _row2_y + floor(string_height("X") / 2);
-    
-    // Draw Coin Drop-Shadow and Main Sprite
-    draw_sprite_ext(spr_coin, 0, _coin_draw_x + 1, _coin_draw_y + 1, 1, 1, 0, c_black, _hud_alpha);
-    draw_sprite_ext(spr_coin, 0, _coin_draw_x, _coin_draw_y, 1, 1, 0, c_white, _hud_alpha);
-    
+    draw_set_alpha(_hud_alpha);
     draw_set_color(c_black);
-    draw_text(_col2_x + _coin_w + 3, _row2_y + 1, "x" + _coin_str);
+    draw_rectangle(_panel_x, _panel_y, _panel_x + _panel_w, _panel_y + _panel_h, false);
+    draw_set_color(make_color_rgb(90, 105, 130));
+    draw_rectangle(_panel_x, _panel_y, _panel_x + _panel_w, _panel_y + _panel_h, true);
+    draw_set_color(c_aqua);
+    draw_line(_panel_x + 1, _panel_y + 1, _panel_x + _panel_w - 1, _panel_y + 1);
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
     draw_set_color(c_white);
-    draw_text(_col2_x + _coin_w + 2, _row2_y, "x" + _coin_str);
 
-    // --- COLUMN 3: WORLD ---
-    var _world_str = variable_instance_exists(id, "world_text") ? world_text : "1-1";
-    draw_set_color(c_black);
-    draw_text(_col3_x + 1, _row1_y + 1, "WORLD");
-    draw_text(_col3_x + 5, _row2_y + 1, _world_str);
-    
+    draw_text(14, 8, get_localized_text("jack_label") + " x" + _lives_text);
+    draw_text(14, 25, get_localized_text("hp_label"));
+
+    var _hp_bar_x = 34;
+    var _hp_bar_y = 27;
+    var _hp_bar_w = 50;
+    var _hp_ratio = clamp(_hp / _max_hp, 0, 1);
+    draw_set_color(c_dkgray);
+    draw_rectangle(_hp_bar_x, _hp_bar_y, _hp_bar_x + _hp_bar_w, _hp_bar_y + 6, false);
+    draw_set_color((_hp_ratio <= 0.25) ? c_red : c_lime);
+    draw_rectangle(_hp_bar_x, _hp_bar_y, _hp_bar_x + (_hp_bar_w * _hp_ratio), _hp_bar_y + 6, false);
     draw_set_color(c_white);
-    draw_text(_col3_x, _row1_y, "WORLD");
-    draw_text(_col3_x + 4, _row2_y, _world_str);
+    draw_text(88, 25, string(_hp));
 
-    // --- COLUMN 4: TIME ---
-    var _remaining_seconds = max(0, max_time_seconds - floor(game_timer_ticks / game_get_speed(gamespeed_fps)));
-    var _time_str = string(_remaining_seconds);
-    while (string_length(_time_str) < 3) {
-        _time_str = "0" + _time_str;
-    }
-    
-    draw_set_color(c_black);
-    draw_text(_col4_x + 1, _row1_y + 1, "TIME");
+    draw_set_color(c_dkgray);
+    draw_line(112, 10, 112, 38);
     draw_set_color(c_white);
-    draw_text(_col4_x, _row1_y, "TIME");
-    
-    var _time_col = c_white;
-    if (_remaining_seconds <= 60) {
-        _time_col = ((floor(game_timer_ticks / 10) % 2 == 0) ? c_red : c_yellow);
-    }
-    
-    draw_set_color(c_black);
-    draw_text(_col4_x + 5, _row2_y + 1, _time_str);
-    draw_set_color(_time_col);
-    draw_text(_col4_x + 4, _row2_y, _time_str);
+    draw_text(120, 8, get_localized_text("score_label"));
+    draw_text(120, 25, _score_text);
 
-    // ARCADE CREDITS READOUT
+    draw_set_color(c_dkgray);
+    draw_line(215, 10, 215, 38);
+    draw_set_color(c_white);
+    draw_text(223, 8, get_localized_text("gems_label"));
+    draw_sprite_ext(spr_coin, 0, 224, 25, 1, 1, 0, c_white, _hud_alpha);
+    draw_text(240, 25, "x" + _coin_text);
+
+    draw_set_color(c_dkgray);
+    draw_line(285, 10, 285, 38);
+    draw_set_color(c_white);
+    draw_text(293, 8, get_localized_text("world_label"));
+    draw_text(293, 25, _world_text);
+
+    draw_set_color(c_dkgray);
+    draw_line(354, 10, 354, 38);
+    draw_set_color(c_white);
+    draw_text(362, 8, get_localized_text("time_label"));
+    var _time_text = string(_seconds_left);
+    while (string_length(_time_text) < 3) _time_text = "0" + _time_text;
+    draw_set_color((_seconds_left <= 60) ? c_yellow : c_white);
+    draw_text(362, 25, _time_text);
+
     if (global.arcade_mode) {
-        var _cred_str = "CREDIT " + string(global.arcade_credits);
-        draw_set_color(c_black);
-        draw_text(_col2_x + 1, _row3_y + 1, _cred_str);
+        draw_set_halign(fa_right);
         draw_set_color(c_yellow);
-        draw_text(_col2_x, _row3_y, _cred_str);
+        draw_text(_panel_x + _panel_w - 7, _panel_y + _panel_h + 2, "CREDIT " + string(global.arcade_credits));
     }
-
     draw_set_alpha(1.0);
 }
 
@@ -244,26 +142,64 @@ if (is_game_over) {
     draw_set_valign(fa_middle);
     
     draw_set_color(c_black);
-    draw_text((_gui_w / 2) + 1, (_gui_h / 2) - 9, "GAME OVER");
+    draw_text((_gui_w / 2) + 1, (_gui_h / 2) - 9, get_localized_text("game_over"));
     draw_set_color(c_red);
-    draw_text(_gui_w / 2, (_gui_h / 2) - 10, "GAME OVER");
+    draw_text(_gui_w / 2, (_gui_h / 2) - 10, get_localized_text("game_over"));
     
     draw_set_color(c_black);
-    draw_text((_gui_w / 2) + 1, (_gui_h / 2) + 17, "PRESS START TO CONTINUE");
+    draw_text((_gui_w / 2) + 1, (_gui_h / 2) + 17, get_localized_text("continue_start"));
     draw_set_color(c_yellow);
-    draw_text(_gui_w / 2, (_gui_h / 2) + 16, "PRESS START TO CONTINUE");
+    draw_text(_gui_w / 2, (_gui_h / 2) + 16, get_localized_text("continue_start"));
     
     if (global.arcade_mode && global.arcade_credits <= 0) {
         draw_set_color(c_black);
-        draw_text((_gui_w / 2) + 1, (_gui_h / 2) + 37, "NO CREDITS - INSERT COIN AT TITLE");
+        draw_text((_gui_w / 2) + 1, (_gui_h / 2) + 37, get_localized_text("no_credits"));
         draw_set_color(c_white);
-        draw_text(_gui_w / 2, (_gui_h / 2) + 36, "NO CREDITS - INSERT COIN AT TITLE");
+        draw_text(_gui_w / 2, (_gui_h / 2) + 36, get_localized_text("no_credits"));
     }
+}
+
+if (death_notice_timer > 0 && !is_game_over) {
+    var _notice_alpha = min(1, death_notice_timer / 12);
+    var _notice_y = _gui_h * 0.42;
+    draw_set_alpha(_notice_alpha * 0.82);
+    draw_set_color(c_black);
+    draw_rectangle(0, _notice_y - 18, _gui_w, _notice_y + 34, false);
+    draw_set_alpha(_notice_alpha);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(c_red);
+    draw_text(_gui_w / 2, _notice_y - 7, get_localized_text("life_lost"));
+    draw_set_color(c_white);
+    var _lives_message = (player_lives <= 1)
+        ? get_localized_text("last_life")
+        : get_localized_text("lives_left") + ": " + string(player_lives);
+    draw_text(_gui_w / 2, _notice_y + 14, _lives_message);
+    draw_set_alpha(1);
 }
 
 // ============================================================================
 // 4. TRANSITION FADE OVERLAY
 // ============================================================================
+if (room == rm_boss && instance_exists(obj_boss_pumpkin)) {
+    var _boss = instance_find(obj_boss_pumpkin, 0);
+    var _bar_w = 180;
+    var _bar_x = (_gui_w - _bar_w) / 2;
+    var _bar_y = 8;
+    var _boss_ratio = clamp(_boss.hp / _boss.max_hp, 0, 1);
+
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_top);
+    draw_set_color(c_black);
+    draw_rectangle(_bar_x - 2, _bar_y - 2, _bar_x + _bar_w + 2, _bar_y + 16, false);
+    draw_set_color(c_white);
+    draw_rectangle(_bar_x, _bar_y, _bar_x + _bar_w, _bar_y + 5, false);
+    draw_set_color(c_red);
+    draw_rectangle(_bar_x, _bar_y, _bar_x + (_bar_w * _boss_ratio), _bar_y + 5, false);
+    draw_set_color(c_yellow);
+    draw_text(_gui_w / 2, _bar_y + 7, "MELON HEAD");
+}
+
 if (fade_alpha > 0.0) {
     draw_set_color(fade_color);
     draw_set_alpha(fade_alpha);

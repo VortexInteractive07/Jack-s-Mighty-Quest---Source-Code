@@ -4,24 +4,14 @@
 
 display_set_gui_size(432, 240);
 
+settings_file_name = "settings.json";
+if (script_exists(scr_load_settings)) {
+    scr_load_settings();
+}
+
 sfx_dialogue_asset = sfx_dialogue;
 sfx_continue_asset = sfx_dialogue_continue;
 mus_menu_asset     = mus_menu;
-
-global.vol_bgm = 100;
-global.vol_sfx = 100;
-global.fullscreen = false;
-global.enable_dialogue = true;
-global.enable_splash_dialogue = true;
-global.enable_title_dialogue = true;
-global.arcade_mode = false;
-global.experimental_weather = false;
-global.weather_type = "RAIN";
-global.weather_intensity = "MID";
-global.weather_wind = false;
-global.cheat_godmode = false;
-global.cheat_infammo = false;
-global.cheat_unlocked = false;
 
 target_room = rm_intro;
 
@@ -54,39 +44,12 @@ gp_axis_pressed_v = false;
 gp_axis_pressed_h = false;
 pending_exit_to_title = false;
 
-settings_file_name = "settings.json";
-if (script_exists(scr_load_settings)) {
-    scr_load_settings();
-}
-
 global.game_session_active = false;
 global.game_lives = 3;
 global.game_score = 0;
 
 save_settings = function() {
-    var _data = {
-        vol_bgm: global.vol_bgm,
-        vol_sfx: global.vol_sfx,
-        fullscreen: global.fullscreen,
-        enable_dialogue: global.enable_dialogue,
-        enable_splash_dialogue: global.enable_splash_dialogue,
-        enable_title_dialogue: global.enable_title_dialogue,
-        arcade_mode: global.arcade_mode,
-        experimental_weather: global.experimental_weather,
-        weather_type: global.weather_type,
-        weather_intensity: global.weather_intensity,
-        weather_wind: global.weather_wind,
-        cheat_godmode: global.cheat_godmode,
-        cheat_infammo: global.cheat_infammo,
-        cheat_unlocked: global.cheat_unlocked
-    };
-
-    var _json_str = json_stringify(_data);
-    var _file = file_text_open_write(settings_file_name);
-    if (_file != -1) {
-        file_text_write_string(_file, _json_str);
-        file_text_close(_file);
-    }
+    return scr_save_settings();
 };
 
 window_set_fullscreen(global.fullscreen);
@@ -108,6 +71,9 @@ make_menu_list = function(_items, _visible_max) {
         }
         if (variable_struct_exists(_item, "get_value") && is_method(_item.get_value)) {
             _item.get_value = method(_inst, _item.get_value);
+        }
+        if (variable_struct_exists(_item, "get_label") && is_method(_item.get_label)) {
+            _item.get_label = method(_inst, _item.get_label);
         }
     }
 
@@ -171,6 +137,11 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
         var _item = _list.items[i];
 
         var _label_text = _item.label;
+        if (variable_struct_exists(_item, "localization_key")) {
+            _label_text = get_localized_text(_item.localization_key);
+        } else if (variable_struct_exists(_item, "get_label")) {
+            _label_text = _item.get_label();
+        }
         if (variable_struct_exists(_item, "get_value")) {
             _label_text += _item.get_value();
         }
@@ -210,108 +181,94 @@ toggle_fullscreen = function() {
     save_settings();
 };
 
-cycle_weather_type = function() {
-    global.weather_type = (global.weather_type == "RAIN") ? "SNOW" : "RAIN";
-    save_settings();
-};
-
-cycle_weather_intensity = function(_direction) {
-    var _levels = ["LOW", "MID", "HIGH", "EXTREME"];
-    var _index = array_get_index(_levels, global.weather_intensity);
-    if (_index < 0) _index = 1;
-    _index = (_index + _direction + array_length(_levels)) mod array_length(_levels);
-    global.weather_intensity = _levels[_index];
-    save_settings();
-};
-
-toggle_weather_wind = function() {
-    global.weather_wind = !global.weather_wind;
+cycle_language = function() {
+    global.language = (global.language == "EN") ? "JP" : "EN";
+    global.language_selected = true;
     save_settings();
 };
 
 menu_list_main = make_menu_list([
-    { label: "Play Game", action: function() { io_clear(); target_room = room_exists(rm_intro) ? rm_intro : room_next(room); fade_state = 2; } },
-    { label: "Load Recent Game", action: function() { show_toast("Load Recent Game coming soon in " + target_version + "!"); } },
-    { label: "Time Attack", action: function() { show_toast("Time Attack coming soon in " + target_version + "!"); } },
-    { label: "Cheats", action: function() { current_mode = 2; menu_list_cheats.index = 0; } },
-    { label: "Settings", action: function() { current_mode = 1; menu_list_options.index = 0; } },
-    { label: "Changelog", action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
-    { label: "Jukebox", action: function() { io_clear(); target_room = room_exists(rm_jukebox) ? rm_jukebox : room_next(room); fade_state = 2; } },
-    { label: "Exit to Title Screen", action: function() { io_clear(); pending_exit_to_title = true; fade_state = 2; } },
-    { label: "Exit Game", action: function() { game_end(); } }
+    { label: "Play Game", localization_key: "play_game", action: function() { io_clear(); target_room = room_exists(rm_intro) ? rm_intro : room_next(room); fade_state = 2; } },
+    { label: "Load Recent Game", localization_key: "load_recent", action: function() { show_toast("Load Recent Game coming soon in " + target_version + "!"); } },
+    { label: "Time Attack", localization_key: "time_attack", action: function() { show_toast("Time Attack coming soon in " + target_version + "!"); } },
+    { label: "Cheats", localization_key: "cheats_option", action: function() { current_mode = 2; menu_list_cheats.index = 0; } },
+    { label: "Settings", localization_key: "settings_option", action: function() { current_mode = 1; menu_list_options.index = 0; } },
+    { label: "Changelog", localization_key: "changelog", action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
+    { label: "Jukebox", localization_key: "jukebox", action: function() { io_clear(); target_room = room_exists(rm_jukebox) ? rm_jukebox : room_next(room); fade_state = 2; } },
+    { label: "Exit to Title Screen", localization_key: "exit_title", action: function() { io_clear(); pending_exit_to_title = true; fade_state = 2; } },
+    { label: "Exit Game", localization_key: "exit_game", action: function() { game_end(); } }
 ], 7);
 
 menu_list_options = make_menu_list([
     {
         label: "BGM VOLUME",
+        localization_key: "bgm_volume",
         get_value: function() { return " < " + string(global.vol_bgm) + "% >"; },
         on_left:  function() { global.vol_bgm = clamp(global.vol_bgm - 10, 0, 100); apply_bgm_volume(); save_settings(); },
         on_right: function() { global.vol_bgm = clamp(global.vol_bgm + 10, 0, 100); apply_bgm_volume(); save_settings(); }
     },
     {
         label: "SFX VOLUME",
+        localization_key: "sfx_volume",
         get_value: function() { return " < " + string(global.vol_sfx) + "% >"; },
         on_left:  function() { global.vol_sfx = clamp(global.vol_sfx - 10, 0, 100); save_settings(); },
         on_right: function() { global.vol_sfx = clamp(global.vol_sfx + 10, 0, 100); save_settings(); }
     },
     {
+        label: "LANGUAGE",
+        get_label: function() { return get_localized_text("language_setting"); },
+        get_value: function() { return " [" + get_localized_text((global.language == "JP") ? "japanese" : "english") + "]"; },
+        on_left: cycle_language,
+        on_right: cycle_language,
+        action: cycle_language
+    },
+    {
         label: "FULLSCREEN",
-        get_value: function() { return global.fullscreen ? " [ON]" : " [OFF]"; },
+        localization_key: "fullscreen",
+        get_value: function() { return " [" + get_localized_text(global.fullscreen ? "on" : "off") + "]"; },
         on_left: toggle_fullscreen,
         on_right: toggle_fullscreen,
         action: toggle_fullscreen
     },
     {
         label: "SPLASH DIALOGUE",
-        get_value: function() { return global.enable_splash_dialogue ? " [ON]" : " [OFF]"; },
+        localization_key: "splash_dialogue",
+        get_value: function() { return " [" + get_localized_text(global.enable_splash_dialogue ? "on" : "off") + "]"; },
         action: function() { global.enable_splash_dialogue = !global.enable_splash_dialogue; save_settings(); }
     },
     {
         label: "WHAT YOU SAY? (EASTER EGG)",
-        get_value: function() { return global.enable_title_dialogue ? " [ON]" : " [OFF]"; },
+        localization_key: "title_dialogue",
+        get_value: function() { return " [" + get_localized_text(global.enable_title_dialogue ? "on" : "off") + "]"; },
         action: function() { global.enable_title_dialogue = !global.enable_title_dialogue; save_settings(); }
     },
     {
         label: "ARCADE MODE (BETA)",
-        get_value: function() { return global.arcade_mode ? " [ON]" : " [OFF]"; },
+        localization_key: "arcade_mode",
+        get_value: function() { return " [" + get_localized_text(global.arcade_mode ? "on" : "off") + "]"; },
         action: function() { global.arcade_mode = !global.arcade_mode; save_settings(); }
     },
     {
-        label: "WEATHER (EXPERIMENTAL)",
-        get_value: function() { return global.experimental_weather ? " [ON]" : " [OFF]"; },
-        action: function() { global.experimental_weather = !global.experimental_weather; save_settings(); }
-    },
-    {
-        label: "  WEATHER TYPE",
-        get_value: function() { return " [" + global.weather_type + "]"; },
-        action: cycle_weather_type
-    },
-    {
-        label: "  WEATHER INTENSITY",
-        get_value: function() { return " [" + global.weather_intensity + "]"; },
-        action: function() { cycle_weather_intensity(1); }
-    },
-    {
-        label: "  WEATHER WIND",
-        get_value: function() { return global.weather_wind ? " [ON]" : " [OFF]"; },
-        action: toggle_weather_wind
+        label: "OPTIONAL STARTUP CHALLENGE",
+        localization_key: "startup_challenge",
+        get_value: function() { return " [" + get_localized_text(global.startup_challenge_enabled ? "on" : "off") + "]"; },
+        action: function() { global.startup_challenge_enabled = !global.startup_challenge_enabled; save_settings(); }
     },
     {
         label: "BACK TO MENU",
+        localization_key: "back_to_menu",
         action: function() { current_mode = 0; }
     }
 ], 7);
 
 var _toggle_godmode  = function() { global.cheat_godmode  = !global.cheat_godmode;  save_settings(); };
-var _toggle_infammo  = function() { global.cheat_infammo  = !global.cheat_infammo;  save_settings(); };
 var _toggle_unlocked = function() { global.cheat_unlocked = !global.cheat_unlocked; save_settings(); };
 var _cheats_back     = function() { current_mode = 0; };
 
 menu_list_cheats = make_menu_list([
-    { label: "GOD MODE", get_value: function() { return global.cheat_godmode ? " [ENABLED]" : " [DISABLED]"; }, action: _toggle_godmode },
-    { label: "INFINITE AMMO", get_value: function() { return global.cheat_infammo ? " [ENABLED]" : " [DISABLED]"; }, action: _toggle_infammo },
-    { label: "UNLOCK ALL LEVELS", get_value: function() { return global.cheat_unlocked ? " [YES]" : " [NO]"; }, action: _toggle_unlocked },
-    { label: "BACK TO MENU", action: _cheats_back }
+    { label: "GOD MODE", localization_key: "god_mode", get_value: function() { return " [" + get_localized_text(global.cheat_godmode ? "enabled" : "disabled") + "]"; }, action: _toggle_godmode },
+    { label: "UNLOCK ALL LEVELS", localization_key: "unlock_levels", get_value: function() { return " [" + get_localized_text(global.cheat_unlocked ? "yes" : "no") + "]"; }, action: _toggle_unlocked },
+    { label: "BACK TO MENU", localization_key: "back_to_menu", action: _cheats_back }
 ], 7);
 
 changelog_lines = script_exists(scr_changelog_details) ? script_execute(scr_changelog_details) : [

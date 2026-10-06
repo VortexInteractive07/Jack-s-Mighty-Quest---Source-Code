@@ -1,4 +1,3 @@
-/// @description Pulse the laser hazard without changing its collision size.
+/// @description Keep the needle hazard fully visible.
 
-pulse_timer += 0.08;
-image_alpha = 0.75 + (sin(pulse_timer) * 0.25);
+image_alpha = 1;

@@ -9,7 +9,7 @@ if (fade_state == 0) {
         fade_alpha = 0;
         fade_state = 1;
         
-        if (!enable_loading_bar && !has_crash_log && drm_passed) {
+        if (!enable_loading_bar && !has_crash_log && drm_passed && !language_selection_required) {
             fade_state = 2;
         }
     }
@@ -33,6 +33,29 @@ if (fade_state == 0) {
         }
         if (keyboard_check(vk_up)) {
             crash_log_scroll = max(0, crash_log_scroll - 2);
+        }
+    }
+    else if (language_selection_required) {
+        var _lang_left = keyboard_check_pressed(vk_left);
+        var _lang_right = keyboard_check_pressed(vk_right);
+        var _lang_confirm = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space);
+
+        if (gamepad_is_connected(0)) {
+            _lang_left = _lang_left || gamepad_button_check_pressed(0, gp_padl);
+            _lang_right = _lang_right || gamepad_button_check_pressed(0, gp_padr);
+            _lang_confirm = _lang_confirm || gamepad_button_check_pressed(0, gp_face1) || gamepad_button_check_pressed(0, gp_start);
+        }
+
+        if (_lang_left || _lang_right) {
+            language_selection_index = 1 - language_selection_index;
+            global.language = (language_selection_index == 0) ? "EN" : "JP";
+        }
+
+        if (_lang_confirm) {
+            global.language = (language_selection_index == 0) ? "EN" : "JP";
+            global.language_selected = true;
+            scr_save_settings();
+            language_selection_required = false;
         }
     }
     else if (!drm_passed) {
@@ -85,13 +108,6 @@ if (fade_state == 0) {
 
         if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space)) {
             if (drm_verify_code()) {
-                var _check_str = drm_user_input;
-                if (string_char_at(_check_str, 1) == "-") {
-                    _check_str = string_delete(_check_str, 1, 1);
-                }
-                if (_check_str != "" && string_digits(_check_str) == _check_str) {
-                    ds_list_add(key_history_list, real(drm_user_input));
-                }
                 if (!enable_loading_bar) {
                     fade_state = 2;
                 }

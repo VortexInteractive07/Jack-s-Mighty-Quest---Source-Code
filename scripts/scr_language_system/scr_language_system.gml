@@ -1,35 +1,164 @@
-// Initialize Global Language Settings
-global.current_language = "EN"; // Supported: "EN", "JP"
-
 /// @function get_localized_text(key)
-/// @description Returns translated string based on global.current_language
+/// @description Returns translated string for the saved language, falling back to English.
 /// @param {string} _key The key identifier for text
 function get_localized_text(_key)
 {
     var _text_db = {
         EN: {
+            language_select: "SELECT LANGUAGE",
+            language_instruction: "LEFT/RIGHT: CHANGE   ENTER: CONFIRM",
+            language_setting: "LANGUAGE",
+            english: "ENGLISH",
+            japanese: "JAPANESE",
+            main_menu: "MAIN MENU",
+            settings: "SETTINGS",
+            cheats_title: "CHEATS",
+            play_game: "PLAY GAME",
+            load_recent: "LOAD RECENT GAME",
+            time_attack: "TIME ATTACK",
+            cheats_option: "CHEATS",
+            settings_option: "SETTINGS",
+            changelog: "CHANGELOG",
+            jukebox: "JUKEBOX",
+            exit_title: "EXIT TO TITLE SCREEN",
+            exit_game: "EXIT GAME",
+            bgm_volume: "BGM VOLUME",
+            sfx_volume: "SFX VOLUME",
+            fullscreen: "FULLSCREEN",
+            splash_dialogue: "SPLASH DIALOGUE",
+            title_dialogue: "TITLE DIALOGUE",
+            arcade_mode: "ARCADE MODE",
+            back_to_menu: "BACK TO MENU",
+            god_mode: "GOD MODE",
+            infinite_ammo: "INFINITE AMMO",
+            unlock_levels: "UNLOCK ALL LEVELS",
+            on: "ON",
+            off: "OFF",
+            enabled: "ENABLED",
+            disabled: "DISABLED",
+            yes: "YES",
+            no: "NO",
+            press_start: "PRESS [ENTER] KEY TO START",
+            insert_coins: "INSERT COIN(S) [C]",
+            credits: "CREDITS",
+            startup_challenge: "OPTIONAL STARTUP CHALLENGE",
+            challenge_title: "OPTIONAL STARTUP CHALLENGE",
+            challenge_enter: "ENTER ANSWER AND PRESS ENTER",
+            challenge_granted: "ANSWER ACCEPTED",
+            challenge_wrong: "INCORRECT ANSWER",
+            challenge_solve: "SOLVE THE CHALLENGE:",
+            challenge_controls: "TAB: MODE | ARROWS: REROLL | NUMBERS: TYPE | ENTER: SUBMIT",
+            difficulty_kids: "KIDS",
+            difficulty_adults: "ADULTS",
+            history_hint: "[H] HISTORY",
+            history_title: "DIALOGUE HISTORY LOG",
+            history_close: "Press [H] or [TAB] to Close | Use [UP/DOWN] to Scroll",
+            world_label: "WORLD",
+            time_label: "TIME",
+            game_over: "GAME OVER",
+            continue_start: "PRESS START TO CONTINUE",
+            no_credits: "NO CREDITS - INSERT COIN AT TITLE",
+            jack_label: "JACK",
+            hp_label: "HP",
+            score_label: "SCORE",
+            gems_label: "GEMS",
+            life_lost: "LIFE LOST",
+            lives_left: "LIVES LEFT",
+            last_life: "LAST LIFE",
+            retrying: "RETRYING...",
+            continue: "CONTINUE",
+            restart: "RESTART",
+            main_menu_exit: "MAIN MENU",
             level_complete: "LEVEL COMPLETE!",
             score_text: "SCORE:",
             time_text: "TIME:",
             press_next: "PRESS START / ENTER TO CONTINUE"
         },
         JP: {
-            level_complete: "ステージ クリア！",
+            language_select: "コトバヲ エランデクダサイ",
+            language_instruction: "LEFT/RIGHT: センタク   ENTER: ケッテイ",
+            language_setting: "コトバ",
+            english: "エイゴ",
+            japanese: "ニホンゴ",
+            main_menu: "メインメニュー",
+            settings: "セッテイ",
+            cheats_title: "チート",
+            play_game: "ゲームヲ ハジメル",
+            load_recent: "ロードゲーム",
+            time_attack: "タイムアタック",
+            cheats_option: "チート",
+            settings_option: "セッテイ",
+            changelog: "コウシン キロク",
+            jukebox: "ジュークボックス",
+            exit_title: "タイトルヘ モドル",
+            exit_game: "ゲームヲ オワル",
+            bgm_volume: "BGM オンリョウ",
+            sfx_volume: "SFX オンリョウ",
+            fullscreen: "フルスクリーン",
+            splash_dialogue: "スプラッシュ セリフ",
+            title_dialogue: "タイトル セリフ",
+            arcade_mode: "アーケード モード",
+            back_to_menu: "メニューヘ モドル",
+            god_mode: "ゴッド モード",
+            infinite_ammo: "ムゲン ダンヤク",
+            unlock_levels: "スベテノ レベル",
+            on: "オン",
+            off: "オフ",
+            enabled: "オン",
+            disabled: "オフ",
+            yes: "ハイ",
+            no: "イイエ",
+            press_start: "ENTER キーデ ハジメル",
+            insert_coins: "コインヲ イレテクダサイ [C]",
+            credits: "クレジット",
+            startup_challenge: "オプション チャレンジ",
+            challenge_title: "オプション チャレンジ",
+            challenge_enter: "コタエヲ イレテ ENTER",
+            challenge_granted: "セイカイ",
+            challenge_wrong: "マチガイデス",
+            challenge_solve: "コタエテクダサイ:",
+            challenge_controls: "TAB: モード | ARROWS: ツクリナオス | NUMBERS: ニュウリョク | ENTER: ケッテイ",
+            difficulty_kids: "キッズ",
+            difficulty_adults: "アダルト",
+            history_hint: "[H] カイワノ キロク",
+            history_title: "カイワノ キロク",
+            history_close: "[H] マタハ [TAB] デ トジル | UP/DOWN デ スクロール",
+            world_label: "ワールド",
+            time_label: "タイム",
+            game_over: "ゲームオーバー",
+            continue_start: "START デ ツヅケル",
+            no_credits: "クレジットガ アリマセン",
+            jack_label: "ジャック",
+            hp_label: "HP",
+            score_label: "スコア",
+            gems_label: "ジェム",
+            life_lost: "ライフ ロスト",
+            lives_left: "ノコリ ライフ",
+            last_life: "ラスト ライフ",
+            retrying: "リトライ...",
+            continue: "ツヅケル",
+            restart: "ヤリナオス",
+            main_menu_exit: "メインメニュー",
+            level_complete: "ステージ クリア!",
             score_text: "スコア:",
             time_text: "タイム:",
-            press_next: "スタート または エンター で つぎ へ"
+            press_next: "スタート マタハ エンター デ ツギヘ"
         }
     };
 
     // Fallback logic if language or key is missing
-    if (variable_struct_exists(_text_db, global.current_language))
+    var _language = variable_global_exists("language") ? global.language : "EN";
+    if (variable_struct_exists(_text_db, _language))
     {
-        var _lang_struct = variable_struct_get(_text_db, global.current_language);
+        var _lang_struct = variable_struct_get(_text_db, _language);
         if (variable_struct_exists(_lang_struct, _key))
         {
             return variable_struct_get(_lang_struct, _key);
         }
     }
     
-    return "MISSING_TEXT";
+    if (variable_struct_exists(_text_db.EN, _key)) {
+        return variable_struct_get(_text_db.EN, _key);
+    }
+    return _key;
 }

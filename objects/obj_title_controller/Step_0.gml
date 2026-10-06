@@ -52,6 +52,10 @@ if (toast_timer > 0) {
     toast_y = lerp(toast_y, -40, toast_lerp_speed);
 }
 
+var _gp_connected = gamepad_is_connected(0);
+var _gp_start = _gp_connected && (gamepad_button_check_pressed(0, gp_face1) || gamepad_button_check_pressed(0, gp_start));
+var _gp_cancel = _gp_connected && gamepad_button_check_pressed(0, gp_face2);
+
 // ==========================================
 // STATE MACHINE
 // ==========================================
@@ -76,7 +80,7 @@ switch (fade_state) {
                     secret_code_unlocked = true;
                     secret_code_index = 0;
                     if (audio_exists(sfx_dialogue_continue)) {
-                        audio_play_sound(sfx_dialogue_continue, 8, false);
+                        scr_play_sfx(sfx_dialogue_continue, 8, false);
                     }
                 }
             } else {
@@ -107,7 +111,8 @@ switch (fade_state) {
         var _start_pressed = (
             keyboard_check_pressed(vk_space)  || 
             keyboard_check_pressed(vk_enter)  || 
-            mouse_check_button_pressed(mb_left)
+            mouse_check_button_pressed(mb_left) ||
+            _gp_start
         );
 
         var _coin_pressed = keyboard_check_pressed(ord("C"));
@@ -115,14 +120,14 @@ switch (fade_state) {
             global.arcade_credits = min(global.arcade_credits + 1, 99);
             show_start_text = true;
             if (audio_exists(sfx_coin)) {
-                audio_play_sound(sfx_coin, 5, false);
+                scr_play_sfx(sfx_coin, 5, false);
             }
         }
 
         if (_start_pressed) {
             if (global.arcade_mode && global.arcade_credits <= 0) {
                 if (audio_exists(sfx_menu_blip)) {
-                    audio_play_sound(sfx_menu_blip, 5, false);
+                    scr_play_sfx(sfx_menu_blip, 5, false);
                 }
                 break;
             }
@@ -139,7 +144,7 @@ switch (fade_state) {
                 menu_alpha = 0;
             } else {
                 // Normal mode: target is rm_main_menu
-                audio_play_sound(sfx_dialogue_continue, 1, false);
+                scr_play_sfx(sfx_dialogue_continue, 1, false);
                 target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
                 
                 if (enable_dialogue && array_length(dialogue_lines) > 0) {
@@ -153,7 +158,7 @@ switch (fade_state) {
                     typewriter_complete = false;
                     
                     if (audio_exists(sfx_dialogue_continue)) {
-                        audio_play_sound(sfx_dialogue_continue, 5, false);
+                        scr_play_sfx(sfx_dialogue_continue, 5, false);
                     }
                 } else {
                     fade_state = 4;
@@ -168,12 +173,12 @@ switch (fade_state) {
             var _total_lines = array_length(dialogue_lines);
             dialogue_arrow_timer++;
             
-            var _skip_all_dialogue = keyboard_check_pressed(vk_escape);
+            var _skip_all_dialogue = keyboard_check_pressed(vk_escape) || _gp_cancel;
             
             if (_skip_all_dialogue) {
                 in_dialogue = false;
                 if (audio_exists(sfx_dialogue_continue)) {
-                    audio_play_sound(sfx_dialogue_continue, 5, false);
+                    scr_play_sfx(sfx_dialogue_continue, 5, false);
                 }
                 
                 // Route to target_room directly (rm_main_menu or selected stage)
@@ -207,7 +212,7 @@ switch (fade_state) {
 
                         if (_char != " " && _char != chr(10) && _char != "\n") {
                             if (audio_exists(sfx_dialogue)) {
-                                audio_play_sound(sfx_dialogue, 1, false);
+                                scr_play_sfx(sfx_dialogue, 1, false);
                             }
                         }
                     }
@@ -221,12 +226,13 @@ switch (fade_state) {
                 var _advance_pressed = (
                     keyboard_check_pressed(vk_space)  || 
                     keyboard_check_pressed(vk_enter)  || 
-                    mouse_check_button_pressed(mb_left)
+                    mouse_check_button_pressed(mb_left) ||
+                    _gp_start
                 );
 
                 if (_advance_pressed) {
                     if (audio_exists(sfx_dialogue_continue)) {
-                        audio_play_sound(sfx_dialogue_continue, 5, false);
+                        scr_play_sfx(sfx_dialogue_continue, 5, false);
                     }
 
                     if (char_count < string_length(_target_text)) {
@@ -280,7 +286,7 @@ switch (fade_state) {
             if (menu_index >= _opt_len) menu_index = 0;
             
             if (audio_exists(sfx_dialogue)) {
-                audio_play_sound(sfx_dialogue, 1, false);
+                scr_play_sfx(sfx_dialogue, 1, false);
             }
         }
         
@@ -296,7 +302,7 @@ switch (fade_state) {
             var _selected = menu_options[menu_index];
 
             if (audio_exists(sfx_dialogue_continue)) {
-                audio_play_sound(sfx_dialogue_continue, 5, false);
+                scr_play_sfx(sfx_dialogue_continue, 5, false);
             }
             
             var _target_dest = -1;

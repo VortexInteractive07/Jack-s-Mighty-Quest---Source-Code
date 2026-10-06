@@ -162,7 +162,7 @@ if (font_exists(fnt_bitmap)) draw_set_font(fnt_bitmap);
 draw_set_halign(fa_right);
 draw_set_valign(fa_top);
 draw_set_color(make_color_rgb(180, 190, 210));
-draw_text(_gui_w - 14, 4, "[H] History");
+draw_text(_gui_w - 14, 4, get_localized_text("history_hint"));
 
 // --- 9. INTERACTIVE CHOICE BOX OVERLAY ---
 if (choice_active && is_array(choices_array)) {
@@ -205,7 +205,7 @@ if (backlog_open && is_array(dialogue_history)) {
     draw_set_color(c_yellow);
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
-    draw_text(_gui_w / 2, 12, "--- DIALOGUE HISTORY LOG ---");
+    draw_text(_gui_w / 2, 12, "--- " + get_localized_text("history_title") + " ---");
 
     var _hist_y = 36;
     var _hist_start = backlog_scroll_index;
@@ -226,7 +226,7 @@ if (backlog_open && is_array(dialogue_history)) {
 
     draw_set_halign(fa_center);
     draw_set_color(make_color_rgb(180, 190, 210));
-    draw_text(_gui_w / 2, _gui_h - 18, "Press [H] or [TAB] to Close | Use [UP/DOWN] to Scroll");
+    draw_text(_gui_w / 2, _gui_h - 18, get_localized_text("history_close"));
 }
 
 // --- 11. SCREEN FADE OVERLAY ---
