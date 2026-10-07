@@ -67,7 +67,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     // ==========================================
     // 2. OPTIONAL DIALOGUE SEQUENCE
     // ==========================================
-    if (_enable_dialogue && asset_get_type("scr_intro_dialogue") == asset_script) {
+    if (_enable_dialogue && script_exists(scr_intro_dialogue)) {
         var _dialogue_list = scr_intro_dialogue();
         for (var i = 0; i < array_length(_dialogue_list); i++) {
             array_push(_sequence, _dialogue_list[i]);

@@ -1,5 +1,6 @@
 /// @description obj_mark - Step Event (Emotion Sync & Jack Death Response)
 
+if (!instance_exists(target)) target = instance_find(obj_jack, 0);
 if (!instance_exists(target)) exit;
 
 depth = target.depth + 1;

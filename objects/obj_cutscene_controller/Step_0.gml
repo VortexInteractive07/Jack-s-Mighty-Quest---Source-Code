@@ -150,7 +150,7 @@ bg_b = lerp(bg_b, target_b, 0.08);
 
 switch (fade_state) {
     case 0: // Fade In
-        fade_alpha -= fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 0; else fade_alpha -= fade_speed;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
             fade_state = 1;
@@ -379,7 +379,7 @@ switch (fade_state) {
         break;
 
     case 2: // Fade Out & Change Room
-        fade_alpha += fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 1; else fade_alpha += fade_speed;
         
         if (audio_exists(sfx_static_glitch) && audio_is_playing(sfx_static_glitch)) {
             audio_stop_sound(sfx_static_glitch);
@@ -396,6 +396,7 @@ switch (fade_state) {
 
         if (fade_alpha >= 1) {
             fade_alpha = 1;
+            if (!scr_transition_black_hold_complete(id)) break;
             if (audio_exists(mus_cutscene) && audio_is_playing(mus_cutscene)) {
                 audio_stop_sound(mus_cutscene);
             }

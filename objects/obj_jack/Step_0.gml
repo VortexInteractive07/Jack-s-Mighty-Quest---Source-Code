@@ -13,18 +13,20 @@ var _gp_axis_h = _gp_connected ? gamepad_axis_value(0, gp_axislh) : 0;
 var _move_left  = keyboard_check(vk_left) || (_gp_connected && (gamepad_button_check(0, gp_padl) || _gp_axis_h < -0.5));
 var _move_right = keyboard_check(vk_right) || (_gp_connected && (gamepad_button_check(0, gp_padr) || _gp_axis_h > 0.5));
 var _run_hold   = keyboard_check(ord("S"));                       // S to Run / Sprint / Dash
-var _jump_press = keyboard_check_pressed(ord("D")) || (_gp_connected && gamepad_button_check_pressed(0, gp_face1));
-var _shoot_press = keyboard_check_pressed(ord("F"));
+var _jump_press = keyboard_check_pressed(ord("D"))
+    || keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_up)
+    || (_gp_connected && gamepad_button_check_pressed(0, gp_face1));
+var _shoot_hold = keyboard_check(ord("F"));                       // Hold F to fire repeatedly
+var _massacre_press = keyboard_check_pressed(ord("G"));           // G triggers the massacre blast
 
-if (_gp_connected && gamepad_button_check_pressed(0, gp_face2)) {
-    _shoot_press = true;
-}
+if (_gp_connected && gamepad_button_check_pressed(0, gp_face2)) _shoot_hold = true;
 
 if (shot_cooldown > 0) {
     shot_cooldown--;
 }
+if (massacre_cooldown > 0) massacre_cooldown--;
 
-if (_shoot_press && shot_cooldown <= 0) {
+if (_shoot_hold && shot_cooldown <= 0) {
     var _projectile_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
     var _shot = instance_create_layer(x + (image_xscale * 10), y - 4, _projectile_layer, obj_projectile);
     if (instance_exists(_shot)) {
@@ -32,7 +34,18 @@ if (_shoot_press && shot_cooldown <= 0) {
         _shot.damage = max(1, damage_multiplier);
         _shot.image_angle = (_shot.shot_direction > 0) ? 90 : 270;
     }
-    shot_cooldown = 12;
+    shot_cooldown = shot_cooldown_max;
+}
+
+if (_massacre_press && massacre_cooldown <= 0) {
+    var _impact_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
+    var _blast = instance_create_layer(x + (image_xscale * 42), y - 4, _impact_layer, obj_projectile_impact);
+    if (instance_exists(_blast)) {
+        _blast.image_speed = 0.35;
+        scr_projectile_impact_apply_blast(_blast, 8 * max(1, damage_multiplier), 76);
+    }
+    if (audio_exists(sfx_explosion)) scr_play_sfx(sfx_explosion, 8, false);
+    massacre_cooldown = massacre_cooldown_max;
 }
 
 var _move = _move_right - _move_left;
@@ -71,6 +84,16 @@ if (_run_hold) {
 // Handle horizontal movement locking during wall jumps
 if (wall_jump_lock > 0) {
     wall_jump_lock--;
+} else if (global.player_physics_mode == "BOOTLEG") {
+    // The bootleg port has syrupy acceleration and keeps coasting after release.
+    var _target_hsp = _move * _current_speed;
+    if (_move != 0) {
+        var _bootleg_accel = grounded ? bootleg_ground_accel : bootleg_air_accel;
+        hsp += clamp(_target_hsp - hsp, -_bootleg_accel, _bootleg_accel);
+    } else {
+        hsp *= grounded ? bootleg_ground_drag : bootleg_air_drag;
+        if (abs(hsp) < bootleg_stop_epsilon) hsp = 0;
+    }
 } else {
     hsp = _move * _current_speed;
 }
@@ -93,7 +116,8 @@ if (!grounded && vsp > 0) {
 // --- 5. JUMPING INPUTS ---
 if (_jump_press) {
     // A. MARIO WALL JUMP
-    if (is_wall_sliding || (!grounded && (_wall_right || _wall_left))) {
+    var _pushing_into_wall = (_wall_right && _move_right) || (_wall_left && _move_left);
+    if (is_wall_sliding || (!grounded && _pushing_into_wall)) {
         var _wall_dir = _wall_right ? -1 : 1; // Kick away from the wall
         
         hsp = _wall_dir * wall_jump_hsp;
@@ -124,7 +148,7 @@ if (_jump_press) {
         if (_run_hold) {
             vsp = jump_speed * 1.15; 
             var _boost_dir = (_move != 0) ? _move : image_xscale;
-            hsp = _boost_dir * (_current_speed * 1.3); 
+            hsp = _boost_dir * (_current_speed * 1.3);
         } else {
             vsp = jump_speed * 1.1; 
         }
@@ -136,11 +160,16 @@ if (_jump_press) {
     }
 }
 
+// Keep fractional velocities in Bootleg mode: the joke is excessive smoothness,
+// followed by noticeably slippery coasting when the player releases a direction.
+var _hsp_step = hsp;
+var _vsp_step = vsp;
+
 // --- 6. HORIZONTAL COLLISION WITH STEP-UP ---
-if (place_meeting(x + hsp, y, obj_wall)) {
+if (place_meeting(x + _hsp_step, y, obj_wall)) {
     var _stepped = false;
     for (var i = 1; i <= step_height; i++) {
-        if (!place_meeting(x + hsp, y - i, obj_wall)) {
+        if (!place_meeting(x + _hsp_step, y - i, obj_wall)) {
             y -= i;
             _stepped = true;
             break;
@@ -148,24 +177,26 @@ if (place_meeting(x + hsp, y, obj_wall)) {
     }
     
     if (!_stepped) {
-        var _h_sign = sign(hsp);
+        var _h_sign = sign(_hsp_step);
         while (!place_meeting(x + _h_sign, y, obj_wall)) {
             x += _h_sign;
         }
         hsp = 0;
+        _hsp_step = 0;
     }
 }
-x += hsp;
+x += _hsp_step;
 
 // --- 7. SOLID VERTICAL COLLISION ---
-if (place_meeting(x, y + vsp, obj_wall)) {
-    var _v_sign = sign(vsp);
+if (place_meeting(x, y + _vsp_step, obj_wall)) {
+    var _v_sign = sign(_vsp_step);
     while (!place_meeting(x, y + _v_sign, obj_wall)) {
         y += _v_sign;
     }
     vsp = 0;
+    _vsp_step = 0;
 }
-y += vsp;
+y += _vsp_step;
 
 // Re-check grounded status after movement
 grounded = place_meeting(x, y + 1, obj_wall);

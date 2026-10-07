@@ -44,7 +44,7 @@ if (changelog_fade_state == 1) {
 
 switch (fade_state) {
     case 0:
-        fade_alpha -= fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 0; else fade_alpha -= fade_speed;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
             fade_state = 1;
@@ -96,7 +96,55 @@ switch (fade_state) {
         var _confirm    = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || _gp_conf;
         var _cancel     = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(vk_backspace) || _gp_canc;
 
-        if (current_mode == 3 || changelog_fade_state != 0) {
+        if (current_mode == 4 && changelog_fade_state == 0) {
+            if (_move_up) selected_save_slot = (selected_save_slot + 2) mod 3;
+            if (_move_down) selected_save_slot = (selected_save_slot + 1) mod 3;
+
+            if (keyboard_check_pressed(vk_delete)) {
+                if (is_struct(save_slots[selected_save_slot])) {
+                    file_delete("save_slot_" + string(selected_save_slot + 1) + ".json");
+                    save_slots[selected_save_slot] = undefined;
+                    show_toast("SAVE FILE DELETED");
+                }
+            } else if (_confirm) {
+                if (is_struct(save_slots[selected_save_slot])) {
+                    load_save_file(selected_save_slot);
+                } else if (save_select_load_only) {
+                    show_toast("THIS SAVE FILE IS EMPTY");
+                } else {
+                    name_entry_text = "";
+                    name_entry_cursor = 0;
+                    current_mode = 5;
+                }
+            } else if (_cancel) {
+                current_mode = 0;
+                play_ui_blip(sfx_continue_asset);
+            }
+        } else if (current_mode == 5 && changelog_fade_state == 0) {
+            if (_move_left) name_entry_cursor = (name_entry_cursor + 37) mod 38;
+            if (_move_right) name_entry_cursor = (name_entry_cursor + 1) mod 38;
+            if (_move_up) name_entry_cursor = max(0, name_entry_cursor - 6);
+            if (_move_down) name_entry_cursor = min(37, name_entry_cursor + 6);
+
+            if (_confirm) {
+                if (name_entry_cursor < 36) {
+                    if (string_length(name_entry_text) < 12) {
+                        name_entry_text += string_char_at(name_entry_chars, name_entry_cursor + 1);
+                        play_ui_blip(sfx_dialogue_asset);
+                    }
+                } else if (name_entry_cursor == 36) {
+                    name_entry_text = string_delete(name_entry_text, string_length(name_entry_text), 1);
+                    play_ui_blip(sfx_dialogue_asset);
+                } else if (string_length(name_entry_text) > 0) {
+                    start_named_game(selected_save_slot, name_entry_text);
+                } else {
+                    show_toast("ENTER A NAME FIRST");
+                }
+            } else if (_cancel) {
+                current_mode = 4;
+                play_ui_blip(sfx_continue_asset);
+            }
+        } else if (current_mode == 3 || changelog_fade_state != 0) {
             if (changelog_fade_state == 0) {
                 var _max_scroll = max(0, array_length(changelog_lines) - changelog_visible_lines);
 
@@ -143,7 +191,7 @@ switch (fade_state) {
         break;
 
     case 2:
-        fade_alpha += fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 1; else fade_alpha += fade_speed;
 
         if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
             audio_sound_gain(current_playing_track, (1 - fade_alpha) * (global.vol_bgm / 100), 0);
@@ -151,6 +199,7 @@ switch (fade_state) {
 
         if (fade_alpha >= 1) {
             fade_alpha = 1;
+            if (!scr_transition_black_hold_complete(id)) break;
 
             if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
                 audio_stop_sound(current_playing_track);

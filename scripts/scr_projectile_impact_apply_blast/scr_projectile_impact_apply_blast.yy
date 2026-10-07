@@ -1,0 +1,10 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_projectile_impact_apply_blast",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_projectile_impact_apply_blast",
+  "parent":{"name":"Scripts","path":"folders/Scripts.yy",},
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

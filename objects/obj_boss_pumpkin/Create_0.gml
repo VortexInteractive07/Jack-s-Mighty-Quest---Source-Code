@@ -8,4 +8,5 @@ contact_damage = 30;
 move_speed = 1.2;
 patrol_range = 160;
 image_speed = 0.25;
+attack_cooldown = 75;
 global.boss_defeated = false;

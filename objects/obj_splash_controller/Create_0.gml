@@ -102,3 +102,5 @@ typewriter_complete    = false;
 
 prompt_blink_timer     = 0;
 prompt_visible         = true;
+splash_frame           = 0;
+last_splash_index      = splash_index;

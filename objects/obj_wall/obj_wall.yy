@@ -1,7 +1,9 @@
 {
   "$GMObject":"",
   "%Name":"obj_wall",
-  "eventList":[],
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"Create_0","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"Create_0","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
   "name":"obj_wall",
   "overriddenProperties":[],

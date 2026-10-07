@@ -156,9 +156,7 @@ draw_text_color(_gui_w / 2, _footer_y + 11, _status_text, color_gold, color_gold
 
 // Fade Transition Overlay
 if (fade_alpha > 0) {
-    draw_set_alpha(fade_alpha);
-    draw_set_color(c_black);
-    draw_rectangle(0, 0, _gui_w, _gui_h, false);
+    scr_draw_transition_overlay(fade_alpha, _gui_w, _gui_h);
 }
 
 // Reset Draw State

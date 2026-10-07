@@ -16,59 +16,46 @@ if (font_exists(fnt_bitmap)) {
     draw_set_font(fnt_bitmap);
 }
 
-var _gold = make_color_rgb(255, 215, 0);
-
 // ==========================================
-// 2. DRAW SPLASH TEXT
+// 2. ORIGINAL LOGO SPLASH
 // ==========================================
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 
 var _splash_x = _gui_w * 0.50;
-var _splash_y = _gui_h * 0.54;
-
+var _splash_y = _gui_h * 0.57;
 if (splash_current_str != "") {
-    var _shadow_offset = 1;
-
-    // Drop Shadow
     draw_text_transformed_color(
-        _splash_x + _shadow_offset, 
-        _splash_y + _shadow_offset, 
-        splash_current_str, 
-        1, 1, 
-        splash_angle, 
-        c_black, c_black, c_black, c_black, 
-        0.85
+        _splash_x + 1, _splash_y + 1, splash_current_str,
+        1, 1, splash_angle,
+        c_black, c_black, c_black, c_black, 0.85
     );
-
-    // Main Yellow/Gold Text
     draw_text_transformed_color(
-        _splash_x, 
-        _splash_y, 
-        splash_current_str, 
-        1, 1, 
-        splash_angle, 
-        c_yellow, c_yellow, _gold, _gold, 
-        1
+        _splash_x, _splash_y, splash_current_str,
+        1, 1, splash_angle,
+        c_yellow, c_yellow, make_color_rgb(255, 215, 0), make_color_rgb(255, 215, 0), 1
     );
 }
 
 // ==========================================
-// 3. FLASHING "PRESS START" PROMPT (STATE 1 ONLY)
+// 3. RANDOM HUMOROUS START MESSAGE AND BLINKING PROMPT
 // ==========================================
-if (show_start_text && fade_state == 1) {
-    var _prompt_y = _gui_h * 0.74;
-    var _prompt_text = global.arcade_mode
-        ? ((global.arcade_credits > 0) ? get_localized_text("press_start") : get_localized_text("insert_coins"))
-        : get_localized_text("press_start");
+if (fade_state == 1) {
+    var _prompt_y = _gui_h * 0.81;
+    var _prompt_label = (global.arcade_mode && global.arcade_credits <= 0)
+        ? get_localized_text("insert_coins")
+        : string_replace_all(press_start_message, "\\n", chr(10));
 
-    draw_text_color(_splash_x + 1, _prompt_y + 1, _prompt_text, c_black, c_black, c_black, c_black, 1);
-    draw_text_color(_splash_x, _prompt_y, _prompt_text, c_white, c_white, c_white, c_white, 1);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    if (show_start_text) {
+        draw_text_color(_splash_x + 1, _prompt_y + 1, _prompt_label, c_black, c_black, c_black, c_black, 1);
+        draw_text_color(_splash_x, _prompt_y, _prompt_label, c_yellow, c_yellow, c_white, c_white, 1);
+    }
 
     if (global.arcade_mode) {
-        var _credits_text = get_localized_text("credits") + " " + string(global.arcade_credits);
-        draw_text_color(_splash_x + 1, _prompt_y + 18, _credits_text, c_black, c_black, c_black, c_black, 1);
-        draw_text_color(_splash_x, _prompt_y + 17, _credits_text, c_yellow, c_yellow, c_white, c_white, 1);
+        draw_set_color(c_white);
+        draw_text(_splash_x, _prompt_y + 14, get_localized_text("credits") + " " + string(global.arcade_credits));
     }
 }
 
@@ -84,7 +71,7 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
         _speaker = _current_line.name;
     }
     
-    var _full_text = struct_exists(_current_line, "text") ? _current_line.text : "";
+    var _full_text = struct_exists(_current_line, "text") ? scr_dialogue_format_text(_current_line.text) : "";
     var _font = (struct_exists(_current_line, "font") && font_exists(_current_line.font)) ? _current_line.font : fnt_bitmap;
     var _color = struct_exists(_current_line, "color") ? _current_line.color : c_white;
     var _scale = struct_exists(_current_line, "scale") ? _current_line.scale : 1.0;
@@ -118,6 +105,7 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
             var _subimg   = (_btn_type == spritespeed_framespersecond)
                 ? (get_timer() / 1000000) * _btn_spd
                 : (get_timer() / 1000000) * (game_get_speed(gamespeed_fps) * _btn_spd);
+            _subimg = _subimg % max(1, sprite_get_number(spr_dialogue_continue_btn));
 
             var _btn_x = _gui_w - 20;
             var _btn_y = _gui_h - 16;
@@ -137,42 +125,6 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
 
 if (font_exists(fnt_bitmap)) {
     draw_set_font(fnt_bitmap);
-}
-
-// ==========================================
-// 5. LEVEL SELECT MENU (STATE 3)
-// ==========================================
-if (fade_state == 3) {
-    draw_set_alpha(menu_alpha);
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    
-    var _menu_base_y = _gui_h * 0.52;
-    var _num_opts = array_length(menu_options);
-    
-    if (_num_opts > 0) {
-        draw_set_color(c_black);
-        draw_set_alpha(0.75 * menu_alpha);
-        draw_rectangle(_gui_w * 0.15, _menu_base_y - 20, _gui_w * 0.85, _menu_base_y + (_num_opts * 22) + 20, false);
-        
-        draw_set_color(c_aqua);
-        draw_set_alpha(menu_alpha);
-        draw_rectangle(_gui_w * 0.15, _menu_base_y - 20, _gui_w * 0.85, _menu_base_y + (_num_opts * 22) + 20, true);
-        
-        for (var i = 0; i < _num_opts; i++) {
-            var _opt = menu_options[i];
-            var _item_y = _menu_base_y + (i * 22);
-            
-            if (i == menu_index) {
-                draw_text_color(_gui_w * 0.5, _item_y, "> " + _opt.name + " <", c_yellow, c_yellow, c_white, c_white, menu_alpha);
-                
-                draw_set_halign(fa_center);
-                draw_text_color(_gui_w * 0.5, _menu_base_y + (_num_opts * 22) + 6, _opt.desc, c_aqua, c_aqua, c_white, c_white, menu_alpha * 0.8);
-            } else {
-                draw_text_color(_gui_w * 0.5, _item_y, _opt.name, c_gray, c_gray, c_silver, c_silver, menu_alpha * 0.7);
-            }
-        }
-    }
 }
 
 draw_set_alpha(1.0);
@@ -255,15 +207,11 @@ draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_color(c_white);
 draw_set_alpha(1.0);
+if (font_exists(fnt_bitmap)) draw_set_font(fnt_bitmap);
 
 // ==========================================
 // 8. SCREEN FADE OVERLAY
 // ==========================================
 if (fade_alpha > 0) {
-    draw_set_alpha(fade_alpha);
-    draw_set_color(c_black);
-    draw_rectangle(0, 0, _gui_w, _gui_h, false);
-    
-    draw_set_color(c_white);
-    draw_set_alpha(1.0);
+    scr_draw_transition_overlay(fade_alpha, _gui_w, _gui_h);
 }

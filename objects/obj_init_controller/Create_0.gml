@@ -28,7 +28,12 @@ if (!variable_global_exists("startup_challenge_enabled")) {
 }
 
 language_selection_required = !global.language_selected;
-language_selection_index = (global.language == "JP") ? 1 : 0;
+language_options = ["EN", "DE", "ES", "PL", "SH", "EG", "JG"];
+language_name_keys = ["english", "german", "spanish", "polish", "shakespearean", "engrish", "japangrish"];
+language_selection_index = 0;
+for (var _lang_i = 0; _lang_i < array_length(language_options); _lang_i++) {
+    if (language_options[_lang_i] == global.language) language_selection_index = _lang_i;
+}
 
 window_set_fullscreen(global.fullscreen);
 
@@ -37,7 +42,7 @@ display_height = 240;
 surface_resize(application_surface, display_width, display_height);
 
 // --- Boot System Configuration ---
-enable_drm           = false;
+enable_drm           = global.startup_challenge_enabled;
 enable_loading_bar   = true;        // Set to false to bypass loading bar and skip to splash
 load_time_seconds    = 1.5;         // Target duration in seconds
 load_max             = max(1, round(load_time_seconds * game_get_speed(gamespeed_fps)));
@@ -90,6 +95,26 @@ drm_equation_str = "";
 drm_user_input   = "";
 drm_shake_timer  = 0;
 drm_status_msg   = "SELECT DIFFICULTY TO BEGIN";
+drm_wrong_attempts = 0;
+drm_retry_warning_at = 3;
+drm_phase = "challenge"; // challenge, warning, story, story_question
+drm_story_scenes = [];
+drm_story_index = 0;
+
+drm_begin_story = function() {
+    drm_story_scenes = scr_story();
+    drm_story_index = 0;
+    drm_phase = "story";
+};
+
+drm_begin_story_question = function() {
+    drm_phase = "story_question";
+    drm_topic_title = get_localized_text("challenge_story_title");
+    drm_equation_str = get_localized_text("challenge_story_question");
+    drm_correct_val = "2";
+    drm_user_input = "";
+    drm_status_msg = get_localized_text("challenge_enter");
+};
 
 // Procedural Educational DRM Challenge Generator
 function drm_generate_problem(_diff) {
@@ -120,12 +145,21 @@ function drm_verify_code() {
         return true;
     } else {
         drm_shake_timer = 20;
-        if (script_exists(get_localized_text)) {
-            drm_status_msg = get_localized_text("challenge_wrong");
-        } else {
-            drm_status_msg = "INCORRECT ANSWER";
-        }
         drm_user_input = "";
+
+        // The story question can be retried freely and does not restart the gate.
+        if (drm_phase == "story_question") {
+            drm_status_msg = get_localized_text("challenge_wrong");
+            return false;
+        }
+
+        drm_wrong_attempts++;
+        if (drm_wrong_attempts >= drm_retry_warning_at) {
+            drm_phase = "warning";
+            drm_status_msg = get_localized_text("challenge_many_wrong");
+        } else {
+            drm_status_msg = get_localized_text("challenge_wrong");
+        }
         return false;
     }
 }

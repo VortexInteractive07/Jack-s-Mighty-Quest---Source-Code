@@ -11,41 +11,37 @@ if (room_exists(rm_main_menu)) {
 }
 target_room = _menu_room;
 
+// Load saved cheats before checking whether level select is already unlocked.
+scr_load_settings();
+
 // --- SECRET CODE & FLOW TRACKING ---
 secret_code_unlocked = global.cheat_unlocked; // Cheats may unlock Level Select immediately
 secret_code_sequence = [vk_up, vk_up, vk_down, vk_down, vk_left, vk_right, vk_left, vk_right];
 secret_code_index = 0;
 
-dialogue_phase = 0; // 0 = Initial Title Dialogue | 1 = Post-Level Select Dialogue
-
 // --- SETTINGS / JSON CONFIGURATION ---
-scr_load_settings();
 enable_dialogue = global.enable_title_dialogue;
 if (!variable_global_exists("arcade_credits")) global.arcade_credits = 0;
 
-// Retrieve random title splash text & game version
+// Retrieve the original logo splash, random start message & game version
 title_splash_text = scr_get_random_splash();
+press_start_message = scr_get_random_press_start_message();
 game_version = "v1.0.0-alpha";
 
-// --- TYPEWRITER EFFECT FOR TITLE SPLASH ---
+// --- Typewriter effect for the original logo splash ---
 splash_type_index = 0;
 splash_type_speed = 0.35;
 splash_current_str = "";
 splash_angle = 0;
 
-// --- RETRO FLASHING PRESS START PROMPT ---
+// --- Blinking press start prompt ---
 show_start_text = true;
 flash_timer = 0;
 flash_interval = 20;
 
-// Legacy variables
-text_alpha = 1;
-text_pulse_speed = 0.03;
-text_pulse_dir = -1;
-
 // --- TECH DEMO DIALOGUE SYSTEM ---
 in_dialogue = false;
-dialogue_lines = scr_dialogue("tech_demo");
+dialogue_lines = scr_dialogue("title_intro");
 dialogue_index = 0;
 dialogue_char_index = 0;
 dialogue_speed = 0.22;
@@ -56,13 +52,29 @@ dialogue_arrow_timer = 0;
 char_count = 0;
 typewriter_complete = false;
 
-// --- LEVEL SELECT MENU SYSTEM ---
-menu_options = [
-    { name: "Celestia - Subway", target: rm_subway, desc: "Play Stage 1 Tech Demo" },
-    { name: "Back to Title", target: -3, desc: "Return to Main Screen" }
-];
-menu_index = 0;
-menu_alpha = 0;
+begin_dialogue = function(_dialogue_id) {
+    var _lines = scr_dialogue(_dialogue_id);
+    if (array_length(_lines) <= 0) return false;
+
+    dialogue_lines = _lines;
+    dialogue_index = 0;
+    dialogue_char_index = 0;
+    dialogue_current_text = "";
+    dialogue_arrow_timer = 0;
+    char_count = 0;
+    typewriter_complete = false;
+    in_dialogue = true;
+    fade_state = 2;
+    return true;
+};
+
+finish_dialogue = function() {
+    in_dialogue = false;
+    if (target_room == -1 || !room_exists(target_room)) {
+        target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
+    }
+    fade_state = 4;
+};
 
 // --- MUSIC NOTIFICATION ---
 randomise();
@@ -92,7 +104,7 @@ if (array_length(ost_playlist) > 0) {
 }
 
 // --- STATE MACHINE ---
-// 0: Fade In | 1: Title Screen | 2: Dialogue | 3: Level Select | 4: Fade Out
+// 0: Fade In | 1: Title Screen | 2: Dialogue | 4: Fade Out
 fade_alpha = 1;
 fade_speed = 0.03;
 fade_state = 0;

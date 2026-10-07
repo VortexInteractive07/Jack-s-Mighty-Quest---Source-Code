@@ -51,8 +51,13 @@ if (score_tally_active && !tally_finished) {
                     global.game_score = tally_counter;
                 }
 
-                // Schedule room transition alarm (delay + fade time)
-                alarm[0] = fade_delay + fade_duration;
+                // Use the selected global fade, including an optional black hold.
+                if (global.fade_style == "OFF") fade_duration = 0;
+                else fade_duration = 60;
+                var _black_hold_frames = (global.fade_style == "BLACK")
+                    ? ceil(global.fade_hold_seconds * game_get_speed(gamespeed_fps))
+                    : 0;
+                alarm[0] = fade_delay + fade_duration + _black_hold_frames;
                 fade_timer = 0;
             }
         }

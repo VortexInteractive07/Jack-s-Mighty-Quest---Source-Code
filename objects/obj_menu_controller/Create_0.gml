@@ -47,9 +47,74 @@ pending_exit_to_title = false;
 global.game_session_active = false;
 global.game_lives = 3;
 global.game_score = 0;
+if (!variable_global_exists("time_attack_active")) global.time_attack_active = false;
+if (!variable_global_exists("time_attack_ticks")) global.time_attack_ticks = 0;
+if (!variable_global_exists("time_attack_result_ticks")) global.time_attack_result_ticks = -1;
+if (!variable_global_exists("active_save_slot")) global.active_save_slot = 0;
+if (!variable_global_exists("player_name")) global.player_name = "JACK";
+save_slots = array_create(3, undefined);
+selected_save_slot = 0;
+save_select_load_only = false;
+name_entry_text = "";
+name_entry_cursor = 0;
+name_entry_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 save_settings = function() {
     return scr_save_settings();
+};
+
+refresh_save_slots = function() {
+    for (var _slot = 0; _slot < 3; _slot++) {
+        save_slots[_slot] = scr_game_save_slot_read(_slot + 1);
+    }
+    if (!is_struct(save_slots[0]) && !is_struct(save_slots[1]) && !is_struct(save_slots[2])) {
+        var _legacy_autosave = scr_game_autosave_read();
+        if (is_struct(_legacy_autosave)) {
+            if (!variable_struct_exists(_legacy_autosave, "name")) _legacy_autosave.name = "JACK";
+            if (scr_game_save_slot_write(1, _legacy_autosave.name, _legacy_autosave)) {
+                file_delete("autosave.json");
+                save_slots[0] = scr_game_save_slot_read(1);
+            }
+        }
+    }
+};
+
+open_save_file_select = function(_load_only) {
+    refresh_save_slots();
+    selected_save_slot = 0;
+    save_select_load_only = _load_only;
+    current_mode = 4;
+};
+
+load_save_file = function(_slot_index) {
+    var _save = save_slots[_slot_index];
+    if (!is_struct(_save)) return false;
+    global.active_save_slot = _slot_index + 1;
+    global.player_name = _save.name;
+    global.game_session_active = true;
+    global.game_score = max(0, floor(_save.score));
+    global.game_lives = clamp(floor(_save.lives), 1, 99);
+    global.time_attack_active = _save.time_attack_active;
+    global.time_attack_ticks = max(0, floor(_save.time_attack_ticks));
+    global.autosave_restore_data = _save;
+    global.autosave_restore_pending = true;
+    io_clear();
+    target_room = _save.room_id;
+    fade_state = 2;
+    return true;
+};
+
+start_named_game = function(_slot_index, _name) {
+    global.active_save_slot = _slot_index + 1;
+    global.player_name = string_copy(_name, 1, 12);
+    if (global.player_name == "") global.player_name = "JACK";
+    global.time_attack_active = false;
+    global.time_attack_ticks = 0;
+    global.autosave_restore_pending = false;
+    global.game_session_active = false;
+    io_clear();
+    target_room = room_exists(rm_intro) ? rm_intro : rm_subway;
+    fade_state = 2;
 };
 
 window_set_fullscreen(global.fullscreen);
@@ -135,6 +200,18 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
         var _display_idx = i - _list.scroll_offset;
         var _item_y = _y_start + (_display_idx * _line_spacing);
         var _item = _list.items[i];
+        var _row_left = _text_x - 22;
+        var _row_right = 232;
+        var _selected = (i == _list.index);
+
+        if (_selected) {
+            draw_set_alpha(0.78 * _alpha);
+            draw_set_color(make_color_rgb(18, 43, 67));
+            draw_rectangle(_row_left, _item_y - 8, _row_right, _item_y + 8, false);
+            draw_set_alpha(_alpha);
+            draw_set_color(c_aqua);
+            draw_rectangle(_row_left, _item_y - 8, _row_left + 2, _item_y + 8, false);
+        }
 
         var _label_text = _item.label;
         if (variable_struct_exists(_item, "localization_key")) {
@@ -146,12 +223,12 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
             _label_text += _item.get_value();
         }
 
-        if (i == _list.index) {
-            draw_text_color(_text_x, _item_y, _label_text, c_yellow, c_yellow, c_yellow, c_yellow, _alpha);
-            var _cursor_x = _text_x - 14 + cursor_offset_x;
-            draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_yellow, c_yellow, _alpha);
+        if (_selected) {
+            draw_text_color(_text_x, _item_y, _label_text, c_white, c_white, c_aqua, c_aqua, _alpha);
+            var _cursor_x = _row_left + 5 + cursor_offset_x;
+            draw_text_color(_cursor_x, _item_y, ">", c_yellow, c_yellow, c_white, c_white, _alpha);
         } else {
-            draw_text_color(_text_x, _item_y, _label_text, c_white, c_white, c_white, c_white, _alpha);
+            draw_text_color(_text_x, _item_y, _label_text, c_silver, c_silver, c_white, c_white, _alpha * 0.88);
         }
     }
 
@@ -181,16 +258,55 @@ toggle_fullscreen = function() {
     save_settings();
 };
 
-cycle_language = function() {
-    global.language = (global.language == "EN") ? "JP" : "EN";
+supported_languages = ["EN", "DE", "ES", "PL", "SH", "EG", "JG"];
+
+cycle_language = function(_direction) {
+    var _current = 0;
+    for (var _i = 0; _i < array_length(supported_languages); _i++) {
+        if (supported_languages[_i] == global.language) {
+            _current = _i;
+            break;
+        }
+    }
+    _current = (_current + _direction + array_length(supported_languages)) mod array_length(supported_languages);
+    global.language = supported_languages[_current];
     global.language_selected = true;
     save_settings();
 };
 
+fade_style_options = ["SMOOTH", "NES", "GENESIS", "MOSAIC", "FLASH", "BLACK", "OFF"];
+cycle_fade_style = function(_direction) {
+    var _current = 0;
+    for (var _i = 0; _i < array_length(fade_style_options); _i++) {
+        if (fade_style_options[_i] == global.fade_style) {
+            _current = _i;
+            break;
+        }
+    }
+    _current = (_current + _direction + array_length(fade_style_options)) mod array_length(fade_style_options);
+    global.fade_style = fade_style_options[_current];
+    save_settings();
+};
+
 menu_list_main = make_menu_list([
-    { label: "Play Game", localization_key: "play_game", action: function() { io_clear(); target_room = room_exists(rm_intro) ? rm_intro : room_next(room); fade_state = 2; } },
-    { label: "Load Recent Game", localization_key: "load_recent", action: function() { show_toast("Load Recent Game coming soon in " + target_version + "!"); } },
-    { label: "Time Attack", localization_key: "time_attack", action: function() { show_toast("Time Attack coming soon in " + target_version + "!"); } },
+    { label: "Play Game", localization_key: "play_game", action: function() {
+        open_save_file_select(false);
+    } },
+    { label: "Load Recent Game", localization_key: "load_recent", action: function() {
+        open_save_file_select(true);
+    } },
+    { label: "Time Attack", localization_key: "time_attack", get_value: function() {
+        if (global.time_attack_best_ticks < 0) return "";
+        var _seconds = floor(global.time_attack_best_ticks / game_get_speed(gamespeed_fps));
+        return "  BEST " + string(_seconds div 60) + ":" + string_format(_seconds mod 60, 2, 0);
+    }, action: function() {
+        global.time_attack_active = true;
+        global.time_attack_ticks = 0;
+        global.time_attack_result_ticks = -1;
+        global.autosave_restore_pending = false;
+        global.game_session_active = false;
+        io_clear(); target_room = rm_subway; fade_state = 2;
+    } },
     { label: "Cheats", localization_key: "cheats_option", action: function() { current_mode = 2; menu_list_cheats.index = 0; } },
     { label: "Settings", localization_key: "settings_option", action: function() { current_mode = 1; menu_list_options.index = 0; } },
     { label: "Changelog", localization_key: "changelog", action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
@@ -217,10 +333,63 @@ menu_list_options = make_menu_list([
     {
         label: "LANGUAGE",
         get_label: function() { return get_localized_text("language_setting"); },
-        get_value: function() { return " [" + get_localized_text((global.language == "JP") ? "japanese" : "english") + "]"; },
-        on_left: cycle_language,
-        on_right: cycle_language,
-        action: cycle_language
+        get_value: function() {
+            var _name_key = "english";
+            switch (global.language) {
+                case "DE": _name_key = "german"; break;
+                case "ES": _name_key = "spanish"; break;
+                case "PL": _name_key = "polish"; break;
+                case "SH": _name_key = "shakespearean"; break;
+                case "EG": _name_key = "engrish"; break;
+                case "JG": _name_key = "japangrish"; break;
+            }
+            return " < " + get_localized_text(_name_key) + " >";
+        },
+        on_left: function() { cycle_language(-1); },
+        on_right: function() { cycle_language(1); },
+        action: function() { cycle_language(1); }
+    },
+    {
+        label: "TRANSITION STYLE",
+        localization_key: "transition_style",
+        get_value: function() {
+            var _style_key = "fade_style_smooth";
+            switch (global.fade_style) {
+                case "NES": _style_key = "fade_style_nes"; break;
+                case "GENESIS": _style_key = "fade_style_genesis"; break;
+                case "MOSAIC": _style_key = "fade_style_mosaic"; break;
+                case "FLASH": _style_key = "fade_style_flash"; break;
+                case "BLACK": _style_key = "fade_style_black"; break;
+                case "OFF": _style_key = "fade_style_off"; break;
+            }
+            return " < " + get_localized_text(_style_key) + " >";
+        },
+        on_left: function() { cycle_fade_style(-1); },
+        on_right: function() { cycle_fade_style(1); },
+        action: function() { cycle_fade_style(1); }
+    },
+    {
+        label: "BLACK HOLD TIME",
+        localization_key: "black_hold_duration",
+        get_value: function() { return " < " + string_format(global.fade_hold_seconds, 1, 2) + "s >"; },
+        on_left: function() { global.fade_hold_seconds = max(0, global.fade_hold_seconds - 0.25); save_settings(); },
+        on_right: function() { global.fade_hold_seconds = min(5, global.fade_hold_seconds + 0.25); save_settings(); }
+    },
+    {
+        label: "PLAYER PHYSICS",
+        localization_key: "player_physics",
+        get_value: function() { return " < " + get_localized_text(global.player_physics_mode == "BOOTLEG" ? "physics_bootleg" : "physics_default") + " >"; },
+        on_left: function() { global.player_physics_mode = (global.player_physics_mode == "DEFAULT") ? "BOOTLEG" : "DEFAULT"; save_settings(); },
+        on_right: function() { global.player_physics_mode = (global.player_physics_mode == "DEFAULT") ? "BOOTLEG" : "DEFAULT"; save_settings(); },
+        action: function() { global.player_physics_mode = (global.player_physics_mode == "DEFAULT") ? "BOOTLEG" : "DEFAULT"; save_settings(); }
+    },
+    {
+        label: "SCROLLING MODE",
+        localization_key: "scrolling_mode",
+        get_value: function() { return " < " + get_localized_text(global.scrolling_mode == "JITTERY" ? "physics_jittery" : "physics_default") + " >"; },
+        on_left: function() { global.scrolling_mode = (global.scrolling_mode == "DEFAULT") ? "JITTERY" : "DEFAULT"; save_settings(); },
+        on_right: function() { global.scrolling_mode = (global.scrolling_mode == "DEFAULT") ? "JITTERY" : "DEFAULT"; save_settings(); },
+        action: function() { global.scrolling_mode = (global.scrolling_mode == "DEFAULT") ? "JITTERY" : "DEFAULT"; save_settings(); }
     },
     {
         label: "FULLSCREEN",
@@ -237,7 +406,7 @@ menu_list_options = make_menu_list([
         action: function() { global.enable_splash_dialogue = !global.enable_splash_dialogue; save_settings(); }
     },
     {
-        label: "WHAT YOU SAY? (EASTER EGG)",
+        label: "TITLE DIALOGUE",
         localization_key: "title_dialogue",
         get_value: function() { return " [" + get_localized_text(global.enable_title_dialogue ? "on" : "off") + "]"; },
         action: function() { global.enable_title_dialogue = !global.enable_title_dialogue; save_settings(); }
@@ -252,7 +421,11 @@ menu_list_options = make_menu_list([
         label: "OPTIONAL STARTUP CHALLENGE",
         localization_key: "startup_challenge",
         get_value: function() { return " [" + get_localized_text(global.startup_challenge_enabled ? "on" : "off") + "]"; },
-        action: function() { global.startup_challenge_enabled = !global.startup_challenge_enabled; save_settings(); }
+        action: function() {
+            global.startup_challenge_enabled = !global.startup_challenge_enabled;
+            save_settings();
+            show_toast("Startup challenge changes apply next launch.");
+        }
     },
     {
         label: "BACK TO MENU",
@@ -263,11 +436,17 @@ menu_list_options = make_menu_list([
 
 var _toggle_godmode  = function() { global.cheat_godmode  = !global.cheat_godmode;  save_settings(); };
 var _toggle_unlocked = function() { global.cheat_unlocked = !global.cheat_unlocked; save_settings(); };
+var _toggle_debug = function() { global.cheat_debug_mode = !global.cheat_debug_mode; save_settings(); };
+var _toggle_hitboxes = function() { global.cheat_hitboxes = !global.cheat_hitboxes; save_settings(); };
+var _toggle_instant_respawn = function() { global.cheat_instant_respawn = !global.cheat_instant_respawn; save_settings(); };
 var _cheats_back     = function() { current_mode = 0; };
 
 menu_list_cheats = make_menu_list([
     { label: "GOD MODE", localization_key: "god_mode", get_value: function() { return " [" + get_localized_text(global.cheat_godmode ? "enabled" : "disabled") + "]"; }, action: _toggle_godmode },
     { label: "UNLOCK ALL LEVELS", localization_key: "unlock_levels", get_value: function() { return " [" + get_localized_text(global.cheat_unlocked ? "yes" : "no") + "]"; }, action: _toggle_unlocked },
+    { label: "DEBUG OVERLAY", get_value: function() { return " [" + get_localized_text(global.cheat_debug_mode ? "enabled" : "disabled") + "]"; }, action: _toggle_debug },
+    { label: "SHOW HITBOXES", get_value: function() { return " [" + get_localized_text(global.cheat_hitboxes ? "enabled" : "disabled") + "]"; }, action: _toggle_hitboxes },
+    { label: "INSTANT RESPAWN", get_value: function() { return " [" + get_localized_text(global.cheat_instant_respawn ? "enabled" : "disabled") + "]"; }, action: _toggle_instant_respawn },
     { label: "BACK TO MENU", localization_key: "back_to_menu", action: _cheats_back }
 ], 7);
 
@@ -281,12 +460,14 @@ changelog_scroll = 0;
 changelog_line_height = 14;
 changelog_visible_lines = 10;
 
+show_toast(get_localized_text("autosave_notice"));
+
 changelog_fade_alpha = 0;
 changelog_fade_state = 0;
 changelog_fade_speed = 0.08;
 
-start_y = 52;
-line_spacing = 18;
+start_y = 61;
+line_spacing = 19;
 
 cursor_offset_x = 0;
 cursor_dir = 1;

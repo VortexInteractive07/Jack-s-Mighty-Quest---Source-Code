@@ -6,11 +6,10 @@ if (enable_bgm) {
         if (enable_lyrics && current_track_index != -1 && array_length(lyric_list) > 0) {
             var _audio_pos = audio_sound_get_track_position(splash_sound_inst);
             
-            if (current_lyric_index < array_length(lyric_list)) {
-                if (_audio_pos >= lyric_list[current_lyric_index].time) {
-                    current_lyric_text = lyric_list[current_lyric_index].text;
-                    current_lyric_index++;
-                }
+            while (current_lyric_index < array_length(lyric_list)
+                && _audio_pos >= lyric_list[current_lyric_index].time) {
+                current_lyric_text = lyric_list[current_lyric_index].text;
+                current_lyric_index++;
             }
         }
     } else {
@@ -45,12 +44,39 @@ if (splash_index >= array_length(splash_list) || is_exiting) exit;
 var _current_splash = splash_list[splash_index];
 var _is_text_struct = is_struct(_current_splash);
 var _is_dialogue    = _is_text_struct && struct_exists(_current_splash, "text");
-var _is_standalone  = _is_text_struct && struct_exists(_current_splash, "raw_text");
 var _instant        = _is_text_struct && struct_exists(_current_splash, "instant_display") && _current_splash.instant_display;
 
-var _active_char_speed = (_is_text_struct && struct_exists(_current_splash, "speed")) 
-    ? _current_splash.speed 
-    : default_char_speed;
+var _active_char_speed = max(0.01, (_is_text_struct && struct_exists(_current_splash, "speed"))
+    ? _current_splash.speed
+    : default_char_speed);
+
+// Advance logo animation in Step so its speed is independent of draw passes.
+if (last_splash_index != splash_index) {
+    splash_frame = 0;
+    last_splash_index = splash_index;
+}
+if (!_is_text_struct && sprite_exists(_current_splash)) {
+    var _total_frames = sprite_get_number(_current_splash);
+    var _target_speed = sprite_get_speed(_current_splash);
+    var _speed_type = sprite_get_speed_type(_current_splash);
+    var _frame_increment = (_speed_type == spritespeed_framespersecond)
+        ? _target_speed / game_get_speed(gamespeed_fps)
+        : _target_speed;
+
+    if (variable_instance_exists(id, "splash_anim_speed")) {
+        _frame_increment *= splash_anim_speed;
+    }
+
+    if (_total_frames > 1) {
+        if (sprite_exists(spr_gamemaker_attribution) && _current_splash == spr_gamemaker_attribution) {
+            splash_frame = (splash_frame + _frame_increment) % _total_frames;
+        } else {
+            splash_frame = min(splash_frame + _frame_increment, _total_frames - 1);
+        }
+    } else {
+        splash_frame = 0;
+    }
+}
 
 if (_is_dialogue && fade_state == 0) {
     alpha = 1;
@@ -129,6 +155,7 @@ if (_skip_all) {
 // --- TYPEWRITER & SFX LOGIC ---
 if (_is_text_struct) {
     var _full_text = _is_dialogue ? _current_splash.text : _current_splash.raw_text;
+    _full_text = scr_dialogue_format_text(_full_text);
     var _total_chars = string_length(_full_text);
     
     if (_instant) {

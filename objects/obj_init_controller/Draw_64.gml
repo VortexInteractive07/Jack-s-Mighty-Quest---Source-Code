@@ -72,27 +72,66 @@ else if (language_selection_required) {
     draw_set_color(c_white);
     draw_text(_cx, 28, get_localized_text("language_select"));
 
-    var _choice_w = 132;
-    var _choice_h = 38;
-    var _choice_gap = 12;
-    var _choice_y = 92;
-    var _choice_0_x = _cx - _choice_w - (_choice_gap / 2);
-    var _choice_1_x = _cx + (_choice_gap / 2);
+    var _choice_w = 118;
+    var _choice_h = 34;
+    var _choice_gap = 8;
+    var _choice_start_x = (_gui_w - ((_choice_w * 3) + (_choice_gap * 2))) / 2;
 
-    for (var _language_i = 0; _language_i < 2; _language_i++) {
-        var _choice_x = (_language_i == 0) ? _choice_0_x : _choice_1_x;
+    for (var _language_i = 0; _language_i < array_length(language_options); _language_i++) {
+        var _choice_x = _choice_start_x + ((_language_i mod 3) * (_choice_w + _choice_gap));
+        var _choice_y = 78 + floor(_language_i / 3) * 42;
         var _selected = (_language_i == language_selection_index);
         draw_set_color(_selected ? make_color_rgb(0, 50, 120) : _glass_navy);
         draw_rectangle(_choice_x, _choice_y, _choice_x + _choice_w, _choice_y + _choice_h, false);
         draw_set_color(_selected ? _border_cyan : make_color_rgb(60, 60, 60));
         draw_rectangle(_choice_x, _choice_y, _choice_x + _choice_w, _choice_y + _choice_h, true);
         draw_set_color(_selected ? c_yellow : c_white);
-        draw_text(_choice_x + (_choice_w / 2), _choice_y + 12, get_localized_text((_language_i == 0) ? "english" : "japanese"));
+        draw_text(_choice_x + (_choice_w / 2), _choice_y + 10, get_localized_text(language_name_keys[_language_i]));
     }
 
     draw_set_valign(fa_bottom);
     draw_set_color(c_white);
     draw_text(_cx, _gui_h - 12, get_localized_text("language_instruction"));
+}
+else if (!drm_passed && (drm_phase == "warning" || drm_phase == "story")) {
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_top);
+    draw_set_color(_blue_shadow);
+    draw_text(_cx + _shadow_offset, 8 + _shadow_offset, get_localized_text("challenge_title"));
+    draw_set_color(c_aqua);
+    draw_text(_cx, 8, get_localized_text("challenge_title"));
+
+    var _story_x1 = 20;
+    var _story_y1 = 32;
+    var _story_x2 = _gui_w - 20;
+    var _story_y2 = _gui_h - 28;
+    draw_set_color(_glass_navy);
+    draw_rectangle(_story_x1, _story_y1, _story_x2, _story_y2, false);
+    draw_set_color(_border_cyan);
+    draw_rectangle(_story_x1, _story_y1, _story_x2, _story_y2, true);
+
+    if (drm_phase == "warning") {
+        draw_set_color(c_yellow);
+        draw_text(_cx, 57, get_localized_text("challenge_many_wrong"));
+        draw_set_color(c_white);
+        draw_text_ext(_cx, 88, get_localized_text("challenge_warning_details"), 5, _gui_w - 56);
+        draw_set_color(c_aqua);
+        draw_text(_cx, 151, get_localized_text("challenge_story_continue"));
+        draw_set_color(c_gray);
+        draw_text(_cx, 171, get_localized_text("challenge_story_skip"));
+    } else {
+        var _story_slide = drm_story_scenes[drm_story_index];
+        var _story_speaker = variable_struct_exists(_story_slide, "speaker") ? _story_slide.speaker : "NARRATOR";
+        var _story_text = variable_struct_exists(_story_slide, "text") ? scr_dialogue_format_text(_story_slide.text) : "";
+        draw_set_color(c_yellow);
+        draw_text(_cx, 47, string_upper(_story_speaker));
+        draw_set_color(c_white);
+        draw_text_ext(_cx, 75, _story_text, 8, _gui_w - 56);
+        draw_set_color(c_aqua);
+        draw_text(_cx, _gui_h - 48, get_localized_text("challenge_story_continue"));
+        draw_set_color(c_gray);
+        draw_text(_cx, _gui_h - 31, get_localized_text("challenge_story_skip"));
+    }
 }
 else if (!drm_passed) {
     var _shake_x = 0;
@@ -104,9 +143,12 @@ else if (!drm_passed) {
     draw_set_valign(fa_top);
     
     draw_set_color(_blue_shadow);
-    draw_text(_cx + _shadow_offset + _shake_x, 6 + _shadow_offset, get_localized_text("challenge_title"));
+    var _challenge_heading = (drm_phase == "story_question")
+        ? get_localized_text("challenge_story_title")
+        : get_localized_text("challenge_title");
+    draw_text(_cx + _shadow_offset + _shake_x, 6 + _shadow_offset, _challenge_heading);
     draw_set_color(make_color_rgb(0, 235, 255));
-    draw_text(_cx + _shake_x, 6, get_localized_text("challenge_title"));
+    draw_text(_cx + _shake_x, 6, _challenge_heading);
 
     var _box_w = _gui_w - 32;
     var _box_h = 178;
@@ -185,7 +227,7 @@ else if (!drm_passed) {
 
     draw_set_valign(fa_bottom);
     draw_set_color(c_yellow);
-    draw_text(_cx, _gui_h - 4, get_localized_text("challenge_controls"));
+    draw_text(_cx, _gui_h - 4, get_localized_text((drm_phase == "story_question") ? "challenge_story_controls" : "challenge_controls"));
 } 
 else {
     draw_set_halign(fa_center);
@@ -269,8 +311,5 @@ draw_set_valign(fa_top);
 draw_set_color(c_white);
 
 if (fade_alpha > 0) {
-    draw_set_color(c_black);
-    draw_set_alpha(fade_alpha);
-    draw_rectangle(0, 0, _gui_w, _gui_h, false);
-    draw_set_alpha(1.0);
+    scr_draw_transition_overlay(fade_alpha, _gui_w, _gui_h);
 }

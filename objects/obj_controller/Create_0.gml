@@ -3,8 +3,12 @@
 // --- 0. CORE STATE & GLOBAL INITIALIZATION ---
 scr_load_settings();
 window_set_fullscreen(global.fullscreen);
+if (!variable_global_exists("active_save_slot")) global.active_save_slot = 0;
+if (!variable_global_exists("player_name")) global.player_name = "JACK";
 
 persistent = false;
+// Draw optional world-space debug bounds above the scene; this controller has no sprite.
+depth = -100000;
 
 if (!variable_global_exists("game_session_active") || !global.game_session_active) {
     global.game_session_active = true;
@@ -18,7 +22,7 @@ exit_room = rm_main_menu;
 is_game_over              = false;
 game_paused               = false;
 pause_option              = 0; // 0: CONTINUE, 1: RESTART, 2: MAIN MENU
-show_debug_overlay_custom = false;
+show_debug_overlay_custom = global.cheat_debug_mode;
 game_score                = global.game_score;
 player_lives              = global.game_lives;
 collectibles_collected    = 0;
@@ -26,12 +30,16 @@ total_collectibles        = 0;
 level_state               = "ACTIVE";
 
 // Dynamic HUD Interpolation Variables
-hp_visual_current         = 0;
+hp_visual_current         = 100;
 
 // Timer & Time Limit System
 game_timer_ticks          = 0;
 max_time_seconds          = 599; // 9 mins 59 secs
 time_exceeded             = false;
+autosave_timer             = game_get_speed(gamespeed_fps); // Save immediately after the room's player instance is ready.
+if (!variable_global_exists("time_attack_active")) global.time_attack_active = false;
+if (!variable_global_exists("time_attack_ticks")) global.time_attack_ticks = 0;
+if (!variable_global_exists("autosave_restore_pending")) global.autosave_restore_pending = false;
 
 // Audio & Death State Trackers
 life_lost_audio_id        = -1;
@@ -52,10 +60,21 @@ bgm_handle = scr_play_level_music(room, bgm_target_volume);
 
 stop_level_audio = function() {
     bgm_enabled = false;
-    if (bgm_handle != -1 && audio_is_playing(bgm_handle)) {
+    if (bgm_handle != -1) {
         audio_stop_sound(bgm_handle);
     }
     bgm_handle = -1;
+};
+
+begin_room_transition = function(_target_room) {
+    if (!room_exists(_target_room)) return false;
+    instance_activate_all();
+    next_room = _target_room;
+    game_paused = true;
+    instance_deactivate_all(true);
+    fade_alpha = 0;
+    state = TRANSITION_STATE.FADE_OUT;
+    return true;
 };
 
 // --- 2. GUI & DISPLAY CONFIGURATION ---
@@ -100,11 +119,11 @@ damage_player = function(_amount) {
 };
 
 restart_level = function() {
+    stop_level_audio();
     game_paused = false;
     is_game_over = false;
     level_state = "ACTIVE";
-    instance_activate_all();
-    room_restart();
+    begin_room_transition(room);
 };
 
 trigger_game_over = function() {
@@ -130,7 +149,7 @@ continue_after_game_over = function() {
     if (global.arcade_mode) {
         if (global.arcade_credits <= 0) {
             global.game_session_active = false;
-            if (room_exists(rm_title_screen)) room_goto(rm_title_screen);
+            begin_room_transition(rm_title_screen);
             return;
         }
         global.arcade_credits--;
@@ -148,13 +167,22 @@ continue_after_game_over = function() {
     game_timer_ticks = 0;
     is_game_over = false;
     level_state = "ACTIVE";
-    room_restart();
+    begin_room_transition(room);
 };
 
 // --- 6. PAUSE ANIMATION SYSTEM ---
 pause_slide          = 0.0; // 0.0 (Unpaused) to 1.0 (Fully Visible)
-pause_options_count  = 3;
-pause_labels         = [get_localized_text("continue"), get_localized_text("restart"), get_localized_text("main_menu")];
+pause_options_count  = 5;
+pause_label_keys     = ["continue", "restart", "pause_options", "jukebox", "main_menu_exit"];
+pause_page = 0; // 0: root, 1: options, 2: jukebox, 3: confirm leaving
+pause_settings_index = 0;
+pause_confirm_selection = 1; // Default to No to prevent accidental exits.
+pause_music_was_playing = false;
+pause_jukebox_tracks = [];
+pause_jukebox_index = 0;
+pause_jukebox_handle = -1;
+pause_jukebox_playing = false;
+pause_jukebox_active_index = -1;
 
 // --- 7. PARTICLE SYSTEM INITIALIZATION ---
 sys_particles = part_system_create();

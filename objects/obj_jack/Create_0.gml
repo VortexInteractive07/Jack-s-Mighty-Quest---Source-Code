@@ -24,6 +24,12 @@ is_sprinting    = false;
 // Physics Variables
 hsp = 0;
 vsp = 0;
+// Bootleg Game mode deliberately overdoes momentum for a smooth, slippery feel.
+bootleg_ground_accel = 0.32;
+bootleg_air_accel = 0.08;
+bootleg_ground_drag = 0.92;
+bootleg_air_drag = 0.99;
+bootleg_stop_epsilon = 0.04;
 
 grounded   = false;
 jump_max   = 2;
@@ -44,3 +50,6 @@ wall_jump_lock   = 0;
 wall_jump_lock_max = 12;
 
 shot_cooldown = 0;
+shot_cooldown_max = 7;
+massacre_cooldown = 0;
+massacre_cooldown_max = game_get_speed(gamespeed_fps) * 2;

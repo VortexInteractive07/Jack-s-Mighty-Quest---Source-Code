@@ -4,7 +4,7 @@
 // ============================================================================
 
 if (fade_state == 0) {
-    fade_alpha -= fade_speed;
+    if (global.fade_style == "OFF") fade_alpha = 0; else fade_alpha -= fade_speed;
     if (fade_alpha <= 0) {
         fade_alpha = 0;
         fade_state = 1;
@@ -47,70 +47,77 @@ if (fade_state == 0) {
         }
 
         if (_lang_left || _lang_right) {
-            language_selection_index = 1 - language_selection_index;
-            global.language = (language_selection_index == 0) ? "EN" : "JP";
+            var _lang_direction = _lang_right ? 1 : -1;
+            language_selection_index = (language_selection_index + _lang_direction + array_length(language_options)) mod array_length(language_options);
+            global.language = language_options[language_selection_index];
         }
 
         if (_lang_confirm) {
-            global.language = (language_selection_index == 0) ? "EN" : "JP";
+            global.language = language_options[language_selection_index];
             global.language_selected = true;
             scr_save_settings();
             language_selection_required = false;
         }
     }
     else if (!drm_passed) {
-        if (drm_shake_timer > 0) {
-            drm_shake_timer--;
-        }
+        if (drm_shake_timer > 0) drm_shake_timer--;
 
-        if (keyboard_check_pressed(vk_tab)) {
-            drm_generate_problem(1 - drm_difficulty);
-        }
-        
-        if (keyboard_check_pressed(vk_left) || keyboard_check_pressed(vk_right)) {
-            drm_generate_problem(drm_difficulty);
-        }
+        var _confirm = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space);
+        var _cancel = keyboard_check_pressed(vk_escape);
 
-        var _num_pressed = -1;
-        
-        if (keyboard_check_pressed(ord("0")) || keyboard_check_pressed(96)) {
-            _num_pressed = 0;
-        }
-        
-        for (var _k = ord("1"); _k <= ord("9"); _k++) {
-            if (keyboard_check_pressed(_k)) {
-                _num_pressed = _k - ord("0");
-                break;
+        if (drm_phase == "warning") {
+            if (_cancel) {
+                drm_begin_story_question();
+            } else if (_confirm) {
+                drm_begin_story();
             }
-        }
-        if (_num_pressed == -1) {
-            for (var _nk = 97; _nk <= 105; _nk++) {
-                if (keyboard_check_pressed(_nk)) {
-                    _num_pressed = _nk - 96;
+        } else if (drm_phase == "story") {
+            if (_cancel) {
+                drm_begin_story_question();
+            } else if (_confirm) {
+                drm_story_index++;
+                if (drm_story_index >= array_length(drm_story_scenes)) {
+                    drm_begin_story_question();
+                }
+            }
+        } else {
+            if (drm_phase == "challenge" && keyboard_check_pressed(vk_tab)) {
+                drm_generate_problem(1 - drm_difficulty);
+            }
+
+            if (drm_phase == "challenge" && (keyboard_check_pressed(vk_left) || keyboard_check_pressed(vk_right))) {
+                drm_generate_problem(drm_difficulty);
+            }
+
+            var _num_pressed = -1;
+            if (keyboard_check_pressed(ord("0")) || keyboard_check_pressed(96)) _num_pressed = 0;
+            for (var _k = ord("1"); _k <= ord("9"); _k++) {
+                if (keyboard_check_pressed(_k)) {
+                    _num_pressed = _k - ord("0");
                     break;
                 }
             }
-        }
-
-        if (_num_pressed != -1 && string_length(drm_user_input) < 5) {
-            drm_user_input += string(_num_pressed);
-        }
-
-        if (keyboard_check_pressed(ord("-")) || keyboard_check_pressed(109) || keyboard_check_pressed(189)) {
-            if (string_length(drm_user_input) == 0) {
-                drm_user_input = "-";
-            }
-        }
-
-        if (keyboard_check_pressed(vk_backspace) && string_length(drm_user_input) > 0) {
-            drm_user_input = string_copy(drm_user_input, 1, string_length(drm_user_input) - 1);
-        }
-
-        if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space)) {
-            if (drm_verify_code()) {
-                if (!enable_loading_bar) {
-                    fade_state = 2;
+            if (_num_pressed == -1) {
+                for (var _nk = 97; _nk <= 105; _nk++) {
+                    if (keyboard_check_pressed(_nk)) {
+                        _num_pressed = _nk - 96;
+                        break;
+                    }
                 }
+            }
+
+            if (_num_pressed != -1 && string_length(drm_user_input) < 5) {
+                drm_user_input += string(_num_pressed);
+            }
+            if (keyboard_check_pressed(ord("-")) || keyboard_check_pressed(109) || keyboard_check_pressed(189)) {
+                if (string_length(drm_user_input) == 0) drm_user_input = "-";
+            }
+            if (keyboard_check_pressed(vk_backspace) && string_length(drm_user_input) > 0) {
+                drm_user_input = string_copy(drm_user_input, 1, string_length(drm_user_input) - 1);
+            }
+
+            if (_confirm && drm_verify_code() && !enable_loading_bar) {
+                fade_state = 2;
             }
         }
     }
@@ -130,9 +137,10 @@ if (fade_state == 0) {
         }
     }
 } else if (fade_state == 2) {
-    fade_alpha += fade_speed;
+    if (global.fade_style == "OFF") fade_alpha = 1; else fade_alpha += fade_speed;
     if (fade_alpha >= 1.0) {
         fade_alpha = 1.0;
+        if (!scr_transition_black_hold_complete(id)) exit;
         if (room_exists(rm_splash_screen)) {
             room_goto(rm_splash_screen);
         }

@@ -91,14 +91,13 @@ if (activated) {
     if (tally_finished) {
         var _alpha = 0.0;
         if (fade_timer > fade_delay) {
-            _alpha = clamp((fade_timer - fade_delay) / fade_duration, 0.0, 1.0);
+            _alpha = (fade_duration <= 0)
+                ? 1
+                : clamp((fade_timer - fade_delay) / fade_duration, 0.0, 1.0);
         }
 
         if (_alpha > 0.0) {
-            draw_set_alpha(_alpha);
-            draw_set_color(c_black);
-            draw_rectangle(0, 0, _gw, _gh, false);
-            draw_set_alpha(1.0);
+            scr_draw_transition_overlay(_alpha, _gw, _gh);
         }
     }
 }

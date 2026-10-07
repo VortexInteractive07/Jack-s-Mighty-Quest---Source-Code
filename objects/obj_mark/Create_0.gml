@@ -1,6 +1,6 @@
 /// @description obj_mark - Create Event (State Tracking & Emotion Engine)
 
-target = obj_jack;
+target = instance_find(obj_jack, 0);
 
 follow_distance = 28;
 follow_height = 16;

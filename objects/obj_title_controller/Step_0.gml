@@ -3,11 +3,13 @@
 // Developer Feature #1:
 if (keyboard_check_pressed(ord("0"))) {
     room_goto(rm_splash_screen);
+    exit;
 }
 
 // Developer Feature #2:
 if (keyboard_check_pressed(ord("9"))) {
     room_goto(rm_init);
+    exit;
 }   
 
 // ==========================================
@@ -63,7 +65,7 @@ switch (fade_state) {
 
     // --- STATE 0: FADE IN ---
     case 0:
-        fade_alpha -= fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 0; else fade_alpha -= fade_speed;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
             fade_state = 1;
@@ -89,7 +91,6 @@ switch (fade_state) {
         }
 
         var _skip_splash = keyboard_check_pressed(ord("S")) || keyboard_check_pressed(vk_escape);
-
         if (splash_type_index < string_length(title_splash_text)) {
             if (_skip_splash) {
                 splash_type_index = string_length(title_splash_text);
@@ -138,29 +139,15 @@ switch (fade_state) {
             show_start_text = false;
 
             if (secret_code_unlocked) {
-                // Secret mode: go to Level Select
-                fade_state = 3;
-                menu_index = 0;
-                menu_alpha = 0;
+                // The bonus stage select is its own room, separate from title rendering/state.
+                target_room = room_exists(rm_level_select) ? rm_level_select : rm_main_menu;
+                fade_state = 4;
             } else {
                 // Normal mode: target is rm_main_menu
                 scr_play_sfx(sfx_dialogue_continue, 1, false);
                 target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
                 
-                if (enable_dialogue && array_length(dialogue_lines) > 0) {
-                    dialogue_phase = 0;
-                    fade_state = 2;
-                    in_dialogue = true;
-                    dialogue_index = 0;
-                    dialogue_char_index = 0;
-                    dialogue_current_text = "";
-                    char_count = 0;
-                    typewriter_complete = false;
-                    
-                    if (audio_exists(sfx_dialogue_continue)) {
-                        scr_play_sfx(sfx_dialogue_continue, 5, false);
-                    }
-                } else {
+                if (!enable_dialogue || !begin_dialogue("title_intro")) {
                     fade_state = 4;
                 }
             }
@@ -172,30 +159,25 @@ switch (fade_state) {
         if (in_dialogue) {
             var _total_lines = array_length(dialogue_lines);
             dialogue_arrow_timer++;
+
+            if (_total_lines <= 0 || dialogue_index < 0 || dialogue_index >= _total_lines) {
+                finish_dialogue();
+                break;
+            }
             
             var _skip_all_dialogue = keyboard_check_pressed(vk_escape) || _gp_cancel;
             
             if (_skip_all_dialogue) {
-                in_dialogue = false;
                 if (audio_exists(sfx_dialogue_continue)) {
                     scr_play_sfx(sfx_dialogue_continue, 5, false);
                 }
-                
-                // Route to target_room directly (rm_main_menu or selected stage)
-                if (target_room != -1 && room_exists(target_room)) {
-                    fade_state = 4;
-                } else {
-                    target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
-                    fade_state = 4;
-                }
+                finish_dialogue();
                 break;
             }
 
             if (_total_lines > 0) {
                 var _raw_text = struct_exists(dialogue_lines[dialogue_index], "text") ? dialogue_lines[dialogue_index].text : "";
-                
-                var _target_text = string_replace_all(_raw_text, "/n", chr(10));
-                _target_text = string_replace_all(_target_text, "\\n", chr(10));
+                var _target_text = scr_dialogue_format_text(_raw_text);
                 
                 var _prev_char_count = floor(char_count);
 
@@ -248,98 +230,19 @@ switch (fade_state) {
                         typewriter_complete = false;
 
                         if (dialogue_index >= _total_lines) {
-                            in_dialogue = false;
-                            
-                            if (target_room != -1 && room_exists(target_room)) {
-                                fade_state = 4;
-                            } else {
-                                target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
-                                fade_state = 4;
-                            }
+                            finish_dialogue();
                         }
                     }
                 }
             } else {
-                in_dialogue = false;
-                if (target_room != -1 && room_exists(target_room)) {
-                    fade_state = 4;
-                } else {
-                    target_room = room_exists(rm_main_menu) ? rm_main_menu : room;
-                    fade_state = 4;
-                }
-            }
-        }
-        break;
-
-    // --- STATE 3: LEVEL SELECT MENU ---
-    case 3:
-        menu_alpha = min(menu_alpha + 0.05, 1);
-        
-        var _move_back = keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("W")) || keyboard_check_pressed(ord("A"));
-        var _move_fwd  = keyboard_check_pressed(vk_down) || keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("S")) || keyboard_check_pressed(ord("D"));
-        var _move      = _move_fwd - _move_back;
-
-        if (_move != 0) {
-            menu_index += _move;
-            var _opt_len = array_length(menu_options);
-            if (menu_index < 0) menu_index = _opt_len - 1;
-            if (menu_index >= _opt_len) menu_index = 0;
-            
-            if (audio_exists(sfx_dialogue)) {
-                scr_play_sfx(sfx_dialogue, 1, false);
-            }
-        }
-        
-        // Escape returns back to standard Title Screen
-        if (keyboard_check_pressed(vk_escape)) {
-            fade_state = 1;
-            show_start_text = true;
-            break;
-        }
-
-        var _select = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
-        if (_select) {
-            var _selected = menu_options[menu_index];
-
-            if (audio_exists(sfx_dialogue_continue)) {
-                scr_play_sfx(sfx_dialogue_continue, 5, false);
-            }
-            
-            var _target_dest = -1;
-            if (struct_exists(_selected, "target")) {
-                _target_dest = _selected.target;
-            } else if (struct_exists(_selected, "target_room")) {
-                _target_dest = _selected.target_room;
-            }
-
-            if (_target_dest == -3) { // Back to title action
-                fade_state = 1;
-                show_start_text = true;
-            } else if (_target_dest == -2) {
-                game_end();
-            } else if (_target_dest != -1 && room_exists(_target_dest)) {
-                // Set explicitly chosen level as target
-                target_room = _target_dest;
-                
-                if (enable_dialogue && array_length(dialogue_lines) > 0) {
-                    dialogue_phase = 1;
-                    fade_state = 2;
-                    in_dialogue = true;
-                    dialogue_index = 0;
-                    dialogue_char_index = 0;
-                    dialogue_current_text = "";
-                    char_count = 0;
-                    typewriter_complete = false;
-                } else {
-                    fade_state = 4;
-                }
+                finish_dialogue();
             }
         }
         break;
 
     // --- STATE 4: FADE OUT & ROOM SWITCH ---
     case 4:
-        fade_alpha += fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 1; else fade_alpha += fade_speed;
         
         if (audio_is_playing(current_sound_inst)) {
             audio_sound_gain(current_sound_inst, 1 - fade_alpha, 0);
@@ -347,6 +250,7 @@ switch (fade_state) {
 
         if (fade_alpha >= 1) {
             fade_alpha = 1;
+            if (!scr_transition_black_hold_complete(id)) break;
             audio_stop_sound(current_sound_inst);
             room_goto(target_room);
         }

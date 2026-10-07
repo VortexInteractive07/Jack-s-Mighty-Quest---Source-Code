@@ -231,9 +231,7 @@ if (backlog_open && is_array(dialogue_history)) {
 
 // --- 11. SCREEN FADE OVERLAY ---
 if (fade_alpha > 0) {
-    draw_set_alpha(fade_alpha);
-    draw_rectangle_color(0, 0, _gui_w, _gui_h, c_black, c_black, c_black, c_black, false);
-    draw_set_alpha(1.0);
+    scr_draw_transition_overlay(fade_alpha, _gui_w, _gui_h);
 }
 
 // Restore GPU State

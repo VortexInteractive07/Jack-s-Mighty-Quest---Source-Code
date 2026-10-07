@@ -13,7 +13,7 @@ if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
 
 switch (fade_state) {
     case 0:
-        fade_alpha -= fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 0; else fade_alpha -= fade_speed;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
             fade_state = 1;
@@ -61,12 +61,13 @@ switch (fade_state) {
         break;
 
     case 2:
-        fade_alpha += fade_speed;
+        if (global.fade_style == "OFF") fade_alpha = 1; else fade_alpha += fade_speed;
         if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
             audio_sound_gain(current_playing_track, (1 - fade_alpha) * audio_gain_val, 0);
         }
         if (fade_alpha >= 1) {
             fade_alpha = 1;
+            if (!scr_transition_black_hold_complete(id)) break;
             if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
                 audio_stop_sound(current_playing_track);
             }
