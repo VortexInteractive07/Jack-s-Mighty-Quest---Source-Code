@@ -1,3 +1,7 @@
+> **IMPORTANT NOTE:** The HUD and many important functions of JMQ are broken in this build. Due to quota limits, I'm unable to proceed! I'm begging to find a GML programmer ASAP!
+
+---
+
 # JACK'S MIGHTY QUEST - Source Code (Temporary)
 
 Thank you for downloading the source code for Jack's Mighty Quest (JMQ)!
@@ -19,6 +23,7 @@ This repository contains the complete source files and assets for the 16-bit ret
 Ensure all asset dependencies are present in your local project hierarchy before compiling.
 
 ### Project Assets Structure
+
 Well, it's only visible in the project files, cause there's a lot of assets that I cannot list!
 
 ---
@@ -26,7 +31,7 @@ Well, it's only visible in the project files, cause there's a lot of assets that
 ## 🕹️ Controls (Default Engine Inputs)
 
 | Action | Keyboard | Gamepad |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **Move Left / Right** | Arrow Keys / `A` / `D` | D-Pad Left / Right |
 | **Jump** | `Space` / `Z` | Button South (`A` / `Cross`) |
 | **Attack / Action** | `X` / `K` | Button West (`X` / `Square`) |
@@ -53,4 +58,4 @@ Well, it's only visible in the project files, cause there's a lot of assets that
 
 ---
 
-*© Vortex Interactive. All rights reserved.*
+*© 2025, 2026, 2027 Vortex Interactive. All rights reserved.*
