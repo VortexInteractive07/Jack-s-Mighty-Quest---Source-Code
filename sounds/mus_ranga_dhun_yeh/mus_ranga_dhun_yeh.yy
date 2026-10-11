@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":30.72,
+  "duration":30.746124,
   "exportDir":"",
   "name":"mus_ranga_dhun_yeh",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":44100,
-  "soundFile":"mus_ranga_dhun_yeh.mp3",
+  "sampleRate":48000,
+  "soundFile":"mus_ranga_dhun_yeh.wav",
   "volume":1.0,
 }

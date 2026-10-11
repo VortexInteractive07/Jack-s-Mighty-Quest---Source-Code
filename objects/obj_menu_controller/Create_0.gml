@@ -11,7 +11,7 @@ if (script_exists(scr_load_settings)) {
 
 sfx_dialogue_asset = sfx_dialogue;
 sfx_continue_asset = sfx_dialogue_continue;
-mus_menu_asset     = mus_menu;
+mus_menu_asset     = mus_gibberish;
 
 target_room = rm_intro;
 
@@ -20,6 +20,9 @@ toast_timer = 0;
 toast_duration = 150;
 toast_alpha = 0;
 target_version = "v1.0.0";
+
+// Animated menu background frame tracking
+menu_bg_index = 0;
 
 play_ui_blip = function(_sfx) {
     if (_sfx != -1 && audio_exists(_sfx)) {
@@ -234,7 +237,7 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
 
     if (_list.total > _list.visible_max) {
         var _arrow_x = 230;
-        var _arrow_y_center = 125;
+        var _arrow_y_center = 115;
         var _bob = round(sin(arrow_anim_timer) * 2);
 
         if (_list.scroll_offset > 0 && sprite_exists(spr_menu_arrow_up)) {
@@ -288,37 +291,53 @@ cycle_fade_style = function(_direction) {
     save_settings();
 };
 
+var _act_play = function() {
+    open_save_file_select(false);
+};
+
+var _act_load = function() {
+    open_save_file_select(true);
+};
+
+var _act_time_attack = function() {
+    global.time_attack_active = true;
+    global.time_attack_ticks = 0;
+    global.time_attack_result_ticks = -1;
+    global.autosave_restore_pending = false;
+    global.game_session_active = false;
+    io_clear(); target_room = rm_subway; fade_state = 2;
+};
+
+var _act_cheats = function() { current_mode = 2; menu_list_cheats.index = 0; };
+var _act_settings = function() { current_mode = 1; menu_list_options.index = 0; };
+var _act_changelog = function() { changelog_scroll = 0; changelog_fade_state = 1; };
+var _act_jukebox = function() { io_clear(); target_room = room_exists(rm_jukebox) ? rm_jukebox : room_next(room); fade_state = 2; };
+var _act_exit_title = function() { io_clear(); pending_exit_to_title = true; fade_state = 2; };
+var _act_exit_game = function() { game_end(); };
+
+var _get_time_attack_val = function() {
+    if (global.time_attack_best_ticks < 0) return "";
+    var _seconds = floor(global.time_attack_best_ticks / game_get_speed(gamespeed_fps));
+    return "  BEST " + string(_seconds div 60) + ":" + string_format(_seconds mod 60, 2, 0);
+};
+
 menu_list_main = make_menu_list([
-    { label: "Play Game", localization_key: "play_game", action: function() {
-        open_save_file_select(false);
-    } },
-    { label: "Load Recent Game", localization_key: "load_recent", action: function() {
-        open_save_file_select(true);
-    } },
-    { label: "Time Attack", localization_key: "time_attack", get_value: function() {
-        if (global.time_attack_best_ticks < 0) return "";
-        var _seconds = floor(global.time_attack_best_ticks / game_get_speed(gamespeed_fps));
-        return "  BEST " + string(_seconds div 60) + ":" + string_format(_seconds mod 60, 2, 0);
-    }, action: function() {
-        global.time_attack_active = true;
-        global.time_attack_ticks = 0;
-        global.time_attack_result_ticks = -1;
-        global.autosave_restore_pending = false;
-        global.game_session_active = false;
-        io_clear(); target_room = rm_subway; fade_state = 2;
-    } },
-    { label: "Cheats", localization_key: "cheats_option", action: function() { current_mode = 2; menu_list_cheats.index = 0; } },
-    { label: "Settings", localization_key: "settings_option", action: function() { current_mode = 1; menu_list_options.index = 0; } },
-    { label: "Changelog", localization_key: "changelog", action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
-    { label: "Jukebox", localization_key: "jukebox", action: function() { io_clear(); target_room = room_exists(rm_jukebox) ? rm_jukebox : room_next(room); fade_state = 2; } },
-    { label: "Exit to Title Screen", localization_key: "exit_title", action: function() { io_clear(); pending_exit_to_title = true; fade_state = 2; } },
-    { label: "Exit Game", localization_key: "exit_game", action: function() { game_end(); } }
-], 7);
+    { label: "Play Game", localization_key: "play_game", tip: "Choose a save slot to begin your journey.", action: _act_play },
+    { label: "Load Recent Game", localization_key: "load_recent", tip: "Instantly jump back into your latest progress.", action: _act_load },
+    { label: "Time Attack", localization_key: "time_attack", tip: "Race against the clock for the best time.", get_value: _get_time_attack_val, action: _act_time_attack },
+    { label: "Cheats", localization_key: "cheats_option", tip: "Toggle modifiers, debug tools, and test features.", action: _act_cheats },
+    { label: "Settings", localization_key: "settings_option", tip: "Configure audio, display, and gameplay options.", action: _act_settings },
+    { label: "Changelog", localization_key: "changelog", tip: "View recent version updates and patch notes.", action: _act_changelog },
+    { label: "Jukebox", localization_key: "jukebox", tip: "Listen to the complete official soundtrack.", action: _act_jukebox },
+    { label: "Exit to Title Screen", localization_key: "exit_title", tip: "Return to the main startup title screen.", action: _act_exit_title },
+    { label: "Exit Game", localization_key: "exit_game", tip: "Quit the application and return to desktop.", action: _act_exit_game }
+], 5);
 
 menu_list_options = make_menu_list([
     {
         label: "BGM VOLUME",
         localization_key: "bgm_volume",
+        tip: "Adjust background music volume level.",
         get_value: function() { return " < " + string(global.vol_bgm) + "% >"; },
         on_left:  function() { global.vol_bgm = clamp(global.vol_bgm - 10, 0, 100); apply_bgm_volume(); save_settings(); },
         on_right: function() { global.vol_bgm = clamp(global.vol_bgm + 10, 0, 100); apply_bgm_volume(); save_settings(); }
@@ -326,12 +345,14 @@ menu_list_options = make_menu_list([
     {
         label: "SFX VOLUME",
         localization_key: "sfx_volume",
+        tip: "Adjust sound effects volume level.",
         get_value: function() { return " < " + string(global.vol_sfx) + "% >"; },
         on_left:  function() { global.vol_sfx = clamp(global.vol_sfx - 10, 0, 100); save_settings(); },
         on_right: function() { global.vol_sfx = clamp(global.vol_sfx + 10, 0, 100); save_settings(); }
     },
     {
         label: "LANGUAGE",
+        tip: "Switch display text language.",
         get_label: function() { return get_localized_text("language_setting"); },
         get_value: function() {
             var _name_key = "english";
@@ -352,6 +373,7 @@ menu_list_options = make_menu_list([
     {
         label: "TRANSITION STYLE",
         localization_key: "transition_style",
+        tip: "Change room transition visual effect.",
         get_value: function() {
             var _style_key = "fade_style_smooth";
             switch (global.fade_style) {
@@ -371,6 +393,7 @@ menu_list_options = make_menu_list([
     {
         label: "BLACK HOLD TIME",
         localization_key: "black_hold_duration",
+        tip: "Set black screen duration during fades.",
         get_value: function() { return " < " + string_format(global.fade_hold_seconds, 1, 2) + "s >"; },
         on_left: function() { global.fade_hold_seconds = max(0, global.fade_hold_seconds - 0.25); save_settings(); },
         on_right: function() { global.fade_hold_seconds = min(5, global.fade_hold_seconds + 0.25); save_settings(); }
@@ -378,6 +401,7 @@ menu_list_options = make_menu_list([
     {
         label: "PLAYER PHYSICS",
         localization_key: "player_physics",
+        tip: "Toggle between standard and bootleg movement physics.",
         get_value: function() { return " < " + get_localized_text(global.player_physics_mode == "BOOTLEG" ? "physics_bootleg" : "physics_default") + " >"; },
         on_left: function() { global.player_physics_mode = (global.player_physics_mode == "DEFAULT") ? "BOOTLEG" : "DEFAULT"; save_settings(); },
         on_right: function() { global.player_physics_mode = (global.player_physics_mode == "DEFAULT") ? "BOOTLEG" : "DEFAULT"; save_settings(); },
@@ -386,6 +410,7 @@ menu_list_options = make_menu_list([
     {
         label: "SCROLLING MODE",
         localization_key: "scrolling_mode",
+        tip: "Configure camera view interpolation style.",
         get_value: function() { return " < " + get_localized_text(global.scrolling_mode == "JITTERY" ? "physics_jittery" : "physics_default") + " >"; },
         on_left: function() { global.scrolling_mode = (global.scrolling_mode == "DEFAULT") ? "JITTERY" : "DEFAULT"; save_settings(); },
         on_right: function() { global.scrolling_mode = (global.scrolling_mode == "DEFAULT") ? "JITTERY" : "DEFAULT"; save_settings(); },
@@ -394,6 +419,7 @@ menu_list_options = make_menu_list([
     {
         label: "FULLSCREEN",
         localization_key: "fullscreen",
+        tip: "Toggle windowed or fullscreen display mode.",
         get_value: function() { return " [" + get_localized_text(global.fullscreen ? "on" : "off") + "]"; },
         on_left: toggle_fullscreen,
         on_right: toggle_fullscreen,
@@ -402,24 +428,28 @@ menu_list_options = make_menu_list([
     {
         label: "SPLASH DIALOGUE",
         localization_key: "splash_dialogue",
+        tip: "Enable or disable startup introductory messages.",
         get_value: function() { return " [" + get_localized_text(global.enable_splash_dialogue ? "on" : "off") + "]"; },
         action: function() { global.enable_splash_dialogue = !global.enable_splash_dialogue; save_settings(); }
     },
     {
         label: "TITLE DIALOGUE",
         localization_key: "title_dialogue",
+        tip: "Enable or disable title screen flavor dialogue.",
         get_value: function() { return " [" + get_localized_text(global.enable_title_dialogue ? "on" : "off") + "]"; },
         action: function() { global.enable_title_dialogue = !global.enable_title_dialogue; save_settings(); }
     },
     {
         label: "ARCADE MODE (BETA)",
         localization_key: "arcade_mode",
+        tip: "Play with fast-paced arcade scoring rules.",
         get_value: function() { return " [" + get_localized_text(global.arcade_mode ? "on" : "off") + "]"; },
         action: function() { global.arcade_mode = !global.arcade_mode; save_settings(); }
     },
     {
         label: "OPTIONAL STARTUP CHALLENGE",
         localization_key: "startup_challenge",
+        tip: "Enable a bonus challenge modifier on boot.",
         get_value: function() { return " [" + get_localized_text(global.startup_challenge_enabled ? "on" : "off") + "]"; },
         action: function() {
             global.startup_challenge_enabled = !global.startup_challenge_enabled;
@@ -430,9 +460,10 @@ menu_list_options = make_menu_list([
     {
         label: "BACK TO MENU",
         localization_key: "back_to_menu",
+        tip: "Return to the main menu options.",
         action: function() { current_mode = 0; }
     }
-], 7);
+], 5);
 
 var _toggle_godmode  = function() { global.cheat_godmode  = !global.cheat_godmode;  save_settings(); };
 var _toggle_unlocked = function() { global.cheat_unlocked = !global.cheat_unlocked; save_settings(); };
@@ -442,13 +473,13 @@ var _toggle_instant_respawn = function() { global.cheat_instant_respawn = !globa
 var _cheats_back     = function() { current_mode = 0; };
 
 menu_list_cheats = make_menu_list([
-    { label: "GOD MODE", localization_key: "god_mode", get_value: function() { return " [" + get_localized_text(global.cheat_godmode ? "enabled" : "disabled") + "]"; }, action: _toggle_godmode },
-    { label: "UNLOCK ALL LEVELS", localization_key: "unlock_levels", get_value: function() { return " [" + get_localized_text(global.cheat_unlocked ? "yes" : "no") + "]"; }, action: _toggle_unlocked },
-    { label: "DEBUG OVERLAY", get_value: function() { return " [" + get_localized_text(global.cheat_debug_mode ? "enabled" : "disabled") + "]"; }, action: _toggle_debug },
-    { label: "SHOW HITBOXES", get_value: function() { return " [" + get_localized_text(global.cheat_hitboxes ? "enabled" : "disabled") + "]"; }, action: _toggle_hitboxes },
-    { label: "INSTANT RESPAWN", get_value: function() { return " [" + get_localized_text(global.cheat_instant_respawn ? "enabled" : "disabled") + "]"; }, action: _toggle_instant_respawn },
-    { label: "BACK TO MENU", localization_key: "back_to_menu", action: _cheats_back }
-], 7);
+    { label: "GOD MODE", localization_key: "god_mode", tip: "Invincibility mode against all hazard damage.", get_value: function() { return " [" + get_localized_text(global.cheat_godmode ? "enabled" : "disabled") + "]"; }, action: _toggle_godmode },
+    { label: "UNLOCK ALL LEVELS", localization_key: "unlock_levels", tip: "Unlock all stages for instant selection.", get_value: function() { return " [" + get_localized_text(global.cheat_unlocked ? "yes" : "no") + "]"; }, action: _toggle_unlocked },
+    { label: "DEBUG OVERLAY", tip: "Display real-time performance and debug stats.", get_value: function() { return " [" + get_localized_text(global.cheat_debug_mode ? "enabled" : "disabled") + "]"; }, action: _toggle_debug },
+    { label: "SHOW HITBOXES", tip: "Visualize entity collision bounding boxes.", get_value: function() { return " [" + get_localized_text(global.cheat_hitboxes ? "enabled" : "disabled") + "]"; }, action: _toggle_hitboxes },
+    { label: "INSTANT RESPAWN", tip: "Respawn immediately upon taking fatal damage.", get_value: function() { return " [" + get_localized_text(global.cheat_instant_respawn ? "enabled" : "disabled") + "]"; }, action: _toggle_instant_respawn },
+    { label: "BACK TO MENU", localization_key: "back_to_menu", tip: "Return to the main menu.", action: _cheats_back }
+], 5);
 
 changelog_lines = script_exists(scr_changelog_details) ? script_execute(scr_changelog_details) : [
     "[v1.0.0 CHANGELOG]",
@@ -466,8 +497,8 @@ changelog_fade_alpha = 0;
 changelog_fade_state = 0;
 changelog_fade_speed = 0.08;
 
-start_y = 61;
-line_spacing = 19;
+start_y = 54;
+line_spacing = 18;
 
 cursor_offset_x = 0;
 cursor_dir = 1;

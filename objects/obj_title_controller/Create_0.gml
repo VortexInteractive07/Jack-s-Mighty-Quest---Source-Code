@@ -26,7 +26,7 @@ if (!variable_global_exists("arcade_credits")) global.arcade_credits = 0;
 // Retrieve the original logo splash, random start message & game version
 title_splash_text = scr_get_random_splash();
 press_start_message = scr_get_random_press_start_message();
-game_version = "v1.0.0-alpha";
+game_version = "v1.1.0-alpha";
 
 // --- Typewriter effect for the original logo splash ---
 splash_type_index = 0;

@@ -16,17 +16,21 @@ if (_main_alpha > 0) {
     draw_set_alpha(_main_alpha);
 
     if (sprite_exists(spr_main_menu)) {
-        draw_sprite_stretched(spr_main_menu, 0, 0, 0, _gui_w, _gui_h);
+        draw_sprite_stretched(spr_main_menu, menu_bg_index, 0, 0, _gui_w, _gui_h);
     }
 
-    // Keep the menu readable while leaving the artwork visible on the right.
+    // Perfectly proportioned box height (192) to frame the 5 items and tip text with zero overflow
     draw_set_alpha(0.82 * _main_alpha);
     draw_set_color(c_black);
-    draw_rectangle(12, 29, 246, 204, false);
+    draw_rectangle(12, 29, 246, 192, false);
     draw_set_alpha(_main_alpha);
     draw_set_color(c_aqua);
     draw_rectangle(12, 29, 246, 31, false);
-    draw_rectangle(12, 29, 246, 204, true);
+    draw_rectangle(12, 29, 246, 192, true);
+
+    // Divider line positioned cleanly below the 5-item menu list
+    draw_set_color(make_color_rgb(40, 52, 72));
+    draw_line(14, 148, 244, 148);
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_middle);
@@ -35,6 +39,22 @@ if (_main_alpha > 0) {
         case 0: draw_menu_list(menu_list_main,    _text_x, start_y, line_spacing, _main_alpha); break;
         case 1: draw_menu_list(menu_list_options, _text_x, start_y, line_spacing, _main_alpha); break;
         case 2: draw_menu_list(menu_list_cheats,  _text_x, start_y, line_spacing, _main_alpha); break;
+    }
+
+    // Render active option tip inside the footer bounds without spilling
+    var _active_list = undefined;
+    if (current_mode == 0) _active_list = menu_list_main;
+    else if (current_mode == 1) _active_list = menu_list_options;
+    else if (current_mode == 2) _active_list = menu_list_cheats;
+
+    if (_active_list != undefined && array_length(_active_list.items) > 0) {
+        var _cur_item = _active_list.items[_active_list.index];
+        if (variable_struct_exists(_cur_item, "tip")) {
+            draw_set_font(fnt_bitmap);
+            draw_set_halign(fa_left);
+            draw_set_valign(fa_top);
+            draw_text_ext_color(18, 153, _cur_item.tip, 11, 222, c_silver, c_silver, c_white, c_white, _main_alpha);
+        }
     }
 
     var _mode_label = get_localized_text("main_menu");
@@ -48,8 +68,6 @@ if (_main_alpha > 0) {
     draw_text_color(24, 37, _mode_label, c_yellow, c_yellow, c_white, c_white, _main_alpha);
     draw_set_color(make_color_rgb(75, 88, 108));
     draw_line(24, 49, 234, 49);
-    draw_set_color(c_white);
-    draw_text_color(16, 216, "ARROWS MOVE   ENTER SELECT", c_silver, c_silver, c_white, c_white, _main_alpha);
     draw_set_halign(fa_right);
     draw_text_color(_gui_w - 10, 216, "VORTEX v1.0", c_gray, c_gray, c_silver, c_silver, _main_alpha);
 }
@@ -95,7 +113,7 @@ if (current_mode == 4 || current_mode == 5) {
         }
 
         draw_set_color(c_silver);
-        draw_text(216, 207, "ARROWS: SELECT   ENTER: OPEN   DELETE: ERASE   ESC: BACK");
+        draw_text(216, 207, "ARROWS: SELECT    ENTER: OPEN    DELETE: ERASE    ESC: BACK");
     } else {
         draw_set_color(c_yellow);
         draw_text(216, 36, "NAME YOUR ADVENTURER");
@@ -121,7 +139,7 @@ if (current_mode == 4 || current_mode == 5) {
         }
 
         draw_set_color(c_silver);
-        draw_text(216, 212, "ARROWS: CHOOSE   ENTER: ADD   ESC: BACK");
+        draw_text(216, 212, "ARROWS: CHOOSE    ENTER: ADD    ESC: BACK");
     }
 
     draw_set_halign(fa_left);
@@ -171,12 +189,12 @@ if (changelog_fade_alpha > 0) {
 }
 
 if (toast_alpha > 0) {
-    var _banner_h = 22;
-    var _banner_y = _gui_h - _banner_h;
+    var _banner_h = 18;
+    var _banner_y = _gui_h - _banner_h - 2;
     
     draw_set_alpha(toast_alpha * 0.9);
     draw_set_color(c_black);
-    draw_rectangle(0, _banner_y, _gui_w, _gui_h, false);
+    draw_rectangle(0, _banner_y, _gui_w, _banner_y + _banner_h, false);
 
     draw_set_alpha(toast_alpha);
     draw_set_color(c_yellow);

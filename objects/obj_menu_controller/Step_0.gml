@@ -2,6 +2,23 @@
 
 // Intelligence Level: 10/10
 
+// Animate menu background based on sprite FPS setting
+if (sprite_exists(spr_main_menu)) {
+    var _spd = sprite_get_speed(spr_main_menu);
+    var _type = sprite_get_speed_type(spr_main_menu);
+    var _num = sprite_get_number(spr_main_menu);
+    
+    if (_type == spritespeed_framespersecond) {
+        menu_bg_index += _spd / game_get_speed(gamespeed_fps);
+    } else {
+        menu_bg_index += _spd;
+    }
+    
+    if (menu_bg_index >= _num) {
+        menu_bg_index = menu_bg_index mod _num;
+    }
+}
+
 if (keyboard_check_pressed(vk_escape)) {
     if (current_mode == 0 && fade_state == 1) {
         play_ui_blip(sfx_continue_asset);
