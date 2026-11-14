@@ -3,6 +3,8 @@
 // Target object for the camera to follow
 target = obj_jack;
 
+scr_load_settings();
+
 // Camera lerp speed (0.1 = smooth and fluid, 1.0 = instant/snappy)
 cam_speed = 0.1;
 
@@ -62,4 +64,3 @@ apply_weather_tint = function(_enabled) {
 
 	weather_tint_active = _enabled;
 };
-

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrSwitchlevel",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrSwitchlevel",
+  "parent":{
+    "name":"Transition",
+    "path":"folders/Scripts/Transition.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

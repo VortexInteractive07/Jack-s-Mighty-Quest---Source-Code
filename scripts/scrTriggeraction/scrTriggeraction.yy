@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrTriggeraction",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrTriggeraction",
+  "parent":{
+    "name":"Action",
+    "path":"folders/Scripts/Action.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

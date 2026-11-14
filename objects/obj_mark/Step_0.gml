@@ -64,8 +64,10 @@ if (needs_help && plasma_cooldown <= 0) {
         wave.hspeed = 8 * dir;
     }
     
-    if (audio_exists(snd_plasma_wave)) {
-        audio_play_sound(snd_plasma_wave, 8, false);
+    var _plasma_sfx = sfx_shoot;
+    if (audio_exists(_plasma_sfx)) {
+        var _plasma_sfx_id = audio_play_sound(_plasma_sfx, 8, false);
+        audio_sound_gain(_plasma_sfx_id, global.vol_sfx / 100, 0);
     }
     
     plasma_cooldown = plasma_cooldown_max;

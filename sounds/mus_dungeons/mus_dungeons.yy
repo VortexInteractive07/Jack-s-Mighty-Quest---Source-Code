@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":64.893105,
+  "duration":64.91429,
   "exportDir":"",
   "name":"mus_dungeons",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":44100,
-  "soundFile":"mus_dungeons.wav",
+  "sampleRate":48000,
+  "soundFile":"mus_dungeons.mp3",
   "volume":1.0,
 }

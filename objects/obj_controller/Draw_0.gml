@@ -1,4 +1,26 @@
-/// @description Procedural experimental weather rendered in world space.
+/// @description Procedural stage atmosphere and experimental weather.
+
+if (stage_theme_effect != 0 && !is_game_over) {
+    var _view_x = camera_get_view_x(view_camera[0]);
+    var _view_y = camera_get_view_y(view_camera[0]);
+    var _view_w = camera_get_view_width(view_camera[0]);
+    var _view_h = camera_get_view_height(view_camera[0]);
+
+    for (var _fx_i = 0; _fx_i < array_length(stage_effect_particles); _fx_i++) {
+        var _effect = stage_effect_particles[_fx_i];
+        if (stage_theme_effect == 1) {
+            draw_set_color(make_color_rgb(110, 190, 220));
+            draw_set_alpha(0.28);
+            draw_line(_view_x + _effect.x, _view_y + _effect.y, _view_x + _effect.x - 3, _view_y + _effect.y + 8);
+        } else {
+            draw_set_color(make_color_rgb(255, 155, 72));
+            draw_set_alpha(0.7);
+            draw_circle(_view_x + _effect.x, _view_y + _effect.y, _effect.size, false);
+        }
+    }
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+}
 
 if (!weather_enabled || is_game_over) {
     exit;

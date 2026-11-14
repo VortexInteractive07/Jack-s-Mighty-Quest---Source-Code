@@ -4,6 +4,8 @@ scr_load_settings();
 activated = false;
 level_audio_id = -1;
 target_level = rm_splash_screen;
+if (room == rm_subway) target_level = rm_city;
+if (room == rm_city) target_level = rm_dungeons;
 
 // Post-Tally Fade-Out Variables
 fade_timer = 0;

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"libFragsizes",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"libFragsizes",
+  "parent":{
+    "name":"Library",
+    "path":"folders/Scripts/Library.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

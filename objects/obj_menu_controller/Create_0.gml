@@ -1,9 +1,6 @@
-/// @description Create Event: Initialize Main Menu Controller (432x240 Sub-Menu Architecture) - List-Modular Engine + settings.json Persistence
+/// @description Initialize the main menu controller, list menus, and persistent settings
 
 // Intelligence Level: 10/10
-
-// Lock GUI canvas to exact 16:9 pixel-art display resolution (432x240)
-display_set_gui_size(432, 240);
 
 // Direct Asset Handle Initialization
 sfx_dialogue_asset = sfx_dialogue;
@@ -14,6 +11,7 @@ mus_menu_asset     = mus_menu;
 global.vol_bgm = 100;
 global.vol_sfx = 100;
 global.fullscreen = false;
+global.screen_resolution = "432x240";
 global.enable_dialogue = true;
 global.enable_splash_dialogue = true;
 global.enable_title_dialogue = true;
@@ -58,6 +56,26 @@ menu_music = mus_menu_asset;
 current_playing_track = -1;
 current_playing_asset = -1;
 
+jukebox_playlist = scr_jukebox_ost_playlist();
+jukebox_selected_index = 0;
+jukebox_scroll_offset = 0;
+jukebox_visible_max = 5;
+jukebox_playing_index = -1;
+jukebox_is_playing = false;
+jukebox_playback_position = 0;
+jukebox_transition_state = 0;
+jukebox_transition_target_mode = 0;
+jukebox_transition_action = 0;
+jukebox_bg_x = 0;
+jukebox_bg_y = 0;
+jukebox_bg_speed_x = 1;
+jukebox_bg_speed_y = -1;
+jukebox_navy_dark = make_color_rgb(10, 25, 47);
+jukebox_navy_light = make_color_rgb(20, 45, 80);
+jukebox_gold = make_color_rgb(212, 175, 55);
+jukebox_gold_light = make_color_rgb(245, 222, 179);
+jukebox_platinum = make_color_rgb(229, 228, 226);
+
 // Analog stick debounce flags
 gp_axis_pressed_v = false;
 gp_axis_pressed_h = false;
@@ -77,6 +95,8 @@ save_settings = function() {
         vol_bgm: global.vol_bgm,
         vol_sfx: global.vol_sfx,
         fullscreen: global.fullscreen,
+        screen_resolution: global.screen_resolution,
+        texture_pack: global.texture_pack,
         enable_dialogue: global.enable_dialogue,
         enable_splash_dialogue: global.enable_splash_dialogue,
         enable_title_dialogue: global.enable_title_dialogue,
@@ -199,15 +219,21 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
     }
 
     if (_list.total > _list.visible_max) {
-        var _arrow_x = 396;
-        var _arrow_y_center = 205;
+        var _arrow_x = _text_x - 16;
+        var _visible_rows = min(_list.visible_max, _list.total - _list.scroll_offset);
+        var _arrow_y_center = min(
+            _y_start + (_visible_rows * _line_spacing) + 2,
+            display_get_gui_height() - 30
+        );
         var _bob = round(sin(arrow_anim_timer) * 2);
 
         if (_list.scroll_offset > 0 && sprite_exists(spr_menu_arrow_up)) {
-            draw_sprite_ext(spr_menu_arrow_up, 0, _arrow_x, _arrow_y_center - 8 + _bob, 1, 1, 0, c_white, _alpha);
+            var _arrow_up = scr_texture_pack_sprite("spr_menu_arrow_up", spr_menu_arrow_up);
+            draw_sprite_ext(_arrow_up, 0, _arrow_x, _arrow_y_center - 8 + _bob, 1, 1, 0, c_white, _alpha);
         }
         if (_list.scroll_offset + _list.visible_max < _list.total && sprite_exists(spr_menu_arrow_down)) {
-            draw_sprite_ext(spr_menu_arrow_down, 0, _arrow_x, _arrow_y_center + 8 - _bob, 1, 1, 0, c_white, _alpha);
+            var _arrow_down = scr_texture_pack_sprite("spr_menu_arrow_down", spr_menu_arrow_down);
+            draw_sprite_ext(_arrow_down, 0, _arrow_x, _arrow_y_center + 8 - _bob, 1, 1, 0, c_white, _alpha);
         }
     }
 };
@@ -222,6 +248,39 @@ toggle_fullscreen = function() {
     global.fullscreen = !global.fullscreen;
     window_set_fullscreen(global.fullscreen);
     save_settings();
+};
+
+cycle_screen_resolution = function(_direction) {
+    var _resolutions = ["432x240", "320x240", "320x224", "256x192", "256x240", "256x224"];
+    var _resolution_index = 0;
+
+    for (var i = 0; i < array_length(_resolutions); i++) {
+        if (_resolutions[i] == global.screen_resolution) {
+            _resolution_index = i;
+            break;
+        }
+    }
+
+    _resolution_index = (_resolution_index + _direction + array_length(_resolutions)) mod array_length(_resolutions);
+    global.screen_resolution = _resolutions[_resolution_index];
+    scr_apply_resolution();
+    save_settings();
+};
+
+cycle_texture_pack = function(_direction) {
+    var _packs = scr_texture_pack_list();
+    var _selected = 0;
+    for (var i = 0; i < array_length(_packs); i++) {
+        if (_packs[i].id == global.texture_pack) {
+            _selected = i;
+            break;
+        }
+    }
+
+    _selected = (_selected + _direction + array_length(_packs)) mod array_length(_packs);
+    global.texture_pack = _packs[_selected].id;
+    save_settings();
+    show_toast("Texture pack applies next launch: " + _packs[_selected].name);
 };
 
 cycle_weather_type = function() {
@@ -243,25 +302,94 @@ toggle_weather_wind = function() {
     save_settings();
 };
 
-play_jukebox_track = function(_asset) {
-    if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+jukebox_play_selected = function(_index) {
+    if (current_playing_track != -1) {
         audio_stop_sound(current_playing_track);
-        current_playing_track = -1;
-        current_playing_asset = -1;
     }
 
-    if (_asset != -1 && audio_exists(_asset)) {
-        current_playing_asset = _asset;
-        current_playing_track = audio_play_sound(_asset, 1, true);
+    current_playing_track = -1;
+    current_playing_asset = -1;
+    jukebox_playing_index = -1;
+    jukebox_is_playing = false;
+
+    var _song = jukebox_playlist[_index];
+    if (audio_exists(_song.sound)) {
+        current_playing_asset = _song.sound;
+        current_playing_track = audio_play_sound(_song.sound, 1, true);
         audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
+        jukebox_playing_index = _index;
+        jukebox_is_playing = true;
+        jukebox_playback_position = 0;
+        play_ui_blip(sfx_continue_asset);
     } else {
-        current_mode = 0;
-        current_playing_asset = menu_music;
-        if (menu_music != -1 && audio_exists(menu_music)) {
-            current_playing_track = audio_play_sound(menu_music, 1, true);
-            audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
+        show_debug_message("Jukebox track asset is unavailable: " + _song.title);
+    }
+};
+
+jukebox_toggle_playback = function() {
+    if (jukebox_is_playing) {
+        if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+            audio_pause_sound(current_playing_track);
+        }
+        jukebox_is_playing = false;
+    } else if (current_playing_track != -1 && jukebox_playing_index == jukebox_selected_index) {
+        audio_resume_sound(current_playing_track);
+        jukebox_is_playing = true;
+    } else {
+        jukebox_play_selected(jukebox_selected_index);
+        return;
+    }
+
+    play_ui_blip(sfx_dialogue_asset);
+};
+
+begin_jukebox_transition = function(_target_mode, _action) {
+    if (jukebox_transition_state != 0) return;
+
+    jukebox_transition_target_mode = _target_mode;
+    jukebox_transition_action = _action;
+    jukebox_transition_state = 1;
+};
+
+open_jukebox = function() {
+    begin_jukebox_transition(2, 1);
+};
+
+close_jukebox = function() {
+    begin_jukebox_transition(0, 2);
+};
+
+jukebox_current_lyrics = function() {
+    var _song = jukebox_playlist[jukebox_selected_index];
+    if (!variable_struct_exists(_song, "lyrics") || !is_array(_song.lyrics) || array_length(_song.lyrics) == 0) {
+        return "NO LYRICS AVAILABLE";
+    }
+    if (jukebox_playing_index != jukebox_selected_index) {
+        return "SELECT A TRACK AND PRESS ENTER TO PLAY";
+    }
+    if (!jukebox_is_playing) {
+        return "(PAUSED)";
+    }
+
+    var _lyrics = _song.lyrics;
+    var _text = "";
+    for (var i = 0; i < array_length(_lyrics); i++) {
+        if (jukebox_playback_position >= _lyrics[i].time) {
+            _text = _lyrics[i].text;
+        } else {
+            break;
         }
     }
+    return (_text == "") ? "..." : _text;
+};
+
+fit_jukebox_text = function(_text, _max_width) {
+    if (string_width(_text) <= _max_width) return _text;
+
+    while (string_length(_text) > 0 && string_width(_text + "...") > _max_width) {
+        _text = string_delete(_text, string_length(_text), 1);
+    }
+    return _text + "...";
 };
 
 // --- MAIN MENU LIST (mode 0) ---
@@ -288,8 +416,9 @@ menu_list_main = make_menu_list([
     },
     { label: "Cheats",          action: function() { current_mode = 4; menu_list_cheats.index = 0; } },
     { label: "Settings",        action: function() { current_mode = 1; menu_list_options.index = 0; } },
+    { label: "IN-GAME BROWSER", action: function() { show_toast("Embedded browser is not available in this build."); } },
     { label: "Changelog",       action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
-    { label: "Sound Test",      action: function() { current_mode = 2; menu_list_jukebox.index = 0; menu_list_jukebox.scroll_offset = 0; } },
+    { label: "Sound Test",      action: function() { open_jukebox(); } },
     { label: "Exit to Title Screen", action: function() { io_clear(); pending_exit_to_title = true; fade_state = 2; } },
     { label: "Exit Game", action: function() { game_end(); } }
 ], 8);
@@ -314,6 +443,37 @@ menu_list_options = make_menu_list([
         on_left: method(self, toggle_fullscreen),
         on_right: method(self, toggle_fullscreen),
         action: method(self, toggle_fullscreen),
+        adjust_sfx: sfx_continue_asset,
+        confirm_sfx: sfx_continue_asset
+    },
+    {
+        label: "RES (EXP)",
+        get_value: function() {
+            var _resolution_label = global.screen_resolution;
+            if (global.screen_resolution == "432x240" && display_get_gui_width() > 256) _resolution_label += " (Default)";
+            if (global.screen_resolution == "320x240") {
+                _resolution_label += (display_get_gui_width() <= 256) ? " GENESIS" : " (SEGA Genesis)";
+            }
+            return " " + _resolution_label;
+        },
+        on_left: function() { cycle_screen_resolution(-1); },
+        on_right: function() { cycle_screen_resolution(1); },
+        action: function() { cycle_screen_resolution(1); },
+        adjust_sfx: sfx_continue_asset,
+        confirm_sfx: sfx_continue_asset
+    },
+    {
+        label: "TEXTURES (RESTART)",
+        get_value: function() {
+            var _packs = scr_texture_pack_list();
+            for (var i = 0; i < array_length(_packs); i++) {
+                if (_packs[i].id == global.texture_pack) return " [" + _packs[i].name + "]";
+            }
+            return " [Default]";
+        },
+        on_left: function() { cycle_texture_pack(-1); },
+        on_right: function() { cycle_texture_pack(1); },
+        action: function() { cycle_texture_pack(1); },
         adjust_sfx: sfx_continue_asset,
         confirm_sfx: sfx_continue_asset
     },
@@ -384,16 +544,6 @@ menu_list_options = make_menu_list([
         label: "BACK TO MENU",
         action: function() { current_mode = 0; }
     }
-], 8);
-
-// --- JUKEBOX LIST (mode 2) ---
-menu_list_jukebox = make_menu_list([
-    { label: "MENU THEME",        get_value: function() { return (current_playing_asset == mus_menu_asset) ? " [PLAYING]" : ""; },            action: function() { play_jukebox_track(mus_menu_asset); } },
-    { label: "MAGE MAALadivaina", get_value: function() { return (current_playing_asset == mus_mage_maaladivaina) ? " [PLAYING]" : ""; }, action: function() { play_jukebox_track(mus_mage_maaladivaina); } },
-    { label: "SUBWAY STATION",    get_value: function() { return (current_playing_asset == mus_subway) ? " [PLAYING]" : ""; },            action: function() { play_jukebox_track(mus_subway); } },
-    { label: "CITYSCAPE",         get_value: function() { return (current_playing_asset == mus_city) ? " [PLAYING]" : ""; },               action: function() { play_jukebox_track(mus_city); } },
-    { label: "BOSS BATTLE",       get_value: function() { return (current_playing_asset == mus_boss) ? " [PLAYING]" : ""; },               action: function() { play_jukebox_track(mus_boss); } },
-    { label: "BACK TO MENU",      action: function() { play_jukebox_track(-1); } }
 ], 8);
 
 // --- CHEATS LIST (mode 4) ---

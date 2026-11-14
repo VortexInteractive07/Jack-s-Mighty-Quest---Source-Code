@@ -4,8 +4,11 @@ if (!activated) {
     activated = true;
 
     // 1. Smoothly fade out stage BGM
-    if (audio_is_playing(mus_subway)) {
-        audio_sound_gain(mus_subway, 0, 500); // 0.5 sec fade out
+    if (instance_exists(obj_controller)) {
+        var _controller = instance_find(obj_controller, 0);
+        if (_controller.bgm_handle != -1 && audio_is_playing(_controller.bgm_handle)) {
+            audio_sound_gain(_controller.bgm_handle, 0, 500);
+        }
     }
 
     // 2. Play victory jingle

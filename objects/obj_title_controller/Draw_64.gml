@@ -6,8 +6,11 @@ var _gui_h = display_get_gui_height();
 // ==========================================
 // 1. DRAW TITLE BACKGROUND
 // ==========================================
-if (sprite_exists(spr_titlescreen)) {
-    draw_sprite_stretched(spr_titlescreen, 0, 0, 0, _gui_w, _gui_h);
+var _title_background = scr_texture_pack_sprite("spr_titlescreen", spr_titlescreen);
+if (sprite_exists(_title_background)) {
+    var _background_x = (_gui_w - sprite_get_width(_title_background)) / 2;
+    var _background_y = (_gui_h - sprite_get_height(_title_background)) / 2;
+    draw_sprite(_title_background, 0, _background_x, _background_y);
 } else {
     draw_clear(c_black);
 }
@@ -94,8 +97,9 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
     }
 
     // Full-Screen Frame Overlay
-    if (sprite_exists(spr_dialogue)) {
-        draw_sprite_ext(spr_dialogue, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
+    var _dialogue_frame = scr_texture_pack_sprite("spr_dialogue", spr_dialogue);
+    if (sprite_exists(_dialogue_frame)) {
+        draw_sprite_ext(_dialogue_frame, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
     }
 
     draw_set_halign(fa_left);
@@ -112,9 +116,10 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
 
     // Continue Prompt
     if (typewriter_complete) {
-        if (sprite_exists(spr_dialogue_continue_btn)) {
-            var _btn_spd  = sprite_get_speed(spr_dialogue_continue_btn);
-            var _btn_type = sprite_get_speed_type(spr_dialogue_continue_btn);
+        var _continue_button = scr_texture_pack_sprite("spr_dialogue_continue_btn", spr_dialogue_continue_btn);
+        if (sprite_exists(_continue_button)) {
+            var _btn_spd  = sprite_get_speed(_continue_button);
+            var _btn_type = sprite_get_speed_type(_continue_button);
             var _subimg   = (_btn_type == spritespeed_framespersecond)
                 ? (get_timer() / 1000000) * _btn_spd
                 : (get_timer() / 1000000) * (game_get_speed(gamespeed_fps) * _btn_spd);
@@ -123,7 +128,7 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
             var _btn_y = _gui_h - 16;
 
             draw_sprite_ext(
-                spr_dialogue_continue_btn, 
+                _continue_button,
                 _subimg, 
                 _btn_x, 
                 _btn_y, 

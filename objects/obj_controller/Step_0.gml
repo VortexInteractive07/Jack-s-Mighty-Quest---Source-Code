@@ -114,6 +114,29 @@ if (weather_enabled && !game_paused) {
     }
 }
 
+if (stage_theme_effect != 0 && !game_paused && !is_game_over) {
+    var _effect_view_w = camera_get_view_width(view_camera[0]);
+    var _effect_view_h = camera_get_view_height(view_camera[0]);
+    for (var _fx_i = 0; _fx_i < array_length(stage_effect_particles); _fx_i++) {
+        var _effect = stage_effect_particles[_fx_i];
+        _effect.y += _effect.speed;
+        _effect.phase += 2;
+        if (stage_theme_effect == 1) {
+            _effect.x -= 0.6;
+            if (_effect.y > _effect_view_h + 8 || _effect.x < -8) {
+                _effect.x = random(_effect_view_w + 16);
+                _effect.y = random_range(-24, -4);
+            }
+        } else {
+            _effect.x += sin(_effect.phase) * 0.35;
+            if (_effect.y > _effect_view_h + 8) {
+                _effect.y = random_range(-24, -4);
+                _effect.x = random(_effect_view_w);
+            }
+        }
+    }
+}
+
 // --- 3. GAME OVER MONITORING & RESTART CONTROLLER ---
 if (is_game_over) {
     var _continue_pressed = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space);
@@ -204,9 +227,13 @@ switch (state) {
 }
 
 // --- 6. BACKGROUND MUSIC MONITORING ---
-if (bgm_enabled && audio_exists(mus_subway)) {
-    if (!audio_is_playing(mus_subway) && state == TRANSITION_STATE.IDLE) {
-        bgm_handle = audio_play_sound(mus_subway, 10, true);
-        audio_sound_gain(bgm_handle, bgm_target_volume, 0);
+if (bgm_enabled && bgm_asset != -1 && audio_exists(bgm_asset)) {
+    if ((bgm_handle == -1 || !audio_is_playing(bgm_handle)) && state == TRANSITION_STATE.IDLE) {
+        bgm_handle = audio_play_sound(bgm_asset, 10, true);
+        if (bgm_handle != -1) {
+            audio_sound_gain(bgm_handle, bgm_target_volume, 0);
+        } else {
+            show_debug_message("Could not restart level music.");
+        }
     }
 }

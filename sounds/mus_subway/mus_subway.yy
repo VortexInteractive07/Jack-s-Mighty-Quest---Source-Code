@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":70.28422,
+  "duration":70.28424,
   "exportDir":"",
   "name":"mus_subway",
   "parent":{

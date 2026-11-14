@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrDoorclose",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrDoorclose",
+  "parent":{
+    "name":"Action",
+    "path":"folders/Scripts/Action.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -2,6 +2,7 @@
 
 var _gui_w = display_get_gui_width();
 var _gui_h = display_get_gui_height();
+var _compact_hud = _gui_w <= 320;
 
 draw_set_font(fnt_bitmap);
 
@@ -31,7 +32,7 @@ if (pause_slide < 1.0 && !is_game_over) {
     
     var _hp_tag_x  = 8;
     var _hp_tag_y  = 8;
-    var _bar_x     = 30;
+    var _bar_x     = 38;
     var _bar_y     = 8;
     var _bar_w     = 72;
     var _bar_h     = 10;
@@ -48,9 +49,9 @@ if (pause_slide < 1.0 && !is_game_over) {
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     draw_set_color(c_black);
-    draw_text(_hp_tag_x + 11, _hp_tag_y + (_bar_h / 2) + 1, "HP");
+    draw_text(_hp_tag_x + 15, _hp_tag_y + (_bar_h / 2) + 1, "HP");
     draw_set_color(c_white);
-    draw_text(_hp_tag_x + 10, _hp_tag_y + (_bar_h / 2), "HP");
+    draw_text(_hp_tag_x + 14, _hp_tag_y + (_bar_h / 2), "HP");
 
     // Health Bar Frame Shadow
     _draw_flat_slanted_banner(_bar_x + 1, _bar_y + 1, _bar_w, _bar_h, _bar_skew, c_black);
@@ -69,7 +70,7 @@ if (pause_slide < 1.0 && !is_game_over) {
     }
 
     // --- LIVES BADGE ---
-    var _life_x = 110;
+    var _life_x = 122;
     var _life_y = 8;
     _draw_flat_slanted_banner(_life_x + 1, _life_y + 1, 28, _bar_h, 6, c_black);
     _draw_flat_slanted_banner(_life_x, _life_y, 28, _bar_h, 6, make_color_rgb(32, 40, 60));
@@ -77,16 +78,18 @@ if (pause_slide < 1.0 && !is_game_over) {
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     draw_set_color(make_color_rgb(255, 220, 0));
-    draw_text(_life_x + 16, _life_y + (_bar_h / 2), "x" + string(player_lives));
+    draw_text(_life_x + 14, _life_y + (_bar_h / 2), "x" + string(player_lives));
 
     // --- COLLECTIBLE READOUT ---
+    var _collectible_x = _compact_hud ? 8 : _life_x + 42;
+    var _collectible_y = _compact_hud ? 26 : _life_y + (_bar_h / 2);
     draw_set_color(make_color_rgb(120, 240, 255));
-    draw_text(_life_x + 42, _life_y + (_bar_h / 2), "G" + string(collectibles_collected));
+    draw_text(_collectible_x, _collectible_y, "G" + string(collectibles_collected));
 
     if (global.arcade_mode) {
         draw_set_halign(fa_left);
         draw_set_color(make_color_rgb(255, 220, 0));
-        draw_text(8, 26, "CREDITS " + string(global.arcade_credits));
+        draw_text(8, _compact_hud ? 40 : 26, "CREDITS " + string(global.arcade_credits));
     }
 
     // --- SCORE READOUT ---
@@ -119,13 +122,14 @@ if (pause_slide < 1.0 && !is_game_over) {
     var _time_str  = string(_mins) + ":" + (_secs < 10 ? "0" : "") + string(_secs);
     
     var _time_col = (_total_sec > (max_time_seconds - 60)) ? ((floor(game_timer_ticks / 15) % 2 == 0) ? c_red : c_yellow) : c_white;
+    var _time_y = _compact_hud ? 26 : _score_y;
     
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     draw_set_color(c_black);
-    draw_text((_gui_w / 2) + 1, _score_y + 1, _time_str);
+    draw_text((_gui_w / 2) + 1, _time_y + 1, _time_str);
     draw_set_color(_time_col);
-    draw_text(_gui_w / 2, _score_y, _time_str);
+    draw_text(_gui_w / 2, _time_y, _time_str);
 
     draw_set_alpha(1.0);
 }
@@ -145,36 +149,41 @@ if (pause_slide > 0.0) {
     _draw_flat_slanted_banner(80 - _bg_offset, 0, 14, _gui_h, 40, make_color_rgb(255, 200, 0));
     
     var _head_x = 20 - ((1.0 - _ease_slide) * 150);
-    var _head_y = 20;
-    
+    var _menu_h = 22 + 10 + (pause_options_count * 18) + ((pause_options_count - 1) * 6);
+    var _menu_top = (_gui_h - _menu_h) / 2;
+    var _head_y = _menu_top;
+
     _draw_flat_slanted_banner(_head_x - 1, _head_y - 1, 92, 22, 10, c_black);
     _draw_flat_slanted_banner(_head_x, _head_y, 90, 20, 10, make_color_rgb(255, 200, 0));
-    
-    draw_set_halign(fa_left);
+
+    draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
     draw_set_color(c_black);
-    draw_text(_head_x + 14, _head_y + 11, "PAUSED");
+    draw_text(_head_x + 46, _head_y + 11, "PAUSED");
     draw_set_color(c_white);
-    draw_text(_head_x + 13, _head_y + 10, "PAUSED");
+    draw_text(_head_x + 45, _head_y + 10, "PAUSED");
 
-    var _start_y = 60;
+    var _start_y = _head_y + 32;
     var _spacing = 24;
+    var _row_w = 132;
+    var _row_h = 18;
+    var _row_skew = 8;
+    var _row_x = 28;
+    draw_set_halign(fa_left);
     
     for (var i = 0; i < pause_options_count; i++) {
         var _item_slide = clamp((_ease_slide * 1.5) - (i * 0.15), 0, 1);
-        var _option_x   = 28 - ((1.0 - _item_slide) * 220);
+        var _option_x   = _row_x - ((1.0 - _item_slide) * 220);
         var _option_y   = _start_y + (i * _spacing);
         var _is_sel     = (i == pause_option);
+
+        var _skew  = _row_skew;
         
-        var _box_w = _is_sel ? 130 : 110;
-        var _box_h = 18;
-        var _skew  = 8;
-        
-        _draw_flat_slanted_banner(_option_x + 1, _option_y + 1, _box_w, _box_h, _skew, c_black);
+        _draw_flat_slanted_banner(_option_x + 1, _option_y + 1, _row_w, _row_h, _skew, c_black);
         
         if (_is_sel) {
             var _c1 = make_color_rgb(255, 200, 0);
-            _draw_flat_slanted_banner(_option_x, _option_y, _box_w, _box_h, _skew, _c1);
+            _draw_flat_slanted_banner(_option_x, _option_y, _row_w, _row_h, _skew, _c1);
             
             draw_set_color(c_white);
             draw_primitive_begin(pr_trianglelist);
@@ -186,10 +195,10 @@ if (pause_slide > 0.0) {
             draw_set_color(c_black);
             draw_text(_option_x + 12, _option_y + 9, pause_labels[i]);
         } else {
-            _draw_flat_slanted_banner(_option_x, _option_y, _box_w, _box_h, _skew, make_color_rgb(18, 24, 42));
+            _draw_flat_slanted_banner(_option_x, _option_y, _row_w, _row_h, _skew, make_color_rgb(18, 24, 42));
             
             draw_set_color(make_color_rgb(180, 200, 230));
-            draw_text(_option_x + 10, _option_y + 9, pause_labels[i]);
+            draw_text(_option_x + 12, _option_y + 9, pause_labels[i]);
         }
     }
     

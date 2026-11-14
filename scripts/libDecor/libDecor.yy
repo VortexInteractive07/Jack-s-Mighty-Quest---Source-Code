@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"libDecor",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"libDecor",
+  "parent":{
+    "name":"Helpers",
+    "path":"folders/Scripts/Library/Helpers.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

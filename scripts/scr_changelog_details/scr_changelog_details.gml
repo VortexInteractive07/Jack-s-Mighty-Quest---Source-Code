@@ -4,6 +4,12 @@ function scr_changelog_details() {
     return [
         "=== VERSION CHANGELOG ===",
         "",
+        "[PROTOTYPE v1.1.0] - 2026-11-14",
+        "+ Added Stage 2 and Stage 3 prototypes with distinct effects",
+        "+ Added Melonhead boss prototype and looped arena music",
+        "+ Fixed dungeon fragment sizing and debug-map controls",
+        "+ Removed duplicate palette-swap local declarations",
+        "",
         "[PROTOTYPE v1.0.1] - 2026-08-30",
         "+ Released August 30th Prototype Build",
         "+ Fixed Time Attack crash by adding a notification toast instead of loading missing room",

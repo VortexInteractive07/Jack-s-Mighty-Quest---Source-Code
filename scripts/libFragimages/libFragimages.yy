@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"libFragimages",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"libFragimages",
+  "parent":{
+    "name":"Library",
+    "path":"folders/Scripts/Library.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrBeyesprite",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrBeyesprite",
+  "parent":{
+    "name":"Sprites",
+    "path":"folders/Scripts/Dungeon/Sprites.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,8 +1,9 @@
 /// @description Room Transition Delay Execution
 
 // Stop all level audio channels cleanly
-if (audio_is_playing(mus_subway)) {
-    audio_stop_sound(mus_subway);
+if (instance_exists(obj_controller)) {
+    var _controller = instance_find(obj_controller, 0);
+    _controller.stop_level_audio();
 }
 
 if (level_audio_id != -1 && audio_is_playing(level_audio_id)) {

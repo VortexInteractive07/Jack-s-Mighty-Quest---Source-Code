@@ -43,8 +43,9 @@ if (is_struct(_current_splash) && struct_exists(_current_splash, "raw_text")) {
 // 2. DIALOGUE FRAME TEXT SPLASH
 // ==========================================
 else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
-    if (sprite_exists(spr_dialogue)) {
-        draw_sprite_ext(spr_dialogue, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
+    var _dialogue_frame = scr_texture_pack_sprite("spr_dialogue", spr_dialogue);
+    if (sprite_exists(_dialogue_frame)) {
+        draw_sprite_ext(_dialogue_frame, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
     }
 
     var _font  = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_bitmap;
@@ -66,15 +67,16 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
     draw_text_transformed_color(8, 188, _displayed_text, _scale, _scale, 0, _color, _color, _color, _color, 1.0);
 
     if (typewriter_complete) {
-        if (sprite_exists(spr_dialogue_continue_btn)) {
-            var _btn_spd  = sprite_get_speed(spr_dialogue_continue_btn);
-            var _btn_type = sprite_get_speed_type(spr_dialogue_continue_btn);
+        var _continue_button = scr_texture_pack_sprite("spr_dialogue_continue_btn", spr_dialogue_continue_btn);
+        if (sprite_exists(_continue_button)) {
+            var _btn_spd  = sprite_get_speed(_continue_button);
+            var _btn_type = sprite_get_speed_type(_continue_button);
             var _btn_subimg = (_btn_type == spritespeed_framespersecond)
                 ? (get_timer() / 1000000) * _btn_spd
                 : (get_timer() / 1000000) * (game_get_speed(gamespeed_fps) * _btn_spd);
 
             draw_sprite_ext(
-                spr_dialogue_continue_btn, 
+                _continue_button,
                 _btn_subimg, 
                 _gui_w - 20, 
                 _gui_h - 16, 

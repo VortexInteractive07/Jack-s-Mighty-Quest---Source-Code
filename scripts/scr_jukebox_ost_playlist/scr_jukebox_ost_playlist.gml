@@ -1,0 +1,270 @@
+/// @function scr_jukebox_ost_playlist()
+/// @description Returns an array of track structs for the jukebox playlist.
+function scr_jukebox_ost_playlist() {
+    return [
+        {
+            sound: mus_raalhehge_monaigaa,
+            title: "1. Raalhehge Monaigaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.000,  text: "(Aaahhh~)" },
+                { time: 4.203,  text: "Hiru Eli Fathaigilaa Moodhu Rangalhu Vey," },
+                { time: 8.563,  text: "Raalhehge Monaigaa Alhugan'du Ge Heyo Aadha," },
+                { time: 13.036, text: "Vesheege There'in, Neshun Ge Thun'di Matheegaa!" },
+                { time: 17.600, text: "Moonaigaa Alhavaa-sithi Kamuge Shauguthah" },
+                { time: 21.850, text: "Heyo Heyo Vaagothah Genaa-dhey Fa-huru thah!" },
+                { time: 26.000, text: "" }
+            ]
+        },
+        {
+            sound: mus_rey_kanda_gais,
+            title: "2. Rey Kanda Gais",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.000,  text: "(Aaahhh~)" },
+                { time: 2.350,  text: "(Oaaahh~)" },
+                { time: 3.695,  text: "Ey hiyaa monaigaa alhavaa," },
+                { time: 8.072,  text: "Vaaeh feshun, nulaa hithugaa!" },
+                { time: 12.157, text: "Rey kanda gais," },
+                { time: 14.099, text: "Iru osseygen dhaashey," },
+                { time: 16.523, text: "Ahmed ge preethi," },
+                { time: 18.334, text: "Aisha ahlee vefaaiy dhey!" },
+                { time: 20.932, text: "Rey kanda gais," },
+                { time: 22.836, text: "Iru osseygen dhaashey," },
+                { time: 25.258, text: "(Rey kanda gaaa~is)" }
+            ]
+        },
+        {
+            sound: mus_mage_maaladivaina,
+            title: "3. Mage Maaladivaina",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.176,  text: "(Aaaaah~)" },
+                { time: 4.244,  text: "Nil vana muhudu thale," },
+                { time: 7.448,  text: "Mutu keta waage veli tarave," },
+                { time: 10.808, text: "Sittata sithala suwayaka genave," },
+                { time: 14.192, text: "Mage Maaladivaina!" },
+                { time: 17.527, text: "Sagaraye suhada sewanali," },
+                { time: 20.915, text: "Jivite pahana vela obe!" },
+                { time: 24.160, text: "Jivite pahana vela obe!" }
+            ]
+        },
+        {
+            sound: mus_oafaraaiy_thah_ginavefaa,
+            title: "4. Oafaraaiy Thah Gina Vefaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.310,  text: "(Oiy! Oiy!)" },
+                { time: 2.273,  text: "Raalhehge go mingonman," },
+                { time: 4.218,  text: "Moosun ge theren feshun!" },
+                { time: 6.300,  text: "(Moosun ge theren feshun!)" },
+                { time: 8.226,  text: "Bodu raalhey alhavaa goavaa," },
+                { time: 10.270, text: "Oafaraaiy thah gina veyfaa!" },
+                { time: 12.263, text: "(Oafaraaiy thah gina veyfaa!)" },
+                { time: 14.224, text: "Eki rangalhu hee aayul'heynee," },
+                { time: 16.195, text: "Eki rangalhu hee aayul'heynee," },
+                { time: 18.248, text: "(Oiy, Oiy, Oiy...)" },
+                { time: 20.245, text: "(Aaaaaahhhh!)" },
+                { time: 22.285, text: "(Drumroll)" }
+            ]
+        },
+        {
+            sound: mus_moodhu_raalhahge_taalam,
+            title: "5. Muhudu Raalhahge Taalhey",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.170,  text: "(Aaaahh~)" },
+                { time: 4.215,  text: "Muhudu Raalhahge Taalhey," },
+                { time: 8.186,  text: "Genda fathaalaa hithaa," },
+                { time: 12.215, text: "Edhi guraalheh fennasheyve," },
+                { time: 16.332, text: "Moanares ge mathiveri!" },
+                { time: 20.243, text: "Hithugaa alhavaa!" },
+                { time: 24.206, text: "Hithugaa alhavaa~" }
+            ]
+        },
+        {
+            sound: mus_rethi_aadha,
+            title: "6. Reythi Aadha",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.000,  text: "(Music)" },
+                { time: 3.279,  text: "Rethi aadha ey, ahh, Rethi aadha ey," },
+                { time: 7.322,  text: "Moonaigaa alhavaa, thibaa ge rangalhu adhu!" },
+                { time: 11.998, text: "Hithugaa shifaa ey, libi ey meethi hithun," },
+                { time: 16.292, text: "Oh reythi aadhaige alhavaa!" },
+                { time: 20.590, text: "Rey~thi aadhaige alhavaa!" },
+                { time: 23.870, text: "(Music)" }
+            ]
+        },
+        {
+            sound: mus_alhavaa,
+            title: "7. Veyn Alhavaa Monaigaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.122,  text: "(Aaah~)" },
+                { time: 2.165,  text: "(Monaigaa!)" },
+                { time: 4.129,  text: "Balaaley-ma miheyh yedhen alhavaa!" },
+                { time: 7.591,  text: "(Strings)" },
+                { time: 8.102,  text: "Ahh, monaigaa hithaa ufaa alhavaa!" },
+                { time: 11.710, text: "(Strings)" },
+                { time: 12.593, text: "Nethey hey ran'galhu jaagaa eh fey-shun!" },
+                { time: 16.627, text: "Monaigaa-veyn alhavaa monaigaa!" },
+                { time: 21.228, text: "Ahh, monaigaa-veyn alhavaa monaigaa!" },
+                { time: 25.204, text: "(Music)" }
+            ]
+        },
+        {
+            sound: mus_reythi_reyge_balaalumey,
+            title: "8. Reythi Reyge Balaalumey",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.226,  text: "(Aaaaaahhh~)" },
+                { time: 3.600,  text: "Reythi reyge balaalumey," },
+                { time: 7.123,  text: "Moonaigaa alhavaa vefaa-lei!" },
+                { time: 11.243, text: "Alhavaa monaigaa~," },
+                { time: 14.669, text: "Tiya nuramey adhi reyga," },
+                { time: 18.214, text: "Tiya nuramey adhi reygaa~!" },
+                { time: 21.731, text: "Ooohh~ alhavaa monaigaaa~!" },
+                { time: 25.101, text: "(music)" }
+            ]
+        },
+        {
+            sound: mus_monaigaa_hithaa,
+            title: "9. Monaigaa Hithaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.000,  text: "(Music)" },
+                { time: 4.300,  text: "Nila fen mathee," },
+                { time: 6.357,  text: "Alhavaa mi dhiyaa!" },
+                { time: 8.341,  text: "Monaigaa hithaa," },
+                { time: 10.106, text: "ge fenvee ashaa!" },
+                { time: 12.417, text: "Handhuvaru therey," },
+                { time: 14.411, text: "Tharithah dhul'hey!" },
+                { time: 16.513, text: "Vaa-ey feshuney," },
+                { time: 18.263, text: "Yageen vey-gen ley!" },
+                { time: 20.531, text: "Moanaigaa mulhi aalamey fenumey!" },
+                { time: 24.520, text: "Aaaaaah~ Alhavaaa~" },
+                { time: 28.133, text: "Hithuga!" }
+            ]
+        },
+        {
+            sound: mus_monaigaa_alhavaa,
+            title: "10. Monaigaa Alhavaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.293,  text: "(Aaahh~)" },
+                { time: 3.664,  text: "(Mhmmm~)" },
+                { time: 6.150,  text: "Moonaigaa Alhavaa" },
+                { time: 9.580,  text: "Raalhehege Monaigaa" },
+                { time: 12.531, text: "Feyn vaa kul'ha-daana" },
+                { time: 15.189, text: "Ey Monaigaa Alhavaa" },
+                { time: 18.537, text: "Mage Heyo Hithugaa" },
+                { time: 21.537, text: "Aduvesu Alhavaa!" },
+                { time: 24.190, text: "(Aaahh~)" },
+                { time: 27.000, text: "" }
+            ]
+        },
+        {
+            sound: mus_beru_alhavaa,
+            title: "13. Beru Alhavaa",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.077,  text: "Raalhehge moanaigaa alhavaaa~!" },
+                { time: 4.207,  text: "(Hey-yah, Hey-yah, alhavaa!)" },
+                { time: 8.243,  text: "Oah, moanaigaa alhavaa!" },
+                { time: 12.233, text: "Boduberu thahagaa," },
+                { time: 14.260, text: "(Alhavaa!)" },
+                { time: 16.211, text: "Hey-yah, Hey-yah, Monaigaa~h!" },
+                { time: 20.143, text: "(Hey-yah, Hey-yah, alhavaa!)" },
+                { time: 24.214, text: "MONAIGAA," },
+                { time: 25.220, text: "ALHAVAA~!" }
+            ]
+        },
+        {
+            sound: mus_nil_diyawela,
+            title: "14. Nil Diyaweyla",
+            composer: "Pixel",
+            lyrics: [
+                { time: 0.091,  text: "(Aaaa-oh, ho-oh-oh~)" },
+                { time: 4.211,  text: "Nil diya veyla nidanna loka thale," },
+                { time: 8.667,  text: "Sitha nivana na Maaladivaina mage!" },
+                { time: 13.203, text: "Sihineka wa~ge," },
+                { time: 15.476, text: "Sihineka wa~ge," },
+                { time: 17.795, text: "Weli thala matha~ rala hadi" },
+                { time: 22.297, text: "Mihira handana thanikama mage~!" }
+            ]
+        },
+        {
+            sound: mus_beyond_the_iron_cage,
+            title: "15. Beyond the Iron Cage",
+            composer: "Pixel",
+            lyrics: []
+        },
+        {
+            sound: mus_no_bridge_to_cross_extended,
+            title: "16. No Bridge to Cross",
+            composer: "Pixel",
+            lyrics: []
+        },
+        {
+            sound: mus_menu,
+            title: "17. Menu",
+            composer: "RKK",
+            lyrics: []
+        },
+        {
+            sound: mus_subway,
+            title: "18. Subway",
+            composer: "Xiancat & PixelForge07",
+            lyrics: []
+        },
+        {
+            sound: mus_city,
+            title: "19. City",
+            composer: "Xiancat & PixelForge07",
+            lyrics: []
+        },
+        {
+            sound: mus_title_theme,
+            title: "20. Title Theme (Unused)",
+            composer: "Xiancat & PixelForge07",
+            lyrics: []
+        },
+        {
+            sound: mus_boss,
+            title: "21. Boss",
+            composer: "PixelForge07",
+            lyrics: []
+        },
+        {
+            sound: mus_mujuraa,
+            title: "22. Mujuraa",
+            composer: "Naifaru Dhohokko",
+            lyrics: []
+        },
+        {
+            sound: mus_dhuru_dhuru_gaavey,
+            title: "23. Dhuru Dhuru Gaavey",
+            composer: "Holhudhoo Abdulla",
+            lyrics: []
+        },
+        {
+            sound: mus_dhombey_thedhuvey,
+            title: "24. Dhombey Thedhuvey",
+            composer: "Holhudhoo Abdulla",
+            lyrics: []
+        },
+        {
+            sound: mus_dhaaru_ofu_maaiy,
+            title: "25. Dhaaru Ofu Maaiy",
+            composer: "Naifaru Dhohokko",
+            lyrics: []
+        },
+        {
+            sound: mus_kaaku_keenhey_kuree,
+            title: "26. Kaaku Keenhey Kuree",
+            composer: "Holhudhoo Abdulla",
+            lyrics: []
+        }
+    ];
+}

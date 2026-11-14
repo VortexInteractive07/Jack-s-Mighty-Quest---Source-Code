@@ -4,6 +4,8 @@ function scr_load_settings() {
     if (!variable_global_exists("vol_bgm"))           global.vol_bgm = 80;
     if (!variable_global_exists("vol_sfx"))           global.vol_sfx = 80;
     if (!variable_global_exists("fullscreen"))        global.fullscreen = false;
+    if (!variable_global_exists("screen_resolution")) global.screen_resolution = "432x240";
+    if (!variable_global_exists("texture_pack"))      global.texture_pack = "";
     if (!variable_global_exists("enable_dialogue"))   global.enable_dialogue = false;
     if (!variable_global_exists("enable_splash_dialogue")) global.enable_splash_dialogue = global.enable_dialogue;
     if (!variable_global_exists("enable_title_dialogue"))  global.enable_title_dialogue = global.enable_dialogue;
@@ -16,6 +18,9 @@ function scr_load_settings() {
     if (!variable_global_exists("cheat_infammo"))     global.cheat_infammo = false;
     if (!variable_global_exists("cheat_unlocked"))    global.cheat_unlocked = false;
     if (!variable_global_exists("selected_mannequin")) global.selected_mannequin = 0;
+
+    scr_apply_resolution();
+    scr_texture_pack_load(global.texture_pack);
 
     var _settings_file_name = "settings.json";
     if (!file_exists(_settings_file_name)) {
@@ -48,6 +53,20 @@ function scr_load_settings() {
         }
         if (variable_struct_exists(_data, "fullscreen") && is_bool(_data.fullscreen)) {
             global.fullscreen = _data.fullscreen;
+        }
+        if (variable_struct_exists(_data, "screen_resolution") && is_string(_data.screen_resolution)) {
+            var _screen_resolution = _data.screen_resolution;
+            if (_screen_resolution == "432x240"
+            || _screen_resolution == "320x240"
+            || _screen_resolution == "320x224"
+            || _screen_resolution == "256x192"
+            || _screen_resolution == "256x240"
+            || _screen_resolution == "256x224") {
+                global.screen_resolution = _screen_resolution;
+            }
+        }
+        if (variable_struct_exists(_data, "texture_pack") && is_string(_data.texture_pack)) {
+            global.texture_pack = _data.texture_pack;
         }
         if (variable_struct_exists(_data, "enable_dialogue") && is_bool(_data.enable_dialogue)) {
             global.enable_dialogue = _data.enable_dialogue;
@@ -91,5 +110,35 @@ function scr_load_settings() {
         }
     } catch (_err) {
         show_debug_message("ERROR: could not parse '" + _settings_file_name + "' (" + string(_err.message) + ").");
+    }
+
+    scr_apply_resolution();
+    scr_texture_pack_load(global.texture_pack);
+}
+
+/// @function scr_apply_resolution()
+/// @description Applies the selected native game, camera, and GUI dimensions.
+function scr_apply_resolution() {
+    var _width = 432;
+    var _height = 240;
+
+    switch (global.screen_resolution) {
+        case "320x240": _width = 320; _height = 240; break;
+        case "320x224": _width = 320; _height = 224; break;
+        case "256x192": _width = 256; _height = 192; break;
+        case "256x240": _width = 256; _height = 240; break;
+        case "256x224": _width = 256; _height = 224; break;
+    }
+
+    global.screen_width = _width;
+    global.screen_height = _height;
+    display_set_gui_size(_width, _height);
+
+    if (view_enabled && is_real(view_camera[0]) && view_camera[0] != -1) {
+        camera_set_view_size(view_camera[0], _width, _height);
+        view_set_xport(0, 0);
+        view_set_yport(0, 0);
+        view_set_wport(0, _width);
+        view_set_hport(0, _height);
     }
 }

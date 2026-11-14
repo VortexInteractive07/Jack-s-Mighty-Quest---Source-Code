@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"libFragsets",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"libFragsets",
+  "parent":{
+    "name":"Library",
+    "path":"folders/Scripts/Library.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

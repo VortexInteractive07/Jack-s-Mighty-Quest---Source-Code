@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrArraywalk",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrArraywalk",
+  "parent":{
+    "name":"Dungeon",
+    "path":"folders/Scripts/Dungeon.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

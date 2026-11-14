@@ -9,6 +9,11 @@ if (bgm_handle != -1 && audio_is_playing(bgm_handle)) {
     bgm_handle = -1;
 }
 
+if (boss_clear_audio_id != -1 && audio_is_playing(boss_clear_audio_id)) {
+    audio_stop_sound(boss_clear_audio_id);
+    boss_clear_audio_id = -1;
+}
+
 if (game_over_music_id != -1 && audio_is_playing(game_over_music_id)) {
     audio_stop_sound(game_over_music_id);
 }

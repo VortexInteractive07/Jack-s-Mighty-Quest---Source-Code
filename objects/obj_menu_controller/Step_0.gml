@@ -38,6 +38,65 @@ if (changelog_fade_state == 1) {
     }
 }
 
+if (current_mode == 2) {
+    if (sprite_exists(spr_vortex_logo_darkmode)) {
+        var _bg_width = sprite_get_width(spr_vortex_logo_darkmode);
+        var _bg_height = sprite_get_height(spr_vortex_logo_darkmode);
+        if (_bg_width > 0) jukebox_bg_x = (jukebox_bg_x + jukebox_bg_speed_x) mod _bg_width;
+        if (_bg_height > 0) jukebox_bg_y = (jukebox_bg_y + jukebox_bg_speed_y + _bg_height) mod _bg_height;
+    }
+
+    if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+        jukebox_playback_position = audio_sound_get_track_position(current_playing_track);
+    }
+}
+
+if (jukebox_transition_state == 1) {
+    fade_alpha = min(1, fade_alpha + fade_speed);
+    if (current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+        audio_sound_gain(current_playing_track, (1 - fade_alpha) * (global.vol_bgm / 100), 0);
+    }
+
+    if (fade_alpha >= 1) {
+        current_mode = jukebox_transition_target_mode;
+
+        if (jukebox_transition_action == 1) {
+            if (current_playing_track != -1) audio_stop_sound(current_playing_track);
+            current_playing_track = -1;
+            current_playing_asset = -1;
+            jukebox_selected_index = 0;
+            jukebox_scroll_offset = 0;
+            jukebox_playing_index = -1;
+            jukebox_is_playing = false;
+            jukebox_playback_position = 0;
+        } else if (jukebox_transition_action == 2) {
+            if (current_playing_track != -1) audio_stop_sound(current_playing_track);
+            current_playing_track = -1;
+            current_playing_asset = -1;
+            jukebox_playing_index = -1;
+            jukebox_is_playing = false;
+
+            if (menu_music != -1 && audio_exists(menu_music)) {
+                current_playing_asset = menu_music;
+                current_playing_track = audio_play_sound(menu_music, 1, true);
+                audio_sound_gain(current_playing_track, 0, 0);
+            }
+        }
+
+        jukebox_transition_state = 2;
+    }
+} else if (jukebox_transition_state == 2) {
+    fade_alpha = max(0, fade_alpha - fade_speed);
+    if (current_mode == 0 && current_playing_track != -1 && audio_is_playing(current_playing_track)) {
+        audio_sound_gain(current_playing_track, (1 - fade_alpha) * (global.vol_bgm / 100), 0);
+    }
+
+    if (fade_alpha <= 0) {
+        fade_alpha = 0;
+        jukebox_transition_state = 0;
+    }
+}
+
 switch (fade_state) {
 
     // ==========================================
@@ -55,6 +114,8 @@ switch (fade_state) {
     // --- STATE 1: INTERACTIVE MENUS ---
     // ==========================================
     case 1:
+        if (jukebox_transition_state != 0) break;
+
         // Input Abstraction (Keyboard + Gamepad Support)
         var _gp_num = 0;
         var _gp_connected = gamepad_is_connected(_gp_num);
@@ -102,10 +163,50 @@ switch (fade_state) {
         var _confirm    = keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space) || _gp_conf;
         var _cancel     = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(vk_backspace) || _gp_canc;
 
+        if (current_mode == 2) {
+            var _playlist_total = array_length(jukebox_playlist);
+
+            if (_move_up) {
+                jukebox_selected_index = (jukebox_selected_index - 1 + _playlist_total) mod _playlist_total;
+                if (jukebox_selected_index < jukebox_scroll_offset) {
+                    jukebox_scroll_offset = jukebox_selected_index;
+                } else if (jukebox_selected_index >= jukebox_scroll_offset + jukebox_visible_max) {
+                    jukebox_scroll_offset = max(0, _playlist_total - jukebox_visible_max);
+                }
+                play_ui_blip(sfx_dialogue_asset);
+            }
+
+            else if (_move_down) {
+                jukebox_selected_index = (jukebox_selected_index + 1) mod _playlist_total;
+                if (jukebox_selected_index < jukebox_scroll_offset) {
+                    jukebox_scroll_offset = 0;
+                } else if (jukebox_selected_index >= jukebox_scroll_offset + jukebox_visible_max) {
+                    jukebox_scroll_offset = jukebox_selected_index - jukebox_visible_max + 1;
+                }
+                play_ui_blip(sfx_dialogue_asset);
+            }
+
+            if (_confirm) {
+                if (jukebox_playing_index == jukebox_selected_index) {
+                    jukebox_toggle_playback();
+                } else {
+                    jukebox_play_selected(jukebox_selected_index);
+                }
+            }
+
+            if (keyboard_check_pressed(ord("P"))) {
+                jukebox_toggle_playback();
+            }
+
+            if (_cancel) {
+                play_ui_blip(sfx_continue_asset);
+                close_jukebox();
+            }
+        }
         // --------------------------------------
         // CHANGELOG (mode 3, or mid-transition)
         // --------------------------------------
-        if (current_mode == 3 || changelog_fade_state != 0) {
+        else if (current_mode == 3 || changelog_fade_state != 0) {
             if (changelog_fade_state == 0) {
                 var _max_scroll = max(0, array_length(changelog_lines) - changelog_visible_lines);
 
@@ -125,7 +226,7 @@ switch (fade_state) {
             }
         }
         // --------------------------------------
-        // ALL LIST-DRIVEN MODES (0, 1, 2, 4)
+        // ALL LIST-DRIVEN MODES (0, 1, 4)
         // --------------------------------------
         else {
             var _active_list = undefined;
@@ -134,28 +235,28 @@ switch (fade_state) {
             switch (current_mode) {
                 case 0: _active_list = menu_list_main;      _cancel_mode = -1; break;
                 case 1: _active_list = menu_list_options;   _cancel_mode = 0;  break;
-                case 2: _active_list = menu_list_jukebox;   _cancel_mode = 0;  break;
                 case 4: _active_list = menu_list_cheats;    _cancel_mode = 0;  break;
             }
 
             if (_active_list != undefined) {
-                menu_navigate(_active_list, _move_up, _move_down);
-
-                if (_move_left)  menu_adjust_item(_active_list, -1);
-                if (_move_right) menu_adjust_item(_active_list, 1);
-
-                if (_confirm) {
-                    menu_confirm_item(_active_list);
-                }
-
-                if (_cancel && _cancel_mode != -1) {
+                if (_cancel && current_mode == 0) {
                     play_ui_blip(sfx_continue_asset);
+                    pending_exit_to_title = true;
+                    fade_state = 2;
+                } else {
+                    menu_navigate(_active_list, _move_up, _move_down);
 
-                    if (current_mode == 2) {
-                        play_jukebox_track(-1);
+                    if (_move_left)  menu_adjust_item(_active_list, -1);
+                    if (_move_right) menu_adjust_item(_active_list, 1);
+
+                    if (_confirm) {
+                        menu_confirm_item(_active_list);
                     }
 
-                    current_mode = _cancel_mode;
+                    if (_cancel && _cancel_mode != -1) {
+                        play_ui_blip(sfx_continue_asset);
+                        current_mode = _cancel_mode;
+                    }
                 }
             }
         }

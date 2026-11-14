@@ -1,8 +1,6 @@
 /// @description Initialize State, Display, Subtitle System, Choices, Backlog, & FX
 scr_load_settings();
 
-display_set_gui_size(432, 240);
-
 // Room Transition Target
 target = rm_subway;
 target_room = (room_exists(target)) ? target : room;

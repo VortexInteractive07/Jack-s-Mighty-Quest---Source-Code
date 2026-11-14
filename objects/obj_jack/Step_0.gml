@@ -170,3 +170,44 @@ if (!grounded) {
     sprite_index = spr_player_jump;
     image_speed = 1.0;
 }
+
+// Mario Stomp on Boss
+if (instance_exists(obj_melonhead_proto)) {
+    var _boss_inst = instance_place(x, y, obj_melonhead_proto);
+    if (_boss_inst != noone && !_boss_inst.defeated && _boss_inst.state != BOSS_STATE.WAIT) {
+        if (vsp > 0 && y < _boss_inst.y + 16) {
+            _boss_inst.take_damage(max(1, round(16 * damage_multiplier)));
+            vsp = -7.0; // Stomp bounce
+            jumps_left = jump_max;
+            coyote_timer = coyote_max;
+            if (audio_exists(sfx_enemy_hit)) {
+                var _hit_snd = audio_play_sound(sfx_enemy_hit, 9, false);
+                audio_sound_gain(_hit_snd, global.vol_sfx / 100, 0);
+            }
+            if (audio_exists(sfx_jump)) {
+                var _bounce_snd = audio_play_sound(sfx_jump, 7, false);
+                audio_sound_gain(_bounce_snd, (global.vol_sfx / 100) * 0.7, 0);
+            }
+        }
+    }
+}
+
+// Melee attack logic
+if (attack_cooldown > 0) attack_cooldown--;
+var _attack_key = keyboard_check_pressed(ord("X")) || keyboard_check_pressed(ord("K"))
+    || (gamepad_is_connected(0) && (gamepad_button_check_pressed(0, gp_face3) || gamepad_button_check_pressed(0, gp_face4)));
+
+if (_attack_key && attack_cooldown <= 0) {
+    attack_cooldown = attack_cooldown_max;
+    if (audio_exists(sfx_shoot)) {
+        var _swing = audio_play_sound(sfx_shoot, 6, false);
+        audio_sound_gain(_swing, (global.vol_sfx / 100) * 0.6, 0);
+    }
+    if (instance_exists(obj_melonhead_proto)) {
+        var _boss = instance_find(obj_melonhead_proto, 0);
+        if (point_distance(x, y, _boss.x, _boss.y) <= attack_range
+        && sign(_boss.x - x) == sign(image_xscale)) {
+            _boss.take_damage(max(1, round(12 * damage_multiplier)));
+        }
+    }
+}

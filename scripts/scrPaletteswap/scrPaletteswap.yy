@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrPaletteswap",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrPaletteswap",
+  "parent":{
+    "name":"Palette",
+    "path":"folders/Scripts/Palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

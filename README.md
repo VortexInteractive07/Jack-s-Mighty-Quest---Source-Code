@@ -53,4 +53,34 @@ Well, it's only visible in the project files, cause there's a lot of assets that
 
 ---
 
+## Windows Texture Packs
+
+Texture packs are data-only `.jmqpack` folders. They cannot run scripts or modify gameplay rules. Close the game, copy each pack folder into the game's `save_directory\texture_packs\` folder, then launch the game and select it under **Settings → Textures**. The selection is saved and takes effect on the next launch.
+
+Each pack folder must contain `pack.json` and a `textures` folder. For example:
+
+```text
+Example.jmqpack/
+  pack.json
+  textures/
+    spr_gem.png
+    spr_main_menu.png
+```
+
+```json
+{
+  "format_version": 1,
+  "name": "Example",
+  "textures": ["spr_gem", "spr_main_menu"]
+}
+```
+
+Supported sprite names: `spr_dialogue`, `spr_dialogue_continue_btn`, `spr_gem`, `spr_main_menu`, `spr_menu_arrow_down`, `spr_menu_arrow_up`, and `spr_titlescreen`. Each PNG must be a horizontal frame strip with the original frame count and per-frame dimensions; incompatible images are ignored instead of stretched. Texture packs are currently supported only in the Windows build.
+
+## Stage Prototypes
+
+The title-screen level select is unlocked with Up, Up, Down, Down, Left, Right, Left, Right. Stages 2 and 3 reuse the Stage 1 parallax background with separate rain and ember effects. Stage 2 contains the Melonhead boss prototype; press `X` or `K` near it to attack. Ranga Dhun Yeh loops while the boss arena is active.
+
+---
+
 *© Vortex Interactive. All rights reserved.*

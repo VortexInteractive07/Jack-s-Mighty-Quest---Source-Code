@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_mujuraa",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":0,
+  "conversionMode":0,
+  "duration":192.00581,
+  "exportDir":"",
+  "name":"mus_mujuraa",
+  "parent":{
+    "name":"Songs (Dhivehi)",
+    "path":"folders/Sounds/Soundtrack/Songs (Dhivehi).yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"mus_mujuraa.wav",
+  "volume":1.0,
+}

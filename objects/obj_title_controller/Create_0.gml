@@ -57,10 +57,19 @@ char_count = 0;
 typewriter_complete = false;
 
 // --- LEVEL SELECT MENU SYSTEM ---
-menu_options = [
-    { name: "Celestia - Subway", target: rm_subway, desc: "Play Stage 1 Tech Demo" },
-    { name: "Back to Title", target: -3, desc: "Return to Main Screen" }
-];
+var _stage_data = scr_level_select_data();
+menu_options = [];
+for (var _stage_index = 0; _stage_index < array_length(_stage_data); _stage_index++) {
+   var _stage = _stage_data[_stage_index];
+   if (_stage.unlocked) {
+       array_push(menu_options, {
+           name: _stage.name,
+           target: _stage.room_id,
+           desc: "Play " + _stage.act
+       });
+   }
+}
+array_push(menu_options, { name: "Back to Title", target: -3, desc: "Return to Main Screen" });
 menu_index = 0;
 menu_alpha = 0;
 
