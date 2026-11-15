@@ -1,12 +1,13 @@
 /// @desc scrMinimap
 
-/// @desc minimap_create(currLvl,slotStart,dungWidth,dungHeight)
+/// @desc minimap_create(currLvl,slotStartX,slotStartY,dungWidth,dungHeight)
 /// @arg currLvl
-/// @arg slotStart
+/// @arg slotStartX
+/// @arg slotStartY
 /// @arg dungWidth
 /// @arg dungHeight
 
-function minimap_create(_currLvl,_slotStart,_dungWidth,_dungHeight) {
+function minimap_create(_currLvl,_slotStartX,_slotStartY,_dungWidth,_dungHeight) {
 	
 	var _layerID = layer_tilemap_get_id("Minimap");
 	
@@ -40,7 +41,7 @@ function minimap_create(_currLvl,_slotStart,_dungWidth,_dungHeight) {
 				}
 				
 				// Place the selected tile on the minimap layer
-				if (_tileIndex != 0) tilemap_set(_layerID,_tileIndex,_slotStart+_xx,_slotStart+_yy);
+				if (_tileIndex != 0) tilemap_set(_layerID,_tileIndex,_slotStartX+_xx,_slotStartY+_yy);
 				
 		    }
 			

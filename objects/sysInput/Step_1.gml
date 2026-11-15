@@ -22,10 +22,10 @@ button2held = keyboard_check(ord("S"));
 button3held = keyboard_check(ord("D"));
 button4held = keyboard_check(ord("F"));
 
-start	    = keyboard_check_pressed(vk_f3);
+start	    = keyboard_check_pressed(ord("W")) or keyboard_check_pressed(vk_f3);
 select	    = keyboard_check_pressed(ord("Q"));
 
-startHeld   = keyboard_check(vk_f3);
+startHeld   = keyboard_check(ord("W")) or keyboard_check(vk_f3);
 selectHeld	= keyboard_check(ord("Q"));
 
 if (is_array(gamepad)) {

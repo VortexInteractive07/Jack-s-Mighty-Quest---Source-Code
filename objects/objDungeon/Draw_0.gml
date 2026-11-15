@@ -34,7 +34,7 @@ var _810w  = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST2LR ][mW];
 var _911h  = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST2TD ][mH];
 
 var _1214w = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST1LR ][mW];
-var _1214h = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST1TD ][mH];
+var _1214h = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST1LR ][mH];
 var _1315w = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST1TD ][mW];
 var _1315h = lib.cat[CAT.FRAGSIZES][FRAGSIZE.DIST1TD ][mH];
 
@@ -235,14 +235,16 @@ if (global.debug > 0) {
 		
 		var _slotSize  = slotSize;
 		var _slotStart = 3*_slotSize;
+		var _mapCellX  = round((_dvX+_slotStart)/_slotSize);
+		var _mapCellY  = round((_dvY+_slotStart)/_slotSize);
 		var _mapLength = nSlots[mX];
 		var _mapHeight = nSlots[mY];
 		
 		// Stretched minimap background
-		draw_sprite_stretched(sprMapbackground,0,_dvX+_slotStart-1,_dvY+_slotStart-1,(_mapLength*(_slotSize))+1,(_mapHeight*(_slotSize))+1);
+		draw_sprite_stretched(sprMapbackground,0,(_mapCellX*_slotSize)-1,(_mapCellY*_slotSize)-1,(_mapLength*(_slotSize))+1,(_mapHeight*(_slotSize))+1);
 		
 		// Fill/show minimap layer
-		if (!layer_get_visible("Minimap")) minimap_create(lib.cat[CAT.DUNGEONS][currDung][currLvl],_slotStart/_slotSize,_mapLength,_mapHeight);
+		if (!layer_get_visible("Minimap")) minimap_create(lib.cat[CAT.DUNGEONS][currDung][currLvl],_mapCellX,_mapCellY,_mapLength,_mapHeight);
 		
 		if (global.debug > 1) {
 			
