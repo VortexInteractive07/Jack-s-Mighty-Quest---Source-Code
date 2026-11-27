@@ -1,4 +1,4 @@
-> **IMPORTANT NOTE:** The HUD and many important functions of JMQ are broken in this build. Due to quota limits, I'm unable to proceed! I'm begging to find a GML programmer ASAP!
+> **IMPORTANT NOTE:** We're actively looking for expertise GML/GameMaker programmers as hobby/revshare based. Along with that, the game is constantly getting updates, so don't be too excited for this. This is tough, but we'll make this game a better place for everyone!
 
 ---
 
