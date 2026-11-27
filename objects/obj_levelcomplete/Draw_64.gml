@@ -15,7 +15,7 @@ if (activated) {
         draw_primitive_end();
     };
 
-    draw_set_font(fnt_bitmap);
+    draw_set_font(fnt_regular);
 
     // Easing Slide-In Offsets
     var _slide_offset = (1.0 - card_slide) * _gw;

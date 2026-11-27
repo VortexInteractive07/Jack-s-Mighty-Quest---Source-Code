@@ -7,7 +7,7 @@ function scr_title_ost_playlist() {
 		{ sound: mus_dhuru_dhuru_gaavey, title: "Dhuru Dhuru Gaavey",          composer: "Holhudhoo Abdulla" },
 		{ sound: mus_dhombey_thedhuvey,  title: "Dhombey Thedhuvey",           composer: "Holhudhoo Abdulla" },
 		{ sound: mus_dhaaru_ofu_maaiy,   title: "Dhaaru Ofu Maaiy",            composer: "Naifaru Dhohokko" },
-		{ sound: mus_rethi_aadha,        title: "Rethi Aadha",                 composer: "Pixel" },
+		{ sound: mus_reythi_aadha,       title: "Rethi Aadha",                 composer: "Pixel" },
 		{ sound: mus_beru_alhavaa,       title: "Moonaigaa Alhavaa Groove",    composer: "Pixel" },
         { sound: mus_alhavaa,            title: "Alhavaa",                     composer: "Pixel" },
 		{ sound: mus_nil_diyawela,       title: "Nil Diyaweyla",               composer: "Pixel" },

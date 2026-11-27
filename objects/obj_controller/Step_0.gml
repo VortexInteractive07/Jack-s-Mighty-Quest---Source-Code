@@ -1,6 +1,32 @@
 /// @description Level Controller Step Logic - Pause, Audio, Timers & Transitions
 
 // --- 1. HUD VISUAL INTERPOLATION LOGIC ---
+if (pending_restore_apply && variable_global_exists("pending_game_restore")
+&& is_struct(global.pending_game_restore) && global.pending_game_restore.room_asset == room
+&& instance_exists(obj_jack)) {
+    global.pending_game_restore = undefined;
+    pending_restore_apply = false;
+}
+if (instance_exists(obj_jack)) {
+    var _standing_jack = instance_find(obj_jack, 0);
+    if (!_standing_jack.is_dead && _standing_jack.hp > 0) {
+        var _standing_mark = instance_exists(obj_mark) ? instance_find(obj_mark, 0) : noone;
+        global.last_stand = {
+            room_asset: room,
+            x: _standing_jack.x,
+            y: _standing_jack.y,
+            mark_x: (_standing_mark != noone) ? _standing_mark.x : _standing_jack.x - 28,
+            mark_y: (_standing_mark != noone) ? _standing_mark.y : _standing_jack.y - 16,
+            hp: _standing_jack.hp
+        };
+    }
+}
+if (!variable_instance_exists(id, "autosave_timer")) autosave_timer = 0;
+autosave_timer++;
+if (autosave_timer >= max(1, floor(game_get_speed(gamespeed_fps) * 0.5))) {
+    autosave_timer = 0;
+    scr_save_slot_autosave();
+}
 if (total_collectibles <= 0 && instance_exists(obj_gem)) {
     total_collectibles = instance_number(obj_gem);
 }
@@ -24,6 +50,36 @@ hp_visual_catchup = lerp(hp_visual_catchup, hp_visual_current, 0.08);
 // --- 2. INPUT PROCESSING & LOCAL PAUSE SYSTEM ---
 var _key_pause = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"));
 var _key_debug = keyboard_check_pressed(vk_f3);
+
+if (keyboard_check_pressed(vk_f1)) {
+    global.guidebook_open = !global.guidebook_open;
+    global.inventory_open = false;
+}
+if (keyboard_check_pressed(ord("I")) && !global.guidebook_open) global.inventory_open = !global.inventory_open;
+if (global.inventory_open || global.guidebook_open) {
+    if (global.inventory_open) {
+        var _items = global.inventory_items;
+        if (keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"))) global.inventory_index = max(0, global.inventory_index - 1);
+        if (keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"))) global.inventory_index = min(array_length(_items) - 1, global.inventory_index + 1);
+        if ((keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_space)) && array_length(_items) > 0) {
+            var _item = _items[global.inventory_index];
+            if (_item.category == "FOOD" && _item.quantity > 0 && instance_exists(obj_jack)) {
+                var _player = instance_find(obj_jack, 0);
+                _player.hp = min(_player.max_hp, _player.hp + _item.heal);
+                _item.quantity--;
+                if (_item.quantity <= 0) {
+                    global.inventory_items = array_delete(_items, global.inventory_index, 1);
+                    global.inventory_index = max(0, global.inventory_index - 1);
+                }
+            }
+        }
+    }
+    if (_key_pause || keyboard_check_pressed(vk_backspace)) {
+        global.inventory_open = false;
+        global.guidebook_open = false;
+    }
+    exit;
+}
 
 if (_key_pause && state == TRANSITION_STATE.IDLE && !is_game_over) {
     game_paused = !game_paused;
@@ -93,7 +149,7 @@ if (weather_enabled && !game_paused) {
 
     var _weather_view_w = camera_get_view_width(view_camera[0]);
     var _weather_view_h = camera_get_view_height(view_camera[0]);
-    var _weather_wind = weather_wind ? 0.8 : 0.0;
+    var _weather_wind = weather_wind ? max(0.8, wind_speed_mph / 50 * 2.4) : 0.0;
 
     for (var _weather_i = 0; _weather_i < array_length(weather_drops); _weather_i++) {
         var _drop = weather_drops[_weather_i];
@@ -105,8 +161,10 @@ if (weather_enabled && !game_paused) {
         }
     }
 
-    if (irandom(720) == 0) {
-        weather_flash_alpha = 0.45;
+    weather_thunder_timer--;
+    if (weather_thunder_timer <= 0) {
+        weather_thunder_timer = stage2_storm ? irandom_range(1800, 3600) : irandom_range(900, 2400);
+        weather_flash_alpha = stage2_storm ? 0.32 : 0.25;
         if (audio_exists(sfx_thunder)) {
             var _thunder_id = audio_play_sound(sfx_thunder, 8, false);
             audio_sound_gain(_thunder_id, global.vol_sfx / 100, 0);

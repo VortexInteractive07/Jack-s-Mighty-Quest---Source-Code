@@ -45,7 +45,7 @@ if (music_started && !defeated) {
     draw_rectangle(_bar_left, _bar_y, _bar_left + (_bar_width * _hp_ratio), _bar_y + 4, false);
     
     // Boss Name Tag
-    draw_set_font(fnt_bitmap);
+    draw_set_font(fnt_regular);
     draw_set_halign(fa_center);
     draw_set_valign(fa_bottom);
     draw_set_color(c_black);

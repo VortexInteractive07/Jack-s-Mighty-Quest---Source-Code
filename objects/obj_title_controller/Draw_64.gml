@@ -15,8 +15,8 @@ if (sprite_exists(_title_background)) {
     draw_clear(c_black);
 }
 
-if (font_exists(fnt_bitmap)) {
-    draw_set_font(fnt_bitmap);
+if (font_exists(fnt_regular)) {
+    draw_set_font(fnt_regular);
 }
 
 var _gold = make_color_rgb(255, 215, 0);
@@ -88,7 +88,7 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
     }
     
     var _full_text = struct_exists(_current_line, "text") ? _current_line.text : "";
-    var _font = (struct_exists(_current_line, "font") && font_exists(_current_line.font)) ? _current_line.font : fnt_bitmap;
+    var _font = (struct_exists(_current_line, "font") && font_exists(_current_line.font)) ? _current_line.font : fnt_regular;
     var _color = struct_exists(_current_line, "color") ? _current_line.color : c_white;
     var _scale = struct_exists(_current_line, "scale") ? _current_line.scale : 1.0;
 
@@ -140,8 +140,8 @@ if (fade_state == 2 && in_dialogue && array_length(dialogue_lines) > 0) {
     }
 }
 
-if (font_exists(fnt_bitmap)) {
-    draw_set_font(fnt_bitmap);
+if (font_exists(fnt_regular)) {
+    draw_set_font(fnt_regular);
 }
 
 // ==========================================

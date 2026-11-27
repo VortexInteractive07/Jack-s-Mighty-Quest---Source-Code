@@ -1,6 +1,15 @@
 /// @description obj_jack - Step Event (Solid Collision, Mario Wall Jump & Updated Controls)
 
+if ((variable_global_exists("inventory_open") && global.inventory_open)
+|| (variable_global_exists("guidebook_open") && global.guidebook_open)) exit;
+
 if (is_dead) {
+    var _death_wind_push = 0;
+    if (instance_exists(obj_controller)) {
+        var _death_controller = instance_find(obj_controller, 0);
+        if (_death_controller.stage2_storm) _death_wind_push = _death_controller.wind_speed_mph * 0.012;
+    }
+    hsp -= _death_wind_push;
     vsp = min(vsp + grav, 8);
     x += hsp;
     y += vsp;
@@ -10,6 +19,8 @@ if (is_dead) {
     }
     exit;
 }
+
+if (damage_invulnerability_timer > 0) damage_invulnerability_timer--;
 
 // --- 1. INPUT PROCESSING ---
 var _move_left  = keyboard_check(vk_left);
@@ -111,6 +122,17 @@ if (_jump_press) {
     }
 }
 
+// Stage 2's westward 50 mph gust reduces forward control and pushes Jack left.
+if (instance_exists(obj_controller)) {
+    var _wind_controller = instance_find(obj_controller, 0);
+    if (_wind_controller.stage2_storm && _wind_controller.wind_speed_mph > 0) {
+        var _wind_ratio = clamp(_wind_controller.wind_speed_mph / 50, 0, 1);
+        var _wind_push = _wind_controller.wind_speed_mph * 0.012;
+        var _wind_drag = 0.20 * _wind_ratio;
+        hsp = (hsp * (1 - _wind_drag)) - _wind_push;
+    }
+}
+
 // --- 6. HORIZONTAL COLLISION WITH STEP-UP ---
 if (place_meeting(x + hsp, y, obj_wall)) {
     var _stepped = false;
@@ -209,5 +231,43 @@ if (_attack_key && attack_cooldown <= 0) {
         && sign(_boss.x - x) == sign(image_xscale)) {
             _boss.take_damage(max(1, round(12 * damage_multiplier)));
         }
+    }
+}
+
+// Hold F for rapid, unlimited plasma fire in Jack's facing direction.
+if (projectile_cooldown > 0) projectile_cooldown--;
+if (keyboard_check(ord("F")) && projectile_cooldown <= 0) {
+    projectile_cooldown = 9;
+    var _shot_dir = (image_xscale < 0) ? -1 : 1;
+    var _shot_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
+    var _shot = instance_create_layer(x + (14 * _shot_dir), y - 8, _shot_layer, obj_plasma_wave);
+    if (instance_exists(_shot)) {
+        _shot.sprite_index = (_shot_dir > 0) ? spr_pwave_right : spr_pwave_left;
+        _shot.hspeed = 9 * _shot_dir;
+        _shot.damage = 7;
+    }
+    if (audio_exists(sfx_shoot)) {
+        var _shot_sfx = audio_play_sound(sfx_shoot, 6, false);
+        audio_sound_gain(_shot_sfx, (global.vol_sfx / 100) * 0.45, 0);
+    }
+}
+
+// G fires a five-lane Massacre volley; the longer cooldown keeps the burst special.
+if (massacre_cooldown > 0) massacre_cooldown--;
+if (keyboard_check_pressed(ord("G")) && massacre_cooldown <= 0) {
+    massacre_cooldown = game_get_speed(gamespeed_fps);
+    var _massacre_dir = (image_xscale < 0) ? -1 : 1;
+    var _massacre_layer = layer_exists("Projectiles") ? "Projectiles" : "Instances";
+    for (var _volley_i = -2; _volley_i <= 2; _volley_i++) {
+        var _volley_shot = instance_create_layer(x + (14 * _massacre_dir), y - 8 + (_volley_i * 8), _massacre_layer, obj_plasma_wave);
+        if (instance_exists(_volley_shot)) {
+            _volley_shot.sprite_index = (_massacre_dir > 0) ? spr_pwave_right : spr_pwave_left;
+            _volley_shot.hspeed = 9 * _massacre_dir;
+            _volley_shot.damage = 7;
+        }
+    }
+    if (audio_exists(sfx_explosion)) {
+        var _massacre_sfx = audio_play_sound(sfx_explosion, 7, false);
+        audio_sound_gain(_massacre_sfx, global.vol_sfx / 100, 0);
     }
 }

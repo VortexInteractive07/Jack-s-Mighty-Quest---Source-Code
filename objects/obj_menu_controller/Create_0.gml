@@ -48,8 +48,20 @@ show_toast = function(_msg) {
 };
 
 // --- NAVIGATION SUB-MODES ---
-// 0 = MAIN MENU, 1 = OPTIONS, 2 = JUKEBOX, 3 = CHANGELOG, 4 = CHEATS
+// 0 = MAIN MENU, 1 = OPTIONS, 2 = JUKEBOX, 3 = CHANGELOG, 4 = CHEATS,
+// 5 = MANUAL, 6 = SAVE SLOTS, 7 = NEW SAVE NAME
 current_mode = 0;
+guidebook_page = 0;
+save_slot_cursor = 0;
+save_slots = array_create(10, undefined);
+save_name_input = "";
+save_delete_armed = false;
+save_delete_timer = 0;
+content_manager_page = 0;
+content_manager_packs = [];
+content_manager_addons = [];
+content_manager_return_mode = 0;
+addon_create_type = 0;
 
 // Track active playing music handle and asset ID
 menu_music = mus_menu_asset;
@@ -87,7 +99,7 @@ pending_exit_to_title = false;
 settings_file_name = "settings.json";
 scr_load_settings();
 global.game_session_active = false;
-global.game_lives = 3;
+global.game_lives = 10;
 global.game_score = 0;
 
 save_settings = function() {
@@ -218,24 +230,6 @@ draw_menu_list = function(_list, _text_x, _y_start, _line_spacing, _alpha) {
         }
     }
 
-    if (_list.total > _list.visible_max) {
-        var _arrow_x = _text_x - 16;
-        var _visible_rows = min(_list.visible_max, _list.total - _list.scroll_offset);
-        var _arrow_y_center = min(
-            _y_start + (_visible_rows * _line_spacing) + 2,
-            display_get_gui_height() - 30
-        );
-        var _bob = round(sin(arrow_anim_timer) * 2);
-
-        if (_list.scroll_offset > 0 && sprite_exists(spr_menu_arrow_up)) {
-            var _arrow_up = scr_texture_pack_sprite("spr_menu_arrow_up", spr_menu_arrow_up);
-            draw_sprite_ext(_arrow_up, 0, _arrow_x, _arrow_y_center - 8 + _bob, 1, 1, 0, c_white, _alpha);
-        }
-        if (_list.scroll_offset + _list.visible_max < _list.total && sprite_exists(spr_menu_arrow_down)) {
-            var _arrow_down = scr_texture_pack_sprite("spr_menu_arrow_down", spr_menu_arrow_down);
-            draw_sprite_ext(_arrow_down, 0, _arrow_x, _arrow_y_center + 8 - _bob, 1, 1, 0, c_white, _alpha);
-        }
-    }
 };
 
 apply_bgm_volume = function() {
@@ -314,13 +308,18 @@ jukebox_play_selected = function(_index) {
 
     var _song = jukebox_playlist[_index];
     if (audio_exists(_song.sound)) {
-        current_playing_asset = _song.sound;
-        current_playing_track = audio_play_sound(_song.sound, 1, true);
-        audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
-        jukebox_playing_index = _index;
-        jukebox_is_playing = true;
-        jukebox_playback_position = 0;
-        play_ui_blip(sfx_continue_asset);
+        var _track_handle = audio_play_sound(_song.sound, 1, true);
+        if (_track_handle != -1) {
+            current_playing_asset = _song.sound;
+            current_playing_track = _track_handle;
+            audio_sound_gain(current_playing_track, global.vol_bgm / 100, 0);
+            jukebox_playing_index = _index;
+            jukebox_is_playing = true;
+            jukebox_playback_position = 0;
+            play_ui_blip(sfx_continue_asset);
+        } else {
+            show_toast("Could not start track: " + _song.title);
+        }
     } else {
         show_debug_message("Jukebox track asset is unavailable: " + _song.title);
     }
@@ -395,17 +394,12 @@ fit_jukebox_text = function(_text, _max_width) {
 // --- MAIN MENU LIST (mode 0) ---
 menu_list_main = make_menu_list([
     { 
-        label: "Play Game", 
+        label: "STORY / SAVE SLOTS",
         action: function() { 
-            io_clear();
-            target_room = room_exists(rm_intro) ? rm_intro : room_next(room);
-            fade_state = 2;
-        } 
-    },
-    { 
-        label: "Load Recent Game", 
-        action: function() { 
-            show_toast("Load Recent Game coming soon in " + target_version + "!");
+            save_slots = scr_save_slots_read();
+            save_slot_cursor = 0;
+            save_delete_armed = false;
+            current_mode = 6;
         } 
     },
     { 
@@ -416,15 +410,24 @@ menu_list_main = make_menu_list([
     },
     { label: "Cheats",          action: function() { current_mode = 4; menu_list_cheats.index = 0; } },
     { label: "Settings",        action: function() { current_mode = 1; menu_list_options.index = 0; } },
+    { label: "Add-On Manager", action: function() { content_manager_return_mode = 0; content_manager_packs = scr_texture_pack_list(); content_manager_addons = scr_addon_pack_list(); content_manager_page = 0; current_mode = 8; } },
+    { label: "Add-On Guide (F1)", action: function() { guidebook_page = 3; current_mode = 5; } },
     { label: "IN-GAME BROWSER", action: function() { show_toast("Embedded browser is not available in this build."); } },
     { label: "Changelog",       action: function() { changelog_scroll = 0; changelog_fade_state = 1; } },
     { label: "Sound Test",      action: function() { open_jukebox(); } },
     { label: "Exit to Title Screen", action: function() { io_clear(); pending_exit_to_title = true; fade_state = 2; } },
-    { label: "Exit Game", action: function() { game_end(); } }
-], 8);
+    { label: "Exit Game", action: function() { game_end(); } },
+    { label: "JMQ Manual (F1)", action: function() { current_mode = 5; } }
+], 10);
 
 // --- SETTINGS / OPTIONS LIST (mode 1) ---
 menu_list_options = make_menu_list([
+    {
+        label: "ADD-ON MANAGER",
+        action: function() { content_manager_return_mode = 1; content_manager_packs = scr_texture_pack_list(); content_manager_addons = scr_addon_pack_list(); content_manager_page = 0; current_mode = 8; },
+        adjust_sfx: sfx_continue_asset,
+        confirm_sfx: sfx_continue_asset
+    },
     {
         label: "BGM VOLUME",
         get_value: function() { return " < " + string(global.vol_bgm) + "% >"; },

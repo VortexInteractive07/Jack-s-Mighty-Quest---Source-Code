@@ -18,3 +18,9 @@ glow_alpha = 0;
 current_state = "IDLE";
 
 depth = -y;
+
+if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+&& global.pending_game_restore.room_asset == room) {
+    x = global.pending_game_restore.mark_x;
+    y = global.pending_game_restore.mark_y;
+}

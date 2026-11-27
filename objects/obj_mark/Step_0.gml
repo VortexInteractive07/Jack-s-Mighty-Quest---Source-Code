@@ -36,6 +36,14 @@ var target_y = target.y - follow_height;
 var dx = (target_x - x) * lerp_speed;
 var dy = (target_y - y) * lerp_speed;
 
+// The same Stage 2 crosswind carries Mark left while he follows Jack.
+if (instance_exists(obj_controller)) {
+    var _wind_controller = instance_find(obj_controller, 0);
+    if (_wind_controller.stage2_storm) {
+        dx -= _wind_controller.wind_speed_mph * 0.012;
+    }
+}
+
 move_and_collide(dx, dy, obj_wall);
 
 if (abs(target.x - x) > 4) {

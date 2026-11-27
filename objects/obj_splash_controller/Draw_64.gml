@@ -5,7 +5,7 @@
 // spr_dialogue
 // spr_dialogue_continue_btn
 // spr_gamemaker_attribution
-// fnt_bitmap
+// fnt_regular
 
 if (splash_index >= array_length(splash_list)) exit;
 
@@ -19,7 +19,7 @@ draw_clear(c_black);
 // 1. STANDALONE RAW TEXT SPLASH
 // ==========================================
 if (is_struct(_current_splash) && struct_exists(_current_splash, "raw_text")) {
-    var _font    = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_bitmap;
+    var _font    = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_regular;
     var _color   = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
     var _scale   = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
     var _shadow  = struct_exists(_current_splash, "blue_shadow") ? _current_splash.blue_shadow : false;
@@ -48,7 +48,7 @@ else if (is_struct(_current_splash) && struct_exists(_current_splash, "text")) {
         draw_sprite_ext(_dialogue_frame, 0, 0, 0, 1.0, 1.0, 0, c_white, 1.0);
     }
 
-    var _font  = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_bitmap;
+    var _font  = (struct_exists(_current_splash, "font") && font_exists(_current_splash.font)) ? _current_splash.font : fnt_regular;
     var _color = struct_exists(_current_splash, "color") ? _current_splash.color : c_white;
     var _scale = struct_exists(_current_splash, "scale") ? _current_splash.scale : 1;
 
@@ -143,7 +143,8 @@ last_splash_index = splash_index;
 if (enable_lyrics && current_lyric_text != "") {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
-    if (font_exists(fnt_bitmap)) draw_set_font(fnt_bitmap);
+    var _lyric_font = current_lyric_is_song_text ? fnt_lyrics : fnt_regular;
+    if (font_exists(_lyric_font)) draw_set_font(_lyric_font);
 
     var _lyric_y = 12;
     var _shadow_c = c_black;
@@ -151,6 +152,7 @@ if (enable_lyrics && current_lyric_text != "") {
 
     draw_text_transformed_color((_gui_w / 2) + 1, _lyric_y + 1, current_lyric_text, 1, 1, 0, _shadow_c, _shadow_c, _shadow_c, _shadow_c, 0.8);
     draw_text_transformed_color(_gui_w / 2, _lyric_y, current_lyric_text, 1, 1, 0, _text_c, _text_c, _text_c, _text_c, 1.0);
+    if (font_exists(fnt_regular)) draw_set_font(fnt_regular);
 }
 
 // Reset Draw State

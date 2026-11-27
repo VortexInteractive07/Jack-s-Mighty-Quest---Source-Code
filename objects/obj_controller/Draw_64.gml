@@ -4,7 +4,7 @@ var _gui_w = display_get_gui_width();
 var _gui_h = display_get_gui_height();
 var _compact_hud = _gui_w <= 320;
 
-draw_set_font(fnt_bitmap);
+draw_set_font(fnt_regular);
 
 // Helper function: Clean solid slanted banner for pixel art UI
 var _draw_flat_slanted_banner = function(_x, _y, _w, _h, _skew, _col) {
@@ -131,6 +131,31 @@ if (pause_slide < 1.0 && !is_game_over) {
     draw_set_color(_time_col);
     draw_text(_gui_w / 2, _time_y, _time_str);
 
+    // Wind gauge appears only in windy stages; strong winds receive a clear caution badge.
+    if (wind_speed_mph > 0) {
+        var _wind_x = max(8, _gui_w - 100);
+        var _wind_y = 26;
+        var _wind_gauge_w = 70;
+        var _wind_ratio = clamp(wind_speed_mph / 60, 0, 1);
+        var _wind_danger = wind_speed_mph >= 40;
+        draw_set_halign(fa_left);
+        draw_set_color(c_black);
+        draw_rectangle(_wind_x - 3, _wind_y - 2, _wind_x + _wind_gauge_w + 4, _wind_y + 18, false);
+        draw_set_color(c_white);
+        draw_text(_wind_x, _wind_y, "WIND " + string(wind_speed_mph) + " MPH");
+        draw_set_color(make_color_rgb(48, 54, 62));
+        draw_rectangle(_wind_x, _wind_y + 12, _wind_x + _wind_gauge_w, _wind_y + 16, false);
+        draw_set_color(_wind_danger ? c_red : make_color_rgb(70, 220, 235));
+        draw_rectangle(_wind_x, _wind_y + 12, _wind_x + (_wind_gauge_w * _wind_ratio), _wind_y + 16, false);
+        if (_wind_danger) {
+            draw_set_color(c_yellow);
+            draw_triangle(_gui_w - 14, _wind_y + 2, _gui_w - 7, _wind_y + 12, _gui_w - 21, _wind_y + 12, false);
+            draw_set_halign(fa_center);
+            draw_set_color(c_black);
+            draw_text(_gui_w - 14, _wind_y + 4, "!");
+        }
+    }
+
     draw_set_alpha(1.0);
 }
 
@@ -244,7 +269,53 @@ if (fade_alpha > 0.0) {
     draw_set_alpha(1.0);
 }
 
+if (global.guidebook_open || global.inventory_open) {
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_black);
+    draw_set_alpha(0.94);
+    draw_rectangle(20, 18, _gui_w - 20, _gui_h - 18, false);
+    draw_set_alpha(1);
+    draw_set_color(c_aqua);
+    draw_rectangle(20, 18, _gui_w - 20, _gui_h - 18, true);
+    draw_set_color(c_yellow);
+    if (global.guidebook_open) {
+        draw_text(32, 28, "JMQ FIELD MANUAL  [F1 / ESC TO CLOSE]");
+        draw_set_color(c_white);
+        draw_text(32, 52, "MOVE: LEFT / RIGHT ARROWS");
+        draw_text(32, 68, "JUMP / WALL JUMP / DOUBLE JUMP: D");
+        draw_text(32, 84, "SPRINT: HOLD S WHILE MOVING");
+        draw_text(32, 100, "ATTACK: X OR K    PAUSE: P OR ESC");
+        draw_text(32, 116, "INVENTORY: I    USE FOOD: SELECT, THEN ENTER");
+        draw_text(32, 132, "F: HOLD FOR RAPID FIRE    G: MASSACRE VOLLEY");
+        draw_text(32, 152, "Collect gems, watch for hazards, and reach the exit.");
+        draw_text(32, 168, "Your selected save slot autosaves as you play.");
+    } else {
+        draw_text(32, 28, "FIELD INVENTORY  [I / ESC TO CLOSE]");
+        draw_set_color(c_white);
+        var _inv_items = global.inventory_items;
+        if (array_length(_inv_items) == 0) draw_text(36, 58, "Your pack is empty.");
+        for (var _inv_i = 0; _inv_i < array_length(_inv_items); _inv_i++) {
+            var _inv_item = _inv_items[_inv_i];
+            var _inv_y = 54 + (_inv_i * 18);
+            draw_set_color(_inv_i == global.inventory_index ? c_yellow : c_white);
+            draw_text(36, _inv_y, (_inv_i == global.inventory_index ? "> " : "  ") + _inv_item.name + "  x" + string(_inv_item.quantity));
+            draw_set_color(c_gray);
+            draw_text(258, _inv_y, _inv_item.category);
+        }
+        draw_set_color(c_aqua);
+        draw_text(32, _gui_h - 36, "UP/DOWN SELECT   ENTER USES FOOD   F1 MANUAL");
+    }
+}
+
 // Reset Alignments
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_color(c_white);
+if (variable_global_exists("save_write_failed") && global.save_write_failed) {
+    draw_set_halign(fa_center);
+    draw_set_color(c_red);
+    draw_text(_gui_w * 0.5, 8, "AUTOSAVE FAILED - CHECK SAVE FOLDER");
+    draw_set_halign(fa_left);
+    draw_set_color(c_white);
+}

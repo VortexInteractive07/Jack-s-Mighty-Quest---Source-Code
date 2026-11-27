@@ -17,7 +17,7 @@ if (backlog_open) {
     if (_scroll_up) backlog_scroll_index = min(backlog_scroll_index + 1, max(0, array_length(dialogue_history) - 5));
     if (_scroll_down) backlog_scroll_index = max(backlog_scroll_index - 1, 0);
     
-    if (keyboard_check_pressed(vk_escape) || _toggle_backlog) {
+    if (keyboard_check_pressed(vk_escape)) {
         backlog_open = false;
     }
     exit; // Halt normal cutscene execution while reviewing backlog
@@ -370,6 +370,7 @@ switch (fade_state) {
                 if (array_length(dialogue_history) > max_backlog_entries) {
                     array_pop(dialogue_history);
                 }
+                global.intro_dialogue_history = dialogue_history;
 
                 // Check if slide contains choices
                 if (variable_struct_exists(_slide, "choices") && is_array(_slide.choices) && array_length(_slide.choices) > 0) {

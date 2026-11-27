@@ -4,7 +4,7 @@ var _gui_h = display_get_gui_height(); // 240
 // Clear Base Canvas
 draw_clear(c_black);
 
-draw_set_font(fnt_bitmap);
+draw_set_font(fnt_regular);
 
 var _cx = _gui_w / 2;
 var _cy = _gui_h / 2;

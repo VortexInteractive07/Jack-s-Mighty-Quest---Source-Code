@@ -150,6 +150,15 @@ function scrMain(_state) {
 				} else {
 					
 					if (!ds_stack_empty(actionStack)) ds_stack_clear(actionStack);
+					if (_slotCurrent[CONTSLOT.BASESTRUCT] != SLOT.CORRIDORTRAP) {
+						if (id.dungeon_encounter_cooldown_steps > 0) {
+							id.dungeon_encounter_cooldown_steps--;
+						} else if (global.dungeon_message_timer <= 0
+						&& irandom(99) < id.dungeon_encounter_chance_percent) {
+							id.start_dungeon_battle();
+							if (id.dungeon_battle_active) id.dungeon_encounter_cooldown_steps = irandom_range(8, 14);
+						}
+					}
 					
 					// Trigger encounter
 					switch (_slotCurrent[CONTSLOT.BASESTRUCT]) {

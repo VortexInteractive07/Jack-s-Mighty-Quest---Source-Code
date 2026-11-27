@@ -234,14 +234,15 @@ if (global.debug > 0) {
 	if (!inTransition and _stateCurr != STATE.ROOM and (_action == undefined or _action == ACTION.DOOR or _action == ACTION.CHEST)) {
 		
 		var _slotSize  = slotSize;
-		var _slotStart = 3*_slotSize;
-		var _mapCellX  = round((_dvX+_slotStart)/_slotSize);
-		var _mapCellY  = round((_dvY+_slotStart)/_slotSize);
+		var _mapCellX  = mapOriginX;
+		var _mapCellY  = mapOriginY;
 		var _mapLength = nSlots[mX];
 		var _mapHeight = nSlots[mY];
+		var _mapPixelX = _mapCellX * _slotSize;
+		var _mapPixelY = _mapCellY * _slotSize;
 		
 		// Stretched minimap background
-		draw_sprite_stretched(sprMapbackground,0,(_mapCellX*_slotSize)-1,(_mapCellY*_slotSize)-1,(_mapLength*(_slotSize))+1,(_mapHeight*(_slotSize))+1);
+		draw_sprite_stretched(sprMapbackground,0,_mapPixelX-1,_mapPixelY-1,(_mapLength*(_slotSize))+1,(_mapHeight*(_slotSize))+1);
 		
 		// Fill/show minimap layer
 		if (!layer_get_visible("Minimap")) minimap_create(lib.cat[CAT.DUNGEONS][currDung][currLvl],_mapCellX,_mapCellY,_mapLength,_mapHeight);

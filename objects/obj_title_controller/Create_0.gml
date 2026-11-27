@@ -87,8 +87,10 @@ toast_lerp_speed = 0.15;
 if (array_length(ost_playlist) > 0) {
     var _track = ost_playlist[current_track_index];
     audio_stop_all();
-    current_sound_inst = audio_play_sound(_track.sound, 10, false);
-    audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
+    if (audio_exists(_track.sound)) {
+        current_sound_inst = audio_play_sound(_track.sound, 10, false);
+        if (current_sound_inst != -1) audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
+    }
 }
 
 // --- STATE MACHINE ---

@@ -3,8 +3,10 @@
 if (global.debug > 1) {
 	
 	var _tileS = 8;
-	var _tileX = 10*_tileS;
-	var _tileY =  4*_tileS;
+	var _padW = sprite_get_width(sprGamepad);
+	var _padH = sprite_get_height(sprGamepad);
+	var _tileX = display_get_gui_width() - _padW - _tileS;
+	var _tileY = display_get_gui_height() - _padH - _tileS;
 	
 	draw_sprite_ext(sprGamepad,DEBUGPAD.PAD,_tileX,_tileY,1,1,0,c_white,0.75);
 	

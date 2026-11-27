@@ -6,7 +6,7 @@
 var _track_count = array_length(ost_playlist);
 
 if (_track_count > 0 && fade_state != 4) {
-    var _song_is_playing = audio_is_playing(current_sound_inst);
+    var _song_is_playing = current_sound_inst != -1 && audio_is_playing(current_sound_inst);
 
     if (!_song_is_playing) {
         if (_track_count > 1) {
@@ -19,8 +19,8 @@ if (_track_count > 0 && fade_state != 4) {
         }
 
         var _next_track = ost_playlist[current_track_index];
-        current_sound_inst = audio_play_sound(_next_track.sound, 10, false);
-        audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
+        current_sound_inst = audio_exists(_next_track.sound) ? audio_play_sound(_next_track.sound, 10, false) : -1;
+        if (current_sound_inst != -1) audio_sound_gain(current_sound_inst, global.vol_bgm / 100, 0);
         toast_timer = 360; 
     }
 }

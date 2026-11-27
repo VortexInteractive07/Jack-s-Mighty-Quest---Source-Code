@@ -2,7 +2,7 @@
 
 // --- SONG LYRICS TIMING TRACKER & MUSIC MODE SYSTEM ---
 if (enable_bgm) {
-    if (audio_is_playing(splash_sound_inst)) {
+    if (splash_sound_inst != -1 && audio_is_playing(splash_sound_inst)) {
         if (enable_lyrics && current_track_index != -1 && array_length(lyric_list) > 0) {
             var _audio_pos = audio_sound_get_track_position(splash_sound_inst);
             

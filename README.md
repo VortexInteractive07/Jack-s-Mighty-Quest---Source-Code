@@ -53,11 +53,21 @@ Well, it's only visible in the project files, cause there's a lot of assets that
 
 ---
 
-## Windows Texture Packs
+## Save Slots
 
-Texture packs are data-only `.jmqpack` folders. They cannot run scripts or modify gameplay rules. Close the game, copy each pack folder into the game's `save_directory\texture_packs\` folder, then launch the game and select it under **Settings → Textures**. The selection is saved and takes effect on the next launch.
+Choose **Story / Save Slots** from the main menu to open ten save slots. Select an empty slot to name a new adventure, or select an occupied slot to continue it. The active slot autosaves during play and when leaving a mission; deleting a slot requires pressing **Delete** twice while it is selected. Slot files are stored in `save_directory` under GameMaker's writable working directory. On death, Jack and Mark return to their last recorded positions.
 
-Each pack folder must contain `pack.json` and a `textures` folder. For example:
+## Add-On Manager and Pack Authoring (Windows)
+
+Open **Settings → Add-On Manager**. Use **N** to create a starter package folder or **I** to import an archive. The creator asks for the package type (texture, behavior, or resource), then writes a randomly named `.jmqpack` folder under the game's `save_directory`. You can edit the generated files with any text or image editor while the game is closed. The manager lists installed texture packs; select one and press Enter, then restart to apply it.
+
+The importer accepts `.zip` and `.jmqpack` archives (a `.jmqpack` import is a ZIP archive using that extension). Choose its type before selecting the archive. The manifest can be at the archive root or inside one enclosing package folder. Imports are extracted beneath `save_directory\texture_packs\` for texture packs or `save_directory\addons\<type>_packs\` for behavior and resource packs. Only import archives you trust.
+
+### Texture pack layout
+
+Texture packs are currently data-only and may replace only the supported built-in sprite list. Each pack folder contains `pack.json` and `textures/`:
+
+Example:
 
 ```text
 Example.jmqpack/
@@ -75,7 +85,25 @@ Example.jmqpack/
 }
 ```
 
-Supported sprite names: `spr_dialogue`, `spr_dialogue_continue_btn`, `spr_gem`, `spr_main_menu`, `spr_menu_arrow_down`, `spr_menu_arrow_up`, and `spr_titlescreen`. Each PNG must be a horizontal frame strip with the original frame count and per-frame dimensions; incompatible images are ignored instead of stretched. Texture packs are currently supported only in the Windows build.
+Supported sprite names: `spr_dialogue`, `spr_dialogue_continue_btn`, `spr_gem`, `spr_main_menu`, `spr_menu_arrow_down`, `spr_menu_arrow_up`, and `spr_titlescreen`. Each PNG must be a horizontal frame strip with the original frame count and per-frame dimensions; incompatible images are ignored instead of stretched.
+
+### Behavior and resource starter packs
+
+Generated behavior and resource packs contain an `addon.json` manifest plus `data/`, `assets/`, and `source/` folders. They are editable package templates and can be imported and stored by the game. The current runtime does not yet load their content or execute external GML. GameMaker compiles scripts into the game; to add characters, gameplay behavior, or executable scripts, incorporate those source files into the GameMaker project and rebuild. Resource assets that are not part of the currently supported texture replacement format are stored only, not activated.
+
+Example behavior/resource manifest:
+
+```json
+{
+  "format_version": 1,
+  "type": "behavior",
+  "name": "Example Behavior Pack",
+  "description": "Package description",
+  "version": "1.0.0"
+}
+```
+
+For authored archives, put the manifest and package files directly at the archive root, or put them inside one enclosing package folder. Use UTF-8 JSON and keep files inside the package folder. Current package handling is Windows-only.
 
 ## Stage Prototypes
 

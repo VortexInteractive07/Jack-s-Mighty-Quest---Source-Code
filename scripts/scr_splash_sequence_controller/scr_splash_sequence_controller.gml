@@ -55,7 +55,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
 
     array_push(_sequence, {
         raw_text: _disclaimer_text,
-        font: fnt_bitmap,
+        font: fnt_regular,
         color: c_white,
         scale: 1,
         speed: 1,
@@ -79,7 +79,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     // ==========================================
     array_push(_sequence, { 
         raw_text: "PRESENTED BY " + _pub_string, 
-        font: fnt_bitmap, 
+        font: fnt_regular,
         color: c_white, 
         scale: 1, 
         speed: 0.4, 
@@ -90,7 +90,7 @@ function scr_splash_sequence_controller(_enable_dialogue = true, _console_type =
     
     array_push(_sequence, { 
         raw_text: "BASED ON THE NARRATIVE OF IBRAHIM AAYAN BIN ABDULLA",
-        font: fnt_bitmap, 
+        font: fnt_regular,
         color: c_white, 
         scale: 1, 
         speed: 0.4, 

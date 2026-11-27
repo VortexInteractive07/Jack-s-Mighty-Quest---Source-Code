@@ -2,9 +2,11 @@ scrEnumerator();
 scrMacros();
 randomize();
 global.debug = 0;
+global.guidebook_open = false;
 fncPalswapinit(shdPaletteswap);
 
-bitmapFont = font_add_sprite_ext(sprFont, " abcdefghijklmnopqrstuvwxyz0123456789-,.:;'\"?!/", false, 0);
+// Keep all system and dungeon UI text on the shared project font.
+bitmapFont = fnt_regular;
 draw_set_font(bitmapFont);
 
 input_controller = instance_create_layer(x, y, "Instances", sysInput);

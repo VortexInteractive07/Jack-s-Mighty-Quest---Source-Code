@@ -1,5 +1,8 @@
 /// @description Clean Up Sound & Particle Memory On Level Unload
 
+// Capture the last playable position on room changes and normal game exit.
+scr_save_slot_autosave();
+
 if (part_system_exists(sys_particles)) {
     part_system_destroy(sys_particles);
 }

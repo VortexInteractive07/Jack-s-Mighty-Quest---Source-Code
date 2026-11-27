@@ -6,7 +6,7 @@
 // scr_load_settings
 // scr_splash_ost_playback
 // scr_splash_sequence_controller
-// fnt_bitmap
+// fnt_regular
 
 if (script_exists(scr_load_settings)) {
     scr_load_settings();
@@ -41,6 +41,7 @@ current_track_index = -1;
 splash_sound_inst   = -1;
 current_lyric_index = 0;
 current_lyric_text  = "";
+current_lyric_is_song_text = false;
 lyric_list          = [];
 
 music_mode = 2; // 0 = ONLY ONCE, 1 = UNCOMMON, 2 = CONTINUOUS
@@ -67,11 +68,13 @@ play_random_track = function() {
     current_lyric_index = 0;
     current_lyric_text  = "";
     lyric_list          = struct_exists(_selected, "lyrics") ? _selected.lyrics : [];
+    current_lyric_is_song_text = array_length(lyric_list) > 0;
+    if (!current_lyric_is_song_text) current_lyric_text = "INSTRUMENTAL / NO LYRICS";
     
     if (struct_exists(_selected, "sound") && audio_exists(_selected.sound)) {
         var _vol = variable_global_exists("vol_bgm") ? global.vol_bgm / 100 : 1.0;
         splash_sound_inst = audio_play_sound(_selected.sound, 10, false);
-        audio_sound_gain(splash_sound_inst, _vol, 0);
+        if (splash_sound_inst != -1) audio_sound_gain(splash_sound_inst, _vol, 0);
     }
 };
 

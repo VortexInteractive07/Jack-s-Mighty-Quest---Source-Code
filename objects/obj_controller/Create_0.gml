@@ -6,13 +6,25 @@ persistent = false;
 
 if (!variable_global_exists("game_session_active") || !global.game_session_active) {
     global.game_session_active = true;
-    global.game_lives = 3;
+    global.game_lives = 10;
     global.game_score = 0;
+}
+if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+&& global.pending_game_restore.room_asset == room) {
+    global.game_lives = global.pending_game_restore.lives;
+    global.game_score = global.pending_game_restore.score;
+    if (variable_struct_exists(global.pending_game_restore, "inventory")
+    && is_array(global.pending_game_restore.inventory)) {
+        global.inventory_items = global.pending_game_restore.inventory;
+    }
 }
 
 exit_room = rm_main_menu;
 
 // --- 1. AUDIO INTEGRATION & MUSIC MANAGEMENT ---
+pending_restore_apply = variable_global_exists("pending_game_restore")
+    && is_struct(global.pending_game_restore)
+    && global.pending_game_restore.room_asset == room;
 bgm_handle = -1;
 bgm_asset = -1;
 bgm_target_volume = global.vol_bgm / 100;
@@ -79,16 +91,48 @@ show_debug_overlay_custom = false;
 game_score                = global.game_score;
 player_lives              = global.game_lives;
 max_lives                 = 5;
+global.inventory_open = false;
+global.guidebook_open = false;
+if (!variable_global_exists("inventory_items")) {
+    global.inventory_items = [
+        { id: "ration", name: "Trail Ration", category: "FOOD", quantity: 3, heal: 35 },
+        { id: "sidearm", name: "Service Sidearm", category: "WEAPON", quantity: 1, heal: 0 },
+        { id: "plasma_buddy", name: "Plasma Buddy", category: "GADGET", quantity: 1, heal: 0 },
+        { id: "rounds", name: "Sidearm Rounds", category: "AMMUNITION", quantity: 12, heal: 0 }
+    ];
+    global.inventory_index = 0;
+}
+global.inventory_add = function(_id, _name, _category, _amount) {
+    var _items = global.inventory_items;
+    for (var _i = 0; _i < array_length(_items); _i++) {
+        if (_items[_i].id == _id) {
+            _items[_i].quantity += max(1, _amount);
+            global.inventory_items = _items;
+            return _items[_i].quantity;
+        }
+    }
+    array_push(global.inventory_items, { id: _id, name: _name, category: _category, quantity: max(1, _amount), heal: 0 });
+    return max(1, _amount);
+};
 collectibles_collected    = 0;
 total_collectibles        = 0;
 level_state               = "ACTIVE";
-weather_enabled           = global.experimental_weather;
+stage2_storm              = (room == rm_city);
+weather_enabled           = global.experimental_weather || stage2_storm;
 weather_type              = global.weather_type;
 weather_intensity         = global.weather_intensity;
 weather_wind              = global.weather_wind;
+wind_speed_mph            = weather_wind ? 20 : 0;
+if (stage2_storm) {
+    weather_type = "RAIN";
+    weather_intensity = "HIGH";
+    weather_wind = true;
+    wind_speed_mph = 50;
+}
 weather_drops             = [];
 weather_flash_alpha       = 0;
 weather_timer             = 0;
+weather_thunder_timer     = irandom_range(1800, 3600);
 
 var _weather_view_w = camera_get_view_width(view_camera[0]);
 var _weather_view_h = camera_get_view_height(view_camera[0]);
@@ -130,7 +174,7 @@ damage_player = function(_amount) {
     if (!instance_exists(obj_jack) || is_game_over) return;
 
     var _player = instance_find(obj_jack, 0);
-    if (_player.is_dead) return;
+    if (_player.is_dead || _player.damage_invulnerability_timer > 0) return;
 
     _player.hp = max(0, _player.hp - max(0, _amount));
     if (_player.hp <= 0) {
@@ -178,6 +222,26 @@ resolve_player_death = function() {
     global.game_lives = player_lives;
     global.game_score = game_score;
 
+    var _dead_player = instance_exists(obj_jack) ? instance_find(obj_jack, 0) : noone;
+    var _last_stand = (variable_global_exists("last_stand") && is_struct(global.last_stand)
+        && global.last_stand.room_asset == room) ? global.last_stand : undefined;
+    var _restore_x = is_struct(_last_stand) ? _last_stand.x : ((_dead_player != noone) ? _dead_player.x : 48);
+    var _restore_y = is_struct(_last_stand) ? _last_stand.y : ((_dead_player != noone) ? _dead_player.y : 224);
+    var _restore_hp = is_struct(_last_stand) ? _last_stand.hp : 100;
+    var _restore_mark_x = is_struct(_last_stand) ? _last_stand.mark_x : _restore_x - 28;
+    var _restore_mark_y = is_struct(_last_stand) ? _last_stand.mark_y : _restore_y - 16;
+    global.pending_game_restore = {
+        room_asset: room,
+        x: _restore_x,
+        y: _restore_y,
+        mark_x: _restore_mark_x,
+        mark_y: _restore_mark_y,
+        hp: max(1, _restore_hp),
+        score: game_score,
+        lives: player_lives,
+        inventory: global.inventory_items
+    };
+
     if (audio_exists(mus_life_lost)) {
         life_lost_audio_id = audio_play_sound(mus_life_lost, 10, false);
         audio_sound_gain(life_lost_audio_id, global.vol_bgm / 100, 0);
@@ -207,9 +271,15 @@ continue_after_game_over = function() {
     }
 
     global.game_session_active = true;
-    global.game_lives = 3;
+    global.game_lives = 10;
     global.game_score = 0;
-    player_lives = 3;
+    if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+    && global.pending_game_restore.room_asset == room) {
+        global.pending_game_restore.lives = 10;
+        global.pending_game_restore.score = 0;
+        global.pending_game_restore.hp = 100;
+    }
+    player_lives = 10;
     game_score = 0;
     game_timer_ticks = 0;
     is_game_over = false;
@@ -263,7 +333,18 @@ if (room == rm_city || room == rm_dungeons) {
     var _instance_layer = "Instances";
     var _wall = noone;
     instance_create_layer(16, 0, _instance_layer, obj_camera);
-    instance_create_layer(48, 224, _instance_layer, obj_jack);
+    var _spawn_x = 48;
+    var _spawn_y = 224;
+    if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+    && global.pending_game_restore.room_asset == room) {
+        _spawn_x = global.pending_game_restore.x;
+        _spawn_y = global.pending_game_restore.y;
+    }
+    var _jack = instance_create_layer(_spawn_x, _spawn_y, _instance_layer, obj_jack);
+    if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+    && global.pending_game_restore.room_asset == room) {
+        _jack.hp = clamp(global.pending_game_restore.hp, 1, _jack.max_hp);
+    }
     instance_create_layer(16, 208, _instance_layer, obj_mark);
 
     _wall = instance_create_layer(-16, 0, _instance_layer, obj_wall);

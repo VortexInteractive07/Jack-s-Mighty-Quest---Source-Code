@@ -126,8 +126,8 @@ draw_rectangle_color(_box_x1 + 2, _box_y1 + 2, _box_x2 - 2, _box_y2 - 2, c_gray,
 // 6. SPEAKER NAME TAG BADGE & PORTRAIT ICON
 // -----------------------------------------------------------------------------
 if (_speaker_name != "") {
-    if (font_exists(fnt_bitmap)) {
-        draw_set_font(fnt_bitmap);
+    if (font_exists(fnt_regular)) {
+        draw_set_font(fnt_regular);
     }
     
     var _tag_w = string_width(_speaker_name) + 16;
@@ -189,12 +189,22 @@ if (text_finished && !choice_active) {
     }
 }
 
-// Small Backlog Hint at Top Right
-draw_set_font(fnt_bitmap);
-draw_set_halign(fa_right);
+// Prologue title, scene counter, and progress track.
+draw_set_font(fnt_regular);
+draw_set_halign(fa_left);
 draw_set_valign(fa_top);
-draw_set_color(c_gray);
-draw_text(_gui_w - 12, 6, "[H] History");
+draw_set_color(c_yellow);
+draw_text(12, 3, (_gui_w < 360) ? "PROLOGUE" : "JACK'S MIGHTY QUEST  /  PROLOGUE");
+draw_set_halign(fa_center);
+draw_set_color(c_white);
+draw_text(_gui_w * 0.5, 3, string(min(scene_index + 1, scene_total)) + " / " + string(scene_total));
+draw_set_halign(fa_right);
+draw_set_color(c_aqua);
+draw_text(_gui_w - 12, 3, (_gui_w < 360) ? "[H / TAB]" : "[H / TAB] HISTORY");
+draw_set_color(c_dkgray);
+draw_rectangle(16, 15, _gui_w - 16, 17, false);
+draw_set_color(c_aqua);
+draw_rectangle(16, 15, 16 + ((_gui_w - 32) * clamp((scene_index + 1) / max(1, scene_total), 0, 1)), 17, false);
 
 // -----------------------------------------------------------------------------
 // 9. INTERACTIVE CHOICE BOX OVERLAY
@@ -240,25 +250,32 @@ if (backlog_open) {
     draw_set_color(c_yellow);
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
-    draw_text(_gui_w / 2, 10, "--- DIALOGUE HISTORY LOG ---");
+    draw_text(_gui_w / 2, 10, "PROLOGUE HISTORY  /  NEWEST FIRST");
 
-    var _hist_y = 35;
+    var _hist_y = 34;
     var _hist_start = backlog_scroll_index;
-    var _hist_end = min(_hist_start + 5, array_length(dialogue_history));
+    var _hist_end = array_length(dialogue_history);
+    if (_hist_end == 0) {
+        draw_set_halign(fa_center);
+        draw_set_color(c_gray);
+        draw_text(_gui_w * 0.5, _gui_h * 0.5, "Advance through the story to build your history.");
+    }
 
-    for (var _h = _hist_start; _h < _hist_end; _h++) {
+    for (var _h = _hist_start; _h < _hist_end && _hist_y < _gui_h - 30; _h++) {
         var _entry = dialogue_history[_h];
+        var _entry_text_h = string_height_ext(_entry.text, 12, _gui_w - 48);
+        var _entry_h = max(32, _entry_text_h + 18);
         draw_set_halign(fa_left);
         draw_set_color(c_yellow);
         draw_text(24, _hist_y, "[" + string_upper(_entry.speaker) + "]");
         draw_set_color(c_white);
         draw_text_ext(24, _hist_y + 12, _entry.text, 12, _gui_w - 48);
-        _hist_y += 38;
+        _hist_y += _entry_h;
     }
 
     draw_set_halign(fa_center);
     draw_set_color(c_gray);
-    draw_text(_gui_w / 2, _gui_h - 16, "Press [H] or [TAB] to Close | Use [UP/DOWN] to Scroll");
+    draw_text(_gui_w / 2, _gui_h - 16, "H / TAB: CLOSE    UP / DOWN: OLDER / NEWER");
 }
 
 // -----------------------------------------------------------------------------

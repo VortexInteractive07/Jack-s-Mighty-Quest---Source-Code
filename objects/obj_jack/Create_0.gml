@@ -4,12 +4,15 @@
 hp = 100;
 max_hp = 100;
 is_dead = false;
+damage_invulnerability_timer = 0;
 death_timer = 0;
 death_delay_max = round(game_get_speed(gamespeed_fps) * 0.75);
 damage_multiplier = 1.0;
 attack_cooldown = 0;
 attack_cooldown_max = 18;
 attack_range = 72;
+projectile_cooldown = 0;
+massacre_cooldown = 0;
 
 // Movement Speeds
 move_speed   = 2.1;
@@ -50,3 +53,14 @@ is_wall_sliding  = false;
 wall_jump_lock     = 0;     // frames left where horizontal input is ignored
 wall_jump_lock_max = 10;    // tune: longer = bigger horizontal kick
 wall_jump_dir      = 0;     // direction of the kick (-1 left, 1 right)
+
+if (variable_global_exists("pending_game_restore") && is_struct(global.pending_game_restore)
+&& global.pending_game_restore.room_asset == room) {
+    x = global.pending_game_restore.x;
+    y = global.pending_game_restore.y;
+    hp = clamp(global.pending_game_restore.hp, 1, max_hp);
+    hsp = 0;
+    vsp = 0;
+    // Give the player time to leave a hazard when restoring the last safe position.
+    damage_invulnerability_timer = game_get_speed(gamespeed_fps) * 1.5;
+}

@@ -1,5 +1,5 @@
 {
-  "$GMNotes":"v1",
+  "$GMNotes":"v2",
   "%Name":"Piracy Note for Asset Rippers (Japanese)",
   "name":"Piracy Note for Asset Rippers (Japanese)",
   "parent":{

@@ -48,7 +48,9 @@ fade_speed = 0.02;
 fade_state = 0; // 0: Fade In | 1: Playing | 2: Transition Out
 
 // --- ADVANCED UPGRADE: DIALOGUE HISTORY & BACKLOG SYSTEM ---
-dialogue_history = [];
+dialogue_history = (variable_global_exists("intro_dialogue_history") && is_array(global.intro_dialogue_history))
+    ? global.intro_dialogue_history : [];
+global.intro_dialogue_history = dialogue_history;
 backlog_open = false;
 backlog_scroll_index = 0;
 max_backlog_entries = 50;

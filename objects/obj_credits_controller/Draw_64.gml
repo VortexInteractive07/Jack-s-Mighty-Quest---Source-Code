@@ -14,7 +14,7 @@ for (var _s = 0; _s < credits_star_count; _s++) {
         _star_x + _star_size - 1, _star_y + _star_size - 1, false);
 }
 
-draw_set_font(fnt_bitmap);
+draw_set_font(fnt_regular);
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 

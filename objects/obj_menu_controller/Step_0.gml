@@ -9,7 +9,19 @@ if (abs(cursor_offset_x) > 1.5) cursor_dir *= -1;
 // Retro arrow animation ticker
 arrow_anim_timer += 0.07;
 
+// Show every main-menu item when the current screen height allows it.
+var _main_menu_rows = max(1, floor((display_get_gui_height() - start_y - 34) / line_spacing) + 1);
+menu_list_main.visible_max = min(menu_list_main.total, _main_menu_rows);
+menu_list_main.scroll_offset = clamp(menu_list_main.scroll_offset, 0, max(0, menu_list_main.total - menu_list_main.visible_max));
+if (menu_list_main.index < menu_list_main.scroll_offset) {
+    menu_list_main.scroll_offset = menu_list_main.index;
+} else if (menu_list_main.index >= menu_list_main.scroll_offset + menu_list_main.visible_max) {
+    menu_list_main.scroll_offset = menu_list_main.index - menu_list_main.visible_max + 1;
+}
+
 // Toast notification decay timer logic
+if (save_delete_timer > 0) save_delete_timer--;
+else save_delete_armed = false;
 if (toast_timer > 0) {
     toast_timer--;
     if (toast_timer > 30) {
@@ -116,6 +128,12 @@ switch (fade_state) {
     case 1:
         if (jukebox_transition_state != 0) break;
 
+        if (keyboard_check_pressed(vk_f1)) {
+            current_mode = (current_mode == 5) ? 0 : 5;
+            play_ui_blip(sfx_continue_asset);
+            break;
+        }
+
         // Input Abstraction (Keyboard + Gamepad Support)
         var _gp_num = 0;
         var _gp_connected = gamepad_is_connected(_gp_num);
@@ -201,6 +219,167 @@ switch (fade_state) {
             if (_cancel) {
                 play_ui_blip(sfx_continue_asset);
                 close_jukebox();
+            }
+        }
+        // --------------------------------------
+        // MANUAL, SAVE SLOT SELECTOR, AND NAME ENTRY
+        // --------------------------------------
+        else if (current_mode == 5) {
+            if (_move_up || _move_down) guidebook_page = (guidebook_page + 1) mod 4;
+            if (_confirm || _cancel) current_mode = 0;
+        }
+        else if (current_mode == 6) {
+            if (_move_up || _move_down) {
+                var _slot_step = _move_up ? -1 : 1;
+                save_slot_cursor = (save_slot_cursor + _slot_step + 10) mod 10;
+                save_delete_armed = false;
+                play_ui_blip(sfx_dialogue_asset);
+            }
+            if (_cancel) {
+                current_mode = 0;
+                save_delete_armed = false;
+            } else if (keyboard_check_pressed(vk_delete)) {
+                if (is_struct(save_slots[save_slot_cursor])) {
+                    if (save_delete_armed && save_delete_timer > 0) {
+                        var _did_clear = scr_save_slot_clear(save_slot_cursor);
+                        save_slots = scr_save_slots_read();
+                        save_delete_armed = false;
+                        show_toast(_did_clear ? "Save slot erased." : "Could not erase save slot.");
+                    } else {
+                        save_delete_armed = true;
+                        save_delete_timer = game_get_speed(gamespeed_fps) * 3;
+                        show_toast("Press Delete again to erase this slot.");
+                    }
+                }
+            } else if (_confirm) {
+                var _selected_save = save_slots[save_slot_cursor];
+                if (is_struct(_selected_save)) {
+                    global.active_save_slot = save_slot_cursor;
+                    global.active_save_name = _selected_save.name;
+                    global.pending_game_restore = _selected_save;
+                    global.game_score = _selected_save.score;
+                    global.game_lives = _selected_save.lives;
+                    if (variable_struct_exists(_selected_save, "inventory") && is_array(_selected_save.inventory)) {
+                        global.inventory_items = _selected_save.inventory;
+                    }
+                    global.collected_gem_positions = _selected_save.collected_gems;
+                    global.game_session_active = true;
+                    target_room = _selected_save.room_asset;
+                    io_clear();
+                    fade_state = 2;
+                } else {
+                    keyboard_string = "";
+                    save_name_input = "";
+                    current_mode = 7;
+                }
+            }
+        }
+        else if (current_mode == 7) {
+            save_name_input = keyboard_string;
+            if (string_length(save_name_input) > 16) {
+                save_name_input = string_copy(save_name_input, 1, 16);
+                keyboard_string = save_name_input;
+            }
+            if (_cancel) {
+                keyboard_string = "";
+                current_mode = 6;
+            } else if (keyboard_check_pressed(vk_enter)) {
+                var _new_name = save_name_input;
+                if (string_replace_all(_new_name, " ", "") == "") _new_name = "PLAYER " + string(save_slot_cursor + 1);
+                var _new_save = {
+                    name: _new_name,
+                    room: "rm_subway",
+                    x: 48,
+                    y: 224,
+                    mark_x: 16,
+                    mark_y: 208,
+                    hp: 100,
+                    score: 0,
+                    lives: 10,
+                    inventory: [
+                        { id: "ration", name: "Trail Ration", category: "FOOD", quantity: 3, heal: 35 },
+                        { id: "sidearm", name: "Service Sidearm", category: "WEAPON", quantity: 1, heal: 0 },
+                        { id: "plasma_buddy", name: "Plasma Buddy", category: "GADGET", quantity: 1, heal: 0 },
+                        { id: "rounds", name: "Sidearm Rounds", category: "AMMUNITION", quantity: 12, heal: 0 }
+                    ]
+                };
+                if (scr_save_slot_write(save_slot_cursor, _new_save)) {
+                    global.active_save_slot = save_slot_cursor;
+                    global.active_save_name = _new_name;
+                    global.pending_game_restore = undefined;
+                    global.game_session_active = true;
+                    global.game_lives = 10;
+                    global.game_score = 0;
+                    global.intro_dialogue_history = [];
+                    global.collected_gem_positions = [];
+                    global.inventory_items = _new_save.inventory;
+                    global.inventory_index = 0;
+                    target_room = rm_intro;
+                    keyboard_string = "";
+                    io_clear();
+                    fade_state = 2;
+                } else {
+                    show_toast("Could not create the save slot.");
+                    current_mode = 6;
+                }
+            }
+        }
+        else if (current_mode == 8) {
+            if (keyboard_check_pressed(ord("N"))) {
+                addon_create_type = 0;
+                current_mode = 9;
+            }
+            if (keyboard_check_pressed(ord("I"))) {
+                addon_create_type = 0;
+                current_mode = 10;
+            }
+            var _pack_count = array_length(content_manager_packs);
+            if (_pack_count > 0) {
+                if (_move_up || _move_left) {
+                    content_manager_page = (content_manager_page - 1 + _pack_count) mod _pack_count;
+                    play_ui_blip(sfx_dialogue_asset);
+                } else if (_move_down || _move_right) {
+                    content_manager_page = (content_manager_page + 1) mod _pack_count;
+                    play_ui_blip(sfx_dialogue_asset);
+                }
+                if (_confirm) {
+                    var _chosen_pack = content_manager_packs[content_manager_page];
+                    global.texture_pack = _chosen_pack.id;
+                    save_settings();
+                    show_toast("Texture pack applies next launch: " + _chosen_pack.name);
+                }
+            }
+            if (_cancel) {
+                current_mode = content_manager_return_mode;
+                play_ui_blip(sfx_continue_asset);
+            }
+        }
+        else if (current_mode == 9) {
+            if (_move_up || _move_left) addon_create_type = (addon_create_type + 2) mod 3;
+            if (_move_down || _move_right) addon_create_type = (addon_create_type + 1) mod 3;
+            if (_confirm) {
+                var _kind = (addon_create_type == 0) ? "texture" : ((addon_create_type == 1) ? "behavior" : "resource");
+                show_toast(scr_addon_pack_create(_kind));
+                if (variable_global_exists("texture_pack_list_cache")) variable_global_remove("texture_pack_list_cache");
+                content_manager_packs = scr_texture_pack_list();
+                content_manager_addons = scr_addon_pack_list();
+                current_mode = 8;
+            } else if (_cancel) {
+                current_mode = 8;
+            }
+        }
+        else if (current_mode == 10) {
+            if (_move_up || _move_left) addon_create_type = (addon_create_type + 2) mod 3;
+            if (_move_down || _move_right) addon_create_type = (addon_create_type + 1) mod 3;
+            if (_confirm) {
+                var _import_kind = (addon_create_type == 0) ? "texture" : ((addon_create_type == 1) ? "behavior" : "resource");
+                var _import_result = scr_addon_pack_import(_import_kind);
+                if (_import_result != "Import cancelled.") show_toast(_import_result);
+                content_manager_packs = scr_texture_pack_list();
+                content_manager_addons = scr_addon_pack_list();
+                current_mode = 8;
+            } else if (_cancel) {
+                current_mode = 8;
             }
         }
         // --------------------------------------

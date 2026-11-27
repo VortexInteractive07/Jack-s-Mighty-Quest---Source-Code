@@ -25,7 +25,7 @@ function scr_texture_pack_list() {
         return _packs;
     }
 
-    var _root = save_directory + "texture_packs\\";
+    var _root = scr_save_directory() + "texture_packs\\";
     if (!directory_exists(_root)) {
         directory_create(_root);
         if (!directory_exists(_root)) {
@@ -35,13 +35,23 @@ function scr_texture_pack_list() {
         }
     }
 
+    var _pack_folders = [];
     var _folder = file_find_first(_root + "*.jmqpack", fa_directory);
     while (_folder != "") {
+        array_push(_pack_folders, _folder);
+        _folder = file_find_next();
+    }
+    file_find_close();
+
+    for (var _pack_folder_i = 0; _pack_folder_i < array_length(_pack_folders); _pack_folder_i++) {
+        _folder = _pack_folders[_pack_folder_i];
         if (string_pos("..", _folder) == 0
         && string_pos("/", _folder) == 0
         && string_pos("\\", _folder) == 0) {
-            var _manifest_path = _root + _folder + "\\pack.json";
-            if (file_exists(_manifest_path)) {
+            var _package_root = _root + _folder + "\\";
+            var _content_root = scr_addon_manifest_root(_package_root, "pack.json");
+            var _manifest_path = _content_root + "pack.json";
+            if (_content_root != "" && file_exists(_manifest_path)) {
                 var _file = file_text_open_read(_manifest_path);
                 if (_file != -1) {
                     var _json = "";
@@ -61,7 +71,8 @@ function scr_texture_pack_list() {
                         && string_length(_data.name) > 0
                         && variable_struct_exists(_data, "textures")
                         && is_array(_data.textures)) {
-                            array_push(_packs, { id: _folder, name: string_copy(_data.name, 1, 32) });
+                            var _relative_content_root = (_content_root == _package_root) ? "" : string_copy(_content_root, string_length(_package_root) + 1, string_length(_content_root) - string_length(_package_root));
+                            array_push(_packs, { id: _folder, name: string_copy(_data.name, 1, 32), content_root: _relative_content_root });
                         } else {
                             show_debug_message("Texture pack ignored: invalid manifest in '" + _folder + "'.");
                         }
@@ -75,10 +86,7 @@ function scr_texture_pack_list() {
                 show_debug_message("Texture pack ignored: missing manifest in '" + _folder + "'.");
             }
         }
-
-        _folder = file_find_next();
     }
-    file_find_close();
 
     global.texture_pack_list_cache = _packs;
     return _packs;
@@ -132,7 +140,15 @@ function scr_texture_pack_load(_pack_id) {
         return;
     }
 
-    var _root = save_directory + "texture_packs\\" + _pack_id + "\\";
+    var _root = scr_save_directory() + "texture_packs\\" + _pack_id + "\\";
+    var _packs_for_root = scr_texture_pack_list();
+    for (var _root_i = 1; _root_i < array_length(_packs_for_root); _root_i++) {
+        if (_packs_for_root[_root_i].id == _pack_id
+        && variable_struct_exists(_packs_for_root[_root_i], "content_root")) {
+            _root += _packs_for_root[_root_i].content_root;
+            break;
+        }
+    }
     var _manifest_path = _root + "pack.json";
     if (!file_exists(_manifest_path)) {
         show_debug_message("Texture pack ignored: missing '" + _manifest_path + "'.");

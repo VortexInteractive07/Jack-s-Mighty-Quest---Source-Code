@@ -4,10 +4,11 @@ x += hspeed;
 life_timer--;
 
 // Collide with boss
-if (instance_exists(obj_melonhead_proto)) {
+if (!has_hit && instance_exists(obj_melonhead_proto)) {
     var _boss = instance_place(x, y, obj_melonhead_proto);
     if (_boss != noone && !_boss.defeated && _boss.state != BOSS_STATE.WAIT) {
-        _boss.take_damage(12);
+        has_hit = true;
+        _boss.take_damage(damage);
         if (audio_exists(sfx_enemy_hit)) {
             var _snd = audio_play_sound(sfx_enemy_hit, 8, false);
             audio_sound_gain(_snd, global.vol_sfx / 100, 0);
