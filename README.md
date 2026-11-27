@@ -12,7 +12,7 @@ This repository contains the complete source files and assets for the 16-bit ret
 
 ## 🎮 Game Overview
 
-* **Engine:** GameMaker LTS 2026.0+ (GML Scripting)
+* **Engine:** GameMaker LTS 2026.1+ (GML Scripting)
 * **Target Resolution:** 432x240 Widescreen (16:9 Aspect Ratio) @ 60 FPS
 * **Target Platforms:** Windows PC (Original Release)
 
